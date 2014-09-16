@@ -1,0 +1,327 @@
+############################################################################################
+GENERAL
+Path		 /scratch/
+#Path             /shome/
+#Path             dcap://t3se01.psi.ch/pnfs/psi.ch/cms/trivcat/store/user/leo/SUSY/MT2trees/MT2_V02-01-02/
+#__________________________________________________________________________________________
+# list of samples
+#
+### New baby-trees for Event Yield Calculation
+
+### QCD
+
+#SAMPLE
+#Name            QCD-Pt5to10
+#SName           QCD
+#File            mmasciov/QCD/QCD_Pt5to10_PU_S14_POSTLS170_babytree.root
+#Xsection        80710000000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt10to15
+#SName           QCD
+#File            mmasciov/QCD/QCD_Pt10to15_PU_S14_POSTLS170_babytree.root
+#Xsection	7528000000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt15to30
+#SName           QCD
+#File            mmasciov/QCD/QCD_Pt15to30_PU_S14_POSTLS170_babytree.root
+#Xsection        2237000000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt30to50
+#SName           QCD
+#File            mmasciov/QCD/QCD_Pt30to50_PU_S14_POSTLS170_babytree.root
+#Xsection	161500000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt50to80
+#SName           QCD
+#File            mmasciov/QCD/QCD_Pt50to80_PU_S14_POSTLS170_babytree.root
+#Xsection	22110000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt80to120
+#SName           QCD
+#File            mmasciov/QCD/QCD_Pt80to120_PU_S14_POSTLS170_babytree.root
+#Xsection	3000114.3
+#Kfact           1.0
+#Lumi            1000
+
+SAMPLE
+Name            QCD-Pt120to170
+SName           QCD
+File            mmasciov/QCD/QCD_Pt120to170_PU_S14_POSTLS170_babytree.root
+Xsection	493200
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt170to300
+SName           QCD
+File            mmasciov/QCD/QCD_Pt170to300_PU_S14_POSTLS170_babytree.root
+Xsection        120300
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt300to470
+SName           QCD
+File            mmasciov/QCD/QCD_Pt300to470_PU_S14_POSTLS170_babytree.root
+Xsection	7475
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt470to600
+SName           QCD
+File            mmasciov/QCD/QCD_Pt470to600_PU_S14_POSTLS170_babytree.root
+Xsection	587.1
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt600to800
+SName           QCD
+File            mmasciov/QCD/QCD_Pt600to800_PU_S14_POSTLS170_babytree.root
+Xsection	167
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt800to1000
+SName           QCD
+File            mmasciov/QCD/QCD_Pt800to1000_PU_S14_POSTLS170_babytree.root
+Xsection	28.25
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt1000to1400
+SName           QCD
+File            mmasciov/QCD/QCD_Pt1000to1400_PU_S14_POSTLS170_babytree.root
+Xsection	8.195
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt1400to1800
+SName           QCD
+File            mmasciov/QCD/QCD_Pt1400to1800_PU_S14_POSTLS170_babytree.root
+Xsection	0.7346
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt1800
+SName           QCD
+File            mmasciov/QCD/QCD_Pt1800_PU_S14_POSTLS170_babytree.root
+Xsection	0.1091
+Kfact           1.0
+Lumi            1000
+
+### Top
+
+SAMPLE
+Name            TTJets_central
+SName           Top
+File            mmasciov/Top/TTJets_MSDecaysCKM_central_PU_S14_POSTLS170_babytree.root
+Xsection        800.0
+Kfact           1.0
+Lumi            1000
+
+### W+jets
+
+SAMPLE
+Name            WJets-HT100to200
+SName           WJets
+File            mmasciov/WJets/WJetsToLNu_HT100to200_PU_S14_POSTLS170_babytree.root
+Xsection        1817
+Kfact           1.23
+Lumi            1000
+
+SAMPLE
+Name            WJets-HT200to400
+SName           WJets
+File            mmasciov/WJets/WJetsToLNu_HT200to400_PU_S14_POSTLS170_babytree.root
+Xsection        471.6
+Kfact           1.23
+Lumi            1000
+
+SAMPLE
+Name            WJets-HT400to600
+SName           WJets
+File            mmasciov/WJets/WJetsToLNu_HT400to600_PU_S14_POSTLS170_babytree.root
+Xsection        55.61
+Kfact           1.23
+Lumi            1000
+
+SAMPLE
+Name            WJets-HT600toInf
+SName           WJets
+File            mmasciov/WJets/WJetsToLNu_HT600toInf_PU_S14_POSTLS170_babytree.root
+Xsection        18.81
+Kfact           1.23
+Lumi            1000
+
+### Z+jets
+
+SAMPLE
+Name            ZJets-HT100to200
+SName           ZJets
+File            mmasciov/ZJets/ZJetsToNuNu_HT100to200_PU_S14_POSTLS170_babytree.root
+Xsection        372.6
+Kfact           1.27
+Lumi            1000
+
+SAMPLE
+Name            ZJets-HT200to400
+SName           ZJets
+File            mmasciov/ZJets/ZJetsToNuNu_HT200to400_PU_S14_POSTLS170_babytree.root
+Xsection        100.8
+Kfact           1.27
+Lumi            1000
+
+SAMPLE
+Name            ZJets-HT400to600
+SName           ZJets
+File            mmasciov/ZJets/ZJetsToNuNu_HT400to600_PU_S14_POSTLS170_babytree.root
+Xsection        11.99
+Kfact           1.27
+Lumi            1000
+
+SAMPLE
+Name            ZJets-HT600toInf
+SName           ZJets
+File            mmasciov/ZJets/ZJetsToNuNu_HT600toInf_PU_S14_POSTLS170_babytree.root
+Xsection        4.113
+Kfact           1.27
+Lumi            1000
+
+## DY+jets
+
+SAMPLE
+Name            DYJets-HT100to200
+SName           DYJets
+File            mmasciov/DYJets/DYJetsM50_HT100to200_PU_S14_POSTLS170_babytree.root
+Xsection        194.3
+Kfact           1.27
+Lumi            1000
+
+SAMPLE
+Name            DYJets-HT200to400
+SName           DYJets
+File            mmasciov/DYJets/DYJetsM50_HT200to400_PU_S14_POSTLS170_babytree.root
+Xsection        52.24
+Kfact           1.27
+Lumi            1000
+
+SAMPLE
+Name            DYJets-HT400to600
+SName           DYJets
+File            mmasciov/DYJets/DYJetsM50_HT400to600_PU_S14_POSTLS170_babytree.root
+Xsection        6.546
+Kfact           1.27
+Lumi            1000
+
+SAMPLE
+Name            DYJets-HT600toInf
+SName           DYJets
+File            mmasciov/DYJets/DYJetsM50_HT100to200_PU_S14_POSTLS170_babytree.root
+Xsection        2.179
+Kfact           1.27
+Lumi            1000
+
+### G+jets
+
+SAMPLE
+Name            GJets-HT100to200
+SName           GJets
+File            mmasciov/GJets/GJets_HT100to200_PU_S14_POSTLS170_babytree.root
+Xsection        1534
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            GJets-HT200to400
+SName           GJets
+File            mmasciov/GJets/GJets_HT200to400_PU_S14_POSTLS170_babytree.root
+Xsection        489.9
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            GJets-HT400to600
+SName           GJets
+File            mmasciov/GJets/GJets_HT400to600_PU_S14_POSTLS170_babytree.root
+Xsection        62.05
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            GJets-HT600toInf
+SName           GJets
+File            mmasciov/GJets/GJets_HT100to200_PU_S14_POSTLS170_babytree.root
+Xsection        20.87
+Kfact           1.0
+Lumi            1000
+
+### Signal
+
+#SAMPLE
+#Name            T1tttt_1500-100
+#SName           Signal
+#File            mmasciov/Signal/SMS_T1tttt_2J_mGl1500_mLSP100_PU_S14_POSTLS170_babytree.root
+#Xsection        0.0141903
+#Kfact           100
+#Lumi            1000
+#
+#SAMPLE
+#Name            T1tttt_1200-800
+#SName           Signal
+#File            mmasciov/Signal/SMS_T1tttt_2J_mGl1200_mLSP800_PU_S14_POSTLS170_babytree.root
+#Xsection        0.0856418
+#Kfact           100
+#Lumi            1000
+#
+#SAMPLE
+#Name            T1bbbb_1000-900
+#SName           Signal
+#File            mmasciov/Signal/SMS_T1bbbb_2J_mGl1000_mLSP900_PU_S14_POSTLS170_babytree.root
+#Xsection        0.325388
+#Kfact           100
+#Lumi            1000
+#
+#SAMPLE
+#Name            T1bbbb_1500-100
+#SName           Signal
+#File            mmasciov/Signal/SMS_T1bbbb_2J_mGl1500_mLSP100_PU_S14_POSTLS170_babytree.root
+#Xsection        0.0141903
+#Kfact           100
+#Lumi            1000
+#
+#SAMPLE
+#Name            T1qqqq_1400-100
+#SName           Signal
+#File            mmasciov/Signal/SMS_T1qqqq_2J_mGl1400_mLSP100_PU_S14_POSTLS170_babytree.root
+#Xsection        0.0252977
+#Kfact           100
+#Lumi            1000
+
+SAMPLE
+Name            T1qqqq_1000-800
+SName           Signal
+File            mmasciov/Signal/SMS_T1qqqq_2J_mGl1000_mLSP800_PU_S14_POSTLS170_babytree.root
+Xsection        0.325388
+Kfact           100
+Lumi            1000

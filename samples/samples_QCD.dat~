@@ -1,0 +1,129 @@
+############################################################################################
+GENERAL
+Path		 /scratch/
+#Path             /shome/
+#Path             dcap://t3se01.psi.ch/pnfs/psi.ch/cms/trivcat/store/user/leo/SUSY/MT2trees/MT2_V02-01-02/
+#__________________________________________________________________________________________
+# list of samples
+#
+### New baby-trees for Event Yield Calculation
+
+#SAMPLE
+#Name            QCD-Pt5to10
+#SName           QCD
+#File            mmasciov/QCD_Pt5to10_PU_S14_POSTLS170_babytree.root
+#Xsection        80710000000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt10to15
+#SName           QCD
+#File            mmasciov/QCD_Pt10to15_PU_S14_POSTLS170_babytree.root
+#Xsection	7528000000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt15to30
+#SName           QCD
+#File            mmasciov/QCD_Pt15to30_PU_S14_POSTLS170_babytree.root
+#Xsection        2237000000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt30to50
+#SName           QCD
+#File            mmasciov/QCD_Pt30to50_PU_S14_POSTLS170_babytree.root
+#Xsection	161500000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt50to80
+#SName           QCD
+#File            mmasciov/QCD_Pt50to80_PU_S14_POSTLS170_babytree.root
+#Xsection	22110000
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt80to120
+#SName           QCD
+#File            mmasciov/QCD_Pt80to120_PU_S14_POSTLS170_babytree.root
+#Xsection	3000114.3
+#Kfact           1.0
+#Lumi            1000
+#
+SAMPLE
+Name            QCD-Pt120to170
+SName           QCD
+File            mmasciov/QCD_Pt120to170_PU_S14_POSTLS170_babytree.root
+Xsection	493200
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt170to300
+SName           QCD
+File            mmasciov/QCD_Pt170to300_PU_S14_POSTLS170_babytree.root
+Xsection        120300
+Kfact           1.0
+Lumi            1000
+
+SAMPLE
+Name            QCD-Pt300to470
+SName           QCD
+File            mmasciov/QCD_Pt300to470_PU_S14_POSTLS170_babytree.root
+Xsection	7475
+Kfact           1.0
+Lumi            1000
+
+#SAMPLE
+#Name            QCD-Pt470to600
+#SName           QCD
+#File            mmasciov/QCD_Pt470to600_PU_S14_POSTLS170_babytree.root
+#Xsection	587.1
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt600to800
+#SName           QCD
+#File            mmasciov/QCD_Pt600to800_PU_S14_POSTLS170_babytree.root
+#Xsection	167
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt800to1000
+#SName           QCD
+#File            mmasciov/QCD_Pt800to1000_PU_S14_POSTLS170_babytree.root
+#Xsection	28.25
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt1000to1400
+#SName           QCD
+#File            mmasciov/QCD_Pt1000to1400_PU_S14_POSTLS170_babytree.root
+#Xsection	8.195
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt1400to1800
+#SName           QCD
+#File            mmasciov/QCD_Pt1400to1800_PU_S14_POSTLS170_babytree.root
+#Xsection	0.7346
+#Kfact           1.0
+#Lumi            1000
+#
+#SAMPLE
+#Name            QCD-Pt1800
+#SName           QCD
+#File            mmasciov/QCD_Pt1800_PU_S14_POSTLS170_babytree.root
+#Xsection	0.1091
+#Kfact           1.0
+#Lumi            1000

@@ -1,0 +1,49 @@
+
+# DO NOT DELETE
+
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TTree.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TBranch.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TNamed.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TObject.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/Rtypes.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/RConfig.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/RVersion.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/DllImport.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/Rtypeinfo.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/snprintf.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/strlcpy.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TGenericClassInfo.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TSchemaHelper.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TStorage.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TVersionCheck.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/Riosfwd.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TBuffer.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TString.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TMathBase.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TObjArray.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TSeqCollection.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TCollection.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TIterator.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TAttFill.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TDataType.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TDictionary.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/Property.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TAttLine.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TAttMarker.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TArrayD.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TArray.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TArrayI.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TClass.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TObjString.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TVirtualTreePlayer.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TFile.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TDirectoryFile.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TDirectory.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TList.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TDatime.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TUUID.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TUrl.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/TMap.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/THashTable.h
+./removeDuplicates_C.so: /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/cintdictversion.h /swshare/cms/slc5_amd64_gcc462/lcg/root/5.32.00-cms21/include/RVersion.h
+removeDuplicates_C__ROOTBUILDVERSION= 5.32/00

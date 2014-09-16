@@ -1,0 +1,3 @@
+#input		output			filter	k-factor	xsec(pb)
+treeSmall1.root	smallOutput1.root	1.0	1.0		98765
+treeSmall2.root	smallOutput2.root	1.0	1.0		98
