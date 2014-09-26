@@ -16,7 +16,7 @@ EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -L$(CMSSW_BASE)/lib/slc6_amd64
 
 
 
-all: regionEventYields_BabyTrees inclusivePlots_BabyTrees inclusivePlots_QCD regionEventYields_postBabyTrees
+all: regionEventYields_BabyTrees inclusivePlots_BabyTrees inclusivePlots_QCD regionEventYields_postBabyTrees regionOptimization_BabyTrees
 
 regionEventYields_BabyTrees: regionEventYields_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o
 	$(CC) -Wall $(INCLUDES) -o regionEventYields_BabyTrees regionEventYields_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o $(ROOTFLAG) $(EXTRALIBS)
@@ -29,6 +29,9 @@ inclusivePlots_QCD: inclusivePlots_QCD.cpp MT2Region.o MT2RegionAnalysisUtilitie
 
 regionEventYields_postBabyTrees: regionEventYields_postBabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o
 	$(CC) -Wall $(INCLUDES) -o regionEventYields_postBabyTrees regionEventYields_postBabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o $(ROOTFLAG) $(EXTRALIBS) -fpermissive
+
+regionOptimization_BabyTrees: regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o
+	$(CC) -Wall $(INCLUDES) -o regionOptimization_BabyTrees regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o $(ROOTFLAG) $(EXTRALIBS)
 
 
 MT2Common.o: src/MT2Common.cc
