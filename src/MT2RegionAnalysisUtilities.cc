@@ -38,7 +38,7 @@ MT2RegionAnalysisBase::MT2RegionAnalysisBase( const std::string& aname, const MT
   //yield = new TH1D(Form("yield_%s", name.c_str()), "", nBins, bins);
   //yield->Sumw2();
 
-  yield = new TH1F(Form("yiled_%s", name.c_str()), "", 2, 0., 2.);
+  yield = new TH1D(Form("yiled_%s", name.c_str()), "", 2, 0., 2.);
   yield->Sumw2();
 
 }

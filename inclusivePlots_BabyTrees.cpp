@@ -43,7 +43,7 @@ int main( int argc, char* argv[] ) {
   std::vector<MT2SampleBaby_basic> fSamples = MT2Common::loadSamplesBaby_basic(samplesFileName);
 
   
-  std::string outputdir = "InclusivePlots/2ndRound";
+  std::string outputdir = "InclusivePlots/FullSelection/nJet40ge9";
   system(Form("mkdir -p %s", outputdir.c_str()));
 
 
@@ -84,8 +84,9 @@ int main( int argc, char* argv[] ) {
 
   TH1F* h_jetpt[nSamples+1];
   
-  int iSignal=999;
-  
+  int iSignal[6];
+  int s=0;
+
   for( unsigned i=0; i<fSamples.size(); ++i ){
     
     //Initializing histograms:
@@ -118,10 +119,28 @@ int main( int argc, char* argv[] ) {
       h_njets[i]->SetLineColor(5);
       h_njets[i]->SetFillColor(5);
     }
-    else if(fSamples[i].sname == "Signal"){
+    else if(fSamples[i].name == "T1qqqq_1400-100"){
       h_njets[i]->SetLineColor(1);
     }
-      
+    else if(fSamples[i].name == "T1qqqq_1000-800"){
+      h_njets[i]->SetLineColor(1);
+      h_njets[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1bbbb_1500-100"){
+      h_njets[i]->SetLineColor(6);
+    }
+    else if(fSamples[i].name == "T1bbbb_1000-900"){
+      h_njets[i]->SetLineColor(6);
+      h_njets[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1500-100"){
+      h_njets[i]->SetLineColor(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1200-800"){
+      h_njets[i]->SetLineColor(2);
+      h_njets[i]->SetLineStyle(2);
+    }   
+   
     std::string name_nbjets="nbjets"+fSamples[i].name;
     h_nbjets[i] = new TH1F(name_nbjets.c_str(), "number of b-jets", 6, 0, 6 );
     h_nbjets[i]->GetXaxis()->SetTitle("N(b-jets)");
@@ -150,8 +169,26 @@ int main( int argc, char* argv[] ) {
       h_nbjets[i]->SetLineColor(5);
       h_nbjets[i]->SetFillColor(5);
     }
-    else if(fSamples[i].sname == "Signal"){
+    else if(fSamples[i].name == "T1qqqq_1400-100"){
       h_nbjets[i]->SetLineColor(1);
+    }
+    else if(fSamples[i].name == "T1qqqq_1000-800"){
+      h_nbjets[i]->SetLineColor(1);
+      h_nbjets[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1bbbb_1500-100"){
+      h_nbjets[i]->SetLineColor(6);
+    }
+    else if(fSamples[i].name == "T1bbbb_1000-900"){
+      h_nbjets[i]->SetLineColor(6);
+      h_nbjets[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1500-100"){
+      h_nbjets[i]->SetLineColor(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1200-800"){
+      h_nbjets[i]->SetLineColor(2);
+      h_nbjets[i]->SetLineStyle(2);
     }
 
     std::string name_nleptons="nleptons"+fSamples[i].name;
@@ -182,14 +219,32 @@ int main( int argc, char* argv[] ) {
       h_nleptons[i]->SetLineColor(5);
       h_nleptons[i]->SetFillColor(5);
     }
-    else if(fSamples[i].sname == "Signal"){
+    else if(fSamples[i].name == "T1qqqq_1400-100"){
       h_nleptons[i]->SetLineColor(1);
     }
-    
+    else if(fSamples[i].name == "T1qqqq_1000-800"){
+      h_nleptons[i]->SetLineColor(1);
+      h_nleptons[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1bbbb_1500-100"){
+      h_nleptons[i]->SetLineColor(6);
+    }
+    else if(fSamples[i].name == "T1bbbb_1000-900"){
+      h_nleptons[i]->SetLineColor(6);
+      h_nleptons[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1500-100"){
+      h_nleptons[i]->SetLineColor(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1200-800"){
+      h_nleptons[i]->SetLineColor(2);
+      h_nleptons[i]->SetLineStyle(2);
+    }
+ 
     std::string name_ht="ht"+fSamples[i].name;
-    h_ht[i] = new TH1F(name_ht.c_str(), "H_{T}", 300, 0, 3000 );
+    h_ht[i] = new TH1F(name_ht.c_str(), "H_{T}", 120, 0, 3000 );
     h_ht[i]->GetXaxis()->SetTitle("H_{T} [GeV]");
-    h_ht[i]->GetYaxis()->SetTitle("Events/10 GeV");
+    h_ht[i]->GetYaxis()->SetTitle("Events/25 GeV");
     if(fSamples[i].sname == "WJets"){
       h_ht[i]->SetLineColor(417);
       h_ht[i]->SetFillColor(417);
@@ -214,14 +269,32 @@ int main( int argc, char* argv[] ) {
       h_ht[i]->SetLineColor(5);
       h_ht[i]->SetFillColor(5);
     }
-    else if(fSamples[i].sname == "Signal"){
+    else if(fSamples[i].name == "T1qqqq_1400-100"){
       h_ht[i]->SetLineColor(1);
+    }
+    else if(fSamples[i].name == "T1qqqq_1000-800"){
+      h_ht[i]->SetLineColor(1);
+      h_ht[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1bbbb_1500-100"){
+      h_ht[i]->SetLineColor(6);
+    }
+    else if(fSamples[i].name == "T1bbbb_1000-900"){
+      h_ht[i]->SetLineColor(6);
+      h_ht[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1500-100"){
+      h_ht[i]->SetLineColor(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1200-800"){
+      h_ht[i]->SetLineColor(2);
+      h_ht[i]->SetLineStyle(2);
     }
 
     std::string name_met="met"+fSamples[i].name;
-    h_met[i] = new TH1F(name_met.c_str(), "E_{T}^{miss}", 100, 0, 1000 );
+    h_met[i] = new TH1F(name_met.c_str(), "E_{T}^{miss}", 60, 0, 1500 );
     h_met[i]->GetXaxis()->SetTitle("E_{T}^{miss} [GeV]");
-    h_met[i]->GetYaxis()->SetTitle("Events/10 GeV");
+    h_met[i]->GetYaxis()->SetTitle("Events/25 GeV");
     if(fSamples[i].sname == "WJets"){
       h_met[i]->SetLineColor(417);
       h_met[i]->SetFillColor(417);
@@ -246,14 +319,32 @@ int main( int argc, char* argv[] ) {
       h_met[i]->SetLineColor(5);
       h_met[i]->SetFillColor(5);
     }
-    else if(fSamples[i].sname == "Signal"){
+    else if(fSamples[i].name == "T1qqqq_1400-100"){
       h_met[i]->SetLineColor(1);
+    }
+    else if(fSamples[i].name == "T1qqqq_1000-800"){
+      h_met[i]->SetLineColor(1);
+      h_met[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1bbbb_1500-100"){
+      h_met[i]->SetLineColor(6);
+    }
+    else if(fSamples[i].name == "T1bbbb_1000-900"){
+      h_met[i]->SetLineColor(6);
+      h_met[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1500-100"){
+      h_met[i]->SetLineColor(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1200-800"){
+      h_met[i]->SetLineColor(2);
+      h_met[i]->SetLineStyle(2);
     }
 
     std::string name_mt2="mt2"+fSamples[i].name;;
-    h_mt2[i] = new TH1F(name_mt2.c_str(), "M_{T2}", 100, 0, 1000 );
+    h_mt2[i] = new TH1F(name_mt2.c_str(), "M_{T2}", 60, 0, 1500 );
     h_mt2[i]->GetXaxis()->SetTitle("M_{T2} [GeV]");
-    h_mt2[i]->GetYaxis()->SetTitle("Events/10 GeV");
+    h_mt2[i]->GetYaxis()->SetTitle("Events/25 GeV");
     if(fSamples[i].sname == "WJets"){
       h_mt2[i]->SetLineColor(417);
       h_mt2[i]->SetFillColor(417);
@@ -278,14 +369,32 @@ int main( int argc, char* argv[] ) {
       h_mt2[i]->SetLineColor(5);
       h_mt2[i]->SetFillColor(5);
     }
-    else if(fSamples[i].sname == "Signal"){
+    else if(fSamples[i].name == "T1qqqq_1400-100"){
       h_mt2[i]->SetLineColor(1);
+    }
+    else if(fSamples[i].name == "T1qqqq_1000-800"){
+      h_mt2[i]->SetLineColor(1);
+      h_mt2[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1bbbb_1500-100"){
+      h_mt2[i]->SetLineColor(6);
+    }
+    else if(fSamples[i].name == "T1bbbb_1000-900"){
+      h_mt2[i]->SetLineColor(6);
+      h_mt2[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1500-100"){
+      h_mt2[i]->SetLineColor(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1200-800"){
+      h_mt2[i]->SetLineColor(2);
+      h_mt2[i]->SetLineStyle(2);
     }
 
     std::string name_jetpt="jetpt"+fSamples[i].name;;
-    h_jetpt[i] = new TH1F(name_jetpt.c_str(), "p_{T} (jet)", 300, 0, 3000 );
+    h_jetpt[i] = new TH1F(name_jetpt.c_str(), "p_{T} (jet)", 120, 0, 3000 );
     h_jetpt[i]->GetXaxis()->SetTitle("p_{T}(jet) [GeV]");
-    h_jetpt[i]->GetYaxis()->SetTitle("Events/10 GeV");
+    h_jetpt[i]->GetYaxis()->SetTitle("Events/25 GeV");
     if(fSamples[i].sname == "WJets"){
       h_jetpt[i]->SetLineColor(417);
       h_jetpt[i]->SetFillColor(417);
@@ -310,8 +419,26 @@ int main( int argc, char* argv[] ) {
       h_jetpt[i]->SetLineColor(5);
       h_jetpt[i]->SetFillColor(5);
     }
-    else if(fSamples[i].sname == "Signal"){
+    else if(fSamples[i].name == "T1qqqq_1400-100"){
       h_jetpt[i]->SetLineColor(1);
+    }
+    else if(fSamples[i].name == "T1qqqq_1000-800"){
+      h_jetpt[i]->SetLineColor(1);
+      h_jetpt[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1bbbb_1500-100"){
+      h_jetpt[i]->SetLineColor(6);
+    }
+    else if(fSamples[i].name == "T1bbbb_1000-900"){
+      h_jetpt[i]->SetLineColor(6);
+      h_jetpt[i]->SetLineStyle(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1500-100"){
+      h_jetpt[i]->SetLineColor(2);
+    }
+    else if(fSamples[i].name == "T1tttt_1200-800"){
+      h_jetpt[i]->SetLineColor(2);
+      h_jetpt[i]->SetLineStyle(2);
     }
 
     std::cout << std::endl << std::endl;
@@ -329,14 +456,14 @@ int main( int argc, char* argv[] ) {
 
       std::ostringstream preselectionStream;
       preselectionStream << " "
-	//<< "(nTaus20==0 && nMuons10==0 && nElectrons10==0)"                   << " && "
+			 << "(nTaus20==0 && nMuons10==0 && nElectrons10==0)"                   << " && "
 			 << "(nVert > 0)"                      << " && "
-			 << "(nJet40 > 1)"                     << " && "
+			 << "(nJet40 > 8)"                     << " && "
 			 << "(ht > 450)"                       << " && "
-			 << "(mt2 > 50)";
-        //		       << "(jet_pt[1] > 100)"                << " && "
-        //		       << "(deltaPhiMin > 0.3)"              << " && "
-        //		       << "(diffMetMht < 70)";
+			 << "(mt2 > 200)"                      << " && "
+			 << "(jet_pt[1] > 100)"                << " && "
+			 << "(deltaPhiMin > 0.3)"              << " && "
+			 << "(diffMetMht < 70)";
       
       TString preselection = preselectionStream.str().c_str();
       TString cuts = preselection;
@@ -428,7 +555,7 @@ int main( int argc, char* argv[] ) {
     }// entries
     
     std::cout << "Done with sample " << fSamples[i].name << std::endl << std::endl; 
- 
+
     if(fSamples[i].sname != "Signal"){
       h_njets_stack    ->Add(h_njets[i]);
       h_nbjets_stack   ->Add(h_nbjets[i]);
@@ -438,7 +565,10 @@ int main( int argc, char* argv[] ) {
       h_mt2_stack      ->Add(h_mt2[i]);
       h_jetpt_stack    ->Add(h_jetpt[i]);
     }
-    else iSignal = i;
+    else {
+      iSignal[s] = i;
+      ++s;
+    }
 
     // Performance statistics
     std::string ps_name = outputdir+"/perfstat"+fSamples[i].name+".root";
@@ -479,8 +609,26 @@ int main( int argc, char* argv[] ) {
   TH1F* hGJets = new TH1F("GJets", "GJets", 1, 0, 1);
   hGJets->SetFillColor(5);
 
-  TH1F* hSignal = new TH1F("Signal", "Signal", 1, 0, 1);
-  hSignal->SetLineColor(1);
+  TH1F* hT1qqqq_hDM = new TH1F("T1qqqq_hDM", "", 1, 0, 1);
+  hT1qqqq_hDM->SetLineColor(1);
+
+  TH1F* hT1qqqq_lDM = new TH1F("T1qqqq_lDM", "", 1, 0, 1);
+  hT1qqqq_lDM->SetLineColor(1);
+  hT1qqqq_lDM->SetLineStyle(2);
+
+  TH1F* hT1bbbb_hDM = new TH1F("T1bbbb_hDM", "", 1, 0, 1);
+  hT1bbbb_hDM->SetLineColor(6);
+
+  TH1F* hT1bbbb_lDM = new TH1F("T1bbbb_lDM", "", 1, 0, 1);
+  hT1bbbb_lDM->SetLineColor(6);
+  hT1bbbb_lDM->SetLineStyle(2);
+
+  TH1F* hT1tttt_hDM = new TH1F("T1tttt_hDM", "", 1, 0, 1);
+  hT1tttt_hDM->SetLineColor(2);
+
+  TH1F* hT1tttt_lDM = new TH1F("T1tttt_lDM", "", 1, 0, 1);
+  hT1tttt_lDM->SetLineColor(2);
+  hT1tttt_lDM->SetLineStyle(2);
 
 
   TLegend* Leg = new TLegend(.65,.65,.85,.85, "");
@@ -491,10 +639,15 @@ int main( int argc, char* argv[] ) {
   Leg->AddEntry(hZJets, "Z + jets", "F");
   Leg->AddEntry(hWJets, "W + jets", "F");
   Leg->AddEntry(hTop, "Top", "F");
-  Leg->AddEntry(hDYJets, "DY + jets", "F");
-  Leg->AddEntry(hGJets, "G + jets", "F");
+  //Leg->AddEntry(hDYJets, "DY + jets", "F");
+  //Leg->AddEntry(hGJets, "G + jets", "F");
   
-  Leg->AddEntry(hSignal, "x100 T1qqqq - 1400, 100", "l");
+  Leg->AddEntry(hT1qqqq_hDM, "x10 T1qqqq - 1400, 100", "l");
+  Leg->AddEntry(hT1qqqq_lDM, "x10 T1qqqq - 1000, 800", "l");
+  Leg->AddEntry(hT1bbbb_hDM, "x10 T1bbbb - 1500, 100", "l");
+  Leg->AddEntry(hT1bbbb_lDM, "x10 T1bbbb - 1000, 900", "l");
+  Leg->AddEntry(hT1tttt_hDM, "x10 T1tttt - 1500, 100", "l");
+  Leg->AddEntry(hT1tttt_lDM, "x10 T1tttt - 1200, 800", "l");
 
   TCanvas* c1=new TCanvas("c1", "c1", 600, 600);
   c1->cd();
@@ -504,10 +657,13 @@ int main( int argc, char* argv[] ) {
   h_njets_stack ->GetXaxis()->SetTitle("N(jets)");
   h_njets_stack ->GetYaxis()->SetTitle("Events");
   h_njets_stack ->GetYaxis()->SetTitleOffset(1.5);
+  h_njets_stack ->SetMinimum(0.1);
+  h_njets_stack ->SetMaximum(10000);
   h_njets_stack ->Draw("hist");
 
-  h_njets[iSignal]->Draw("same");
-
+  for (int ss =0; ss < 6; ++ss)
+    h_njets[iSignal[ss]]->Draw("same");
+  
   Leg->Draw("same");
   
   c1->Update();
@@ -522,9 +678,12 @@ int main( int argc, char* argv[] ) {
   h_nbjets_stack ->GetXaxis()->SetTitle("N(b-jets)");
   h_nbjets_stack ->GetYaxis()->SetTitle("Events");
   h_nbjets_stack ->GetYaxis()->SetTitleOffset(1.5);
+  h_nbjets_stack ->SetMinimum(0.1);
+  h_nbjets_stack ->SetMaximum(10000);
   h_nbjets_stack ->Draw("hist");
 
-  h_nbjets[iSignal]->Draw("same");
+  for (int ss =0; ss < 6; ++ss)
+    h_nbjets[iSignal[ss]]->Draw("same");
 
   Leg->Draw("same");
   
@@ -539,9 +698,12 @@ int main( int argc, char* argv[] ) {
   h_nleptons_stack ->GetXaxis()->SetTitle("N(leptons)");
   h_nleptons_stack ->GetYaxis()->SetTitle("Events");
   h_nleptons_stack ->GetYaxis()->SetTitleOffset(1.5);
+  h_nleptons_stack ->SetMinimum(0.1);
+  h_nleptons_stack ->SetMaximum(10000);
   h_nleptons_stack ->Draw("hist");
   
-  h_nleptons[iSignal]->Draw("same");
+  for (int ss =0; ss < 6; ++ss)
+    h_nleptons[iSignal[ss]]->Draw("same");
 
   Leg->Draw("same");
 
@@ -554,13 +716,15 @@ int main( int argc, char* argv[] ) {
 
   h_ht_stack ->Draw("hist");
   h_ht_stack ->GetXaxis()->SetTitle("H_{T} [GeV]");
-  h_ht_stack ->GetYaxis()->SetTitle("Events/10 GeV");
+  h_ht_stack ->GetYaxis()->SetTitle("Events/25 GeV");
   h_ht_stack ->GetYaxis()->SetTitleOffset(1.5);
   h_ht_stack ->SetMinimum(0.1);
+  h_ht_stack ->SetMaximum(10000);
   h_ht_stack ->Draw("hist");
 
-  h_ht[iSignal]->Draw("same");
-
+  for (int ss =0; ss < 6; ++ss)
+    h_ht[iSignal[ss]]->Draw("same");
+  
   Leg->Draw("same");
 
   c4->Update();
@@ -572,12 +736,14 @@ int main( int argc, char* argv[] ) {
 
   h_met_stack ->Draw("hist");
   h_met_stack ->GetXaxis()->SetTitle("E_{T}^{miss} [GeV]");
-  h_met_stack ->GetYaxis()->SetTitle("Events/10 GeV");
+  h_met_stack ->GetYaxis()->SetTitle("Events/25 GeV");
   h_met_stack ->GetYaxis()->SetTitleOffset(1.5);
   h_met_stack ->SetMinimum(0.1);
+  h_met_stack ->SetMaximum(10000);
   h_met_stack ->Draw("hist");
   
-  h_met[iSignal]->Draw("same");
+  for (int ss =0; ss < 6; ++ss)
+    h_met[iSignal[ss]]->Draw("same");
 
   Leg->Draw("same");
   
@@ -590,12 +756,14 @@ int main( int argc, char* argv[] ) {
 
   h_mt2_stack ->Draw("hist");
   h_mt2_stack ->GetXaxis()->SetTitle("M_{T2} [GeV]");
-  h_mt2_stack ->GetYaxis()->SetTitle("Events/10 GeV");
+  h_mt2_stack ->GetYaxis()->SetTitle("Events/25 GeV");
   h_mt2_stack ->GetYaxis()->SetTitleOffset(1.5);
   h_mt2_stack ->SetMinimum(0.1);
+  h_mt2_stack ->SetMaximum(10000);
   h_mt2_stack ->Draw("hist");
 
-  h_mt2[iSignal]->Draw("same");
+  for (int ss =0; ss < 6; ++ss)
+    h_mt2[iSignal[ss]]->Draw("same");
 
   Leg->Draw("same");
 
@@ -608,13 +776,15 @@ int main( int argc, char* argv[] ) {
 
   h_jetpt_stack ->Draw("hist");
   h_jetpt_stack ->GetXaxis()->SetTitle("p_{T}(jet) [GeV]");
-  h_jetpt_stack ->GetYaxis()->SetTitle("Events/10 GeV");
+  h_jetpt_stack ->GetYaxis()->SetTitle("Events/25 GeV");
   h_jetpt_stack ->GetYaxis()->SetTitleOffset(1.5);
   h_jetpt_stack ->SetMinimum(0.1);
+  h_mt2_stack ->SetMaximum(1e6);
   h_jetpt_stack ->Draw("hist");
-
-  h_jetpt[iSignal]->Draw("same");
-
+  
+  for (int ss =0; ss < 6; ++ss)
+    h_jetpt[iSignal[ss]]->Draw("same");
+  
   Leg->Draw("same");
 
   c7->Update();

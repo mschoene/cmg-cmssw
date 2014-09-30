@@ -1,11 +1,8 @@
 #include <iostream>
 #include <sstream>
 
-//#include "MT2tree.hh"
-//#include "helper/Utilities.hh"
-//#include "Utilities.hh"
-
 #include <TTreeFormula.h>
+#include <TMath.h>
 
 #include "interface/MT2Common.h"
 #include "interface/MT2Region.h"
@@ -15,24 +12,18 @@
 #include "treeProducerSusyFullHad.h"
 
 bool fFast = true;
-bool fISRreweight = true;
-bool fbTagReweight = true;
-bool fIncludeTaus = true;
-
-
+//bool fbTagReweight = true;
+//bool fIncludeTaus = true;
 
 
 
 MT2LostLeptonEstimate* computeLostLepton( const MT2SampleBaby_basic& sample, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions );
 std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::string> leptType, TTree* tree, MT2SampleBaby_basic sample, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions );
-float getISRCorrection( MT2tree* fMT2tree, const MT2SampleBaby_basic& sample );
-void getBTagScaleFactor( MT2tree* fMT2tree, MT2Region* region, float& btagSF, float& btagSFerr );
+//void getBTagScaleFactor( treeProducerSusyFullHad myTree, MT2Region* region, float& btagSF, float& btagSFerr );
 MT2LostLeptonEstimate* mergeEstimates( std::vector<MT2LostLeptonEstimate*> llest, const std::string& n1, const std::string& n2="", const std::string& n3="", const std::string& n4="", const std::string& n5="" );
 std::vector<TH1D*> getPredictionHistos( const std::string& prefix, const std::string& leptType, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions, MT2LostLeptonEstimate* ll_tot, MT2LostLeptonEstimate* ll_bg, MT2LostLeptonEstimate* ll_eff );
 std::vector<TH1D*> getSimTruthHistos( const std::string& prefix, const std::string& leptType, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions, MT2LostLeptonEstimate* ll_tot );
 int getPdgId( const std::string leptType );
-
-
 
 
 int main( int argc, char* argv[] ) {
@@ -250,7 +241,7 @@ MT2LostLeptonEstimate* computeLostLepton( const MT2SampleBaby_basic& sample, std
 std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::string> leptType, TTree* tree, MT2SampleBaby_basic sample, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions ) {
 
 
-  bool isData = (sample.type=="data");
+  bool isData = (sample.sname=="data");
 
   // global sample weight:
   Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents*sample.PU_avg_weight);
@@ -294,7 +285,7 @@ std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::
 
     if( iEntry % 50000 == 0 ) std::cout << "    Entry: " << iEntry << " / " << nentries << std::endl;
 
-    myTree->GetEntry(iEntry);
+    myTree.GetEntry(iEntry);
 
     //if(myTree.ht>=750.&&myTree.ht<1200.&&myTree.nJet40==2&&myTree.nBJet40>=1&&myTree.mt2>=135.&&myTree.mt2<=170.&&sample.sname=="Top"&&myTree.lumi149&&myTree.event==44699) continue;//sample T_t_highHT - fix for one 8 TeV MC sample with crazy weight
 
@@ -311,8 +302,12 @@ std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::
     //StartFromHere
 
 
-    int ngenleptot = fMT2tree->GenNumLeptFromW(1113,0,1000, fIncludeTaus);
-
+    //int ngenleptot = fMT2tree->GenNumLeptFromW(1113,0,1000, fIncludeTaus);
+    int ngenleptot = 0;
+    for (int gl=0; gl < myTree.nGenLep; ++gl)
+      if(fabs(myTree.GenLep_sourceId[gl]) == 24) ++ngenleptot;
+    for (int gl=0; gl < myTree.nGenLepFromTau; ++gl)
+      if(fabs(myTree.GenLepFromTau_sourceId[gl]) == 24) ++ngenleptot;
 
     bool foundRegion = false;
 
@@ -341,14 +336,17 @@ std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::
         // compute weight
         if( !isData ) {
 
-          float puweight =  fMT2tree->pileUp.Weight;
-          float isrweight = getISRCorrection( fMT2tree, sample );
-          float btagSF, btagSFerr;
-          getBTagScaleFactor( fMT2tree, &thisRegion, btagSF, btagSFerr );
+          float puweight =  myTree.puWeight;
 
-          fullweight          = weight * puweight * isrweight * btagSF;
-          fullweight_btagUp   = weight * puweight * isrweight *(btagSF + btagSFerr);
-          fullweight_btagDown = weight * puweight * isrweight *(btagSF - btagSFerr);
+	  ////// FIXME
+	  //float btagSF, btagSFerr;
+          //getBTagScaleFactor( myTree, &thisRegion, btagSF, btagSFerr );
+	  float btagSF = 1., btagSFerr = 0.;
+	  //////
+
+          fullweight          = weight * puweight * btagSF;
+          fullweight_btagUp   = weight * puweight * (btagSF + btagSFerr);
+          fullweight_btagDown = weight * puweight * (btagSF - btagSFerr);
 
         }
 
@@ -358,11 +356,11 @@ std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::
           float mt = 0.;
           bool hasRecoLep = false;
           if( leptType[iLept]=="Ele" ) {
-            hasRecoLep = (fMT2tree->NEles==1 && fMT2tree->NMuons==0);
-            mt = (hasRecoLep) ? fMT2tree->ele[0].MT : 0.;
+            hasRecoLep = (myTree.nElectrons10==1 && myTree.nMuons10==0);
+	    mt = (hasRecoLep) ? sqrt(myTree.lep_mass[0]*myTree.lep_mass[0] + myTree.lep_pt[0]*myTree.lep_pt[0]) : 0.;
           } else if( leptType[iLept]=="Muo" ) {
-            hasRecoLep = (fMT2tree->NEles==0 && fMT2tree->NMuons==1);
-            mt = (hasRecoLep) ? fMT2tree->muo[0].MT : 0.;
+            hasRecoLep = (myTree.nElectrons10==0 && myTree.nMuons10==1);
+	    mt = (hasRecoLep) ? sqrt(myTree.lep_mass[0]*myTree.lep_mass[0] + myTree.lep_pt[0]*myTree.lep_pt[0]) : 0.;
           }
 
 
@@ -387,8 +385,10 @@ std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::
 
           } 
 
-          bool genlept = fMT2tree->GenLeptFromW(pdgIdLept[iLept], 0 , 1000,fIncludeTaus);
-          bool hasGenLept = (genlept) && (ngenleptot==1);
+          //bool genlept = fMT2tree->GenLeptFromW(pdgIdLept[iLept], 0 , 1000,fIncludeTaus);
+	  //bool hasGenLept = (genlept) && (ngenleptot==1);
+	  
+	  bool hasGenLept = (ngenleptot==1);
 
           if( hasGenLept ) {
             thisPred->effLept_tot->Fill( mt2, fullweight );
@@ -397,9 +397,9 @@ std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::
             }
           }
  
-          bool noRecoLep = (fMT2tree->NEles==0 && fMT2tree->NMuons==0);
-          if( genlept && noRecoLep ) thisSimTruth->yield->Fill( mt2, fullweight );
-
+          bool noRecoLep = (myTree.nElectrons10==0 && myTree.nMuons10==0);
+          //if( genlept && noRecoLep ) thisSimTruth->yield->Fill( mt2, fullweight );
+	  if( ngenleptot==1 && noRecoLep ) thisSimTruth->yield->Fill( mt2, fullweight );
 
         } // for leptType
 
@@ -417,7 +417,7 @@ std::vector<MT2LeptonTypeLLEstimate*> getLeptonTypeLLEstimate( std::vector<std::
     llest[i]->addOverflow();
 
 
-  delete fMT2tree;
+  delete tree;
   
   return llest;
 
@@ -590,191 +590,63 @@ std::vector<TH1D*> getSimTruthHistos( const std::string& prefix, const std::stri
 
 
 
-
-
-
-
-
-
-float getISRCorrection( MT2tree* fMT2tree, const MT2SampleBaby_basic& sample ) {
-
-  //assign all samples to its type
-  string sampletype = (string)sample.type;
-  if(sampletype==(string)"mc"){
-    if(sample.sname=="QCD")         sampletype = (string)"QCD";
-    else if(sample.sname=="Wtolnu") sampletype = (string)"WJets";
-    else if(sample.sname=="DY")     sampletype = (string)"ZJets";
-    else if(sample.name=="TTbar")   sampletype = (string)"TTbar";
-    else if(sample.name=="TTbar_Madgraph0l")   sampletype = (string)"TTbar";
-    else if(sample.name=="TTbar_Madgraph1l")   sampletype = (string)"TTbar";
-    else if(sample.name=="TTbar_Madgraph2l")   sampletype = (string)"TTbar";
-    else if(sample.sname=="Top")    sampletype = (string)"SingleTop";//no ttbar, includes TTZ, TTW
-    else sampletype = (string)"Other";
-  }
-
-  TLorentzVector hardgenlv; hardgenlv.SetPtEtaPhiM(0,0,0,0);
-  if(sampletype=="WJets"){
-    bool foundW(false);
-    for(int ngl = 0; ngl<fMT2tree->NGenLepts; ++ngl){//lepton from W
-      int ID  =abs(fMT2tree->genlept[ngl].ID);
-      int MID =abs(fMT2tree->genlept[ngl].MID);
-      if((ID == 11 || ID == 12 || ID == 13 || ID == 14 || ID == 15 || ID == 16) && MID==24){
-        hardgenlv = fMT2tree->genlept[ngl].Mlv; foundW = true;
-      }
-      if(foundW) break;
-    }
-    if(!foundW){
-      for(int ngl = 0; ngl<fMT2tree->NGenLepts; ++ngl){//lepton from tau, tau from W
-        int ID  =abs(fMT2tree->genlept[ngl].ID);
-        int MID =abs(fMT2tree->genlept[ngl].MID);
-        int GMID=abs(fMT2tree->genlept[ngl].GMID);
-        if((ID == 11 || ID == 12 || ID == 13 || ID == 14 || ID == 16) && MID==15 && GMID==24){
-          hardgenlv = fMT2tree->genlept[ngl].Mlv; foundW = true;
-        }
-        if(foundW) break;
-      }
-    }
-  } else if(sampletype=="ZJets"){
-    hardgenlv = fMT2tree->GenZ[0];
-  } else if(sampletype=="TTbar"){
-    TLorentzVector top1(0.,0.,0.,0.), top2(0.,0.,0.,0.);
-    bool top1f(false), top2f(false);
-    for(int ngl = 0; ngl<fMT2tree->NGenLepts; ++ngl){
-      int id   = abs(fMT2tree->genlept[ngl].ID);
-      if(id!=5) continue;
-      int mid  = fMT2tree->genlept[ngl].MID;//from b
-      if(mid==6&&top1f) continue;
-      else if(mid==6) { top1 = fMT2tree->genlept[ngl].Mlv; top1f = true; }
-      if(mid==-6&&top2f) continue;
-      else if(mid==-6){ top2 = fMT2tree->genlept[ngl].Mlv; top2f = true; }
-      if(top1f&&top2f) {
-        hardgenlv = top1+top2;
-        break;
-      }
-    }
-  } else if(sampletype=="SingleTop"){
-    TString samplename_tstr(sample.name);
-    if(samplename_tstr.Contains("tW")){//t + W
-      TLorentzVector top(0.,0.,0.,0.), W(0.,0.,0.,0.);
-      bool topf(false), Wf(false);
-      for(int ngl = 0; ngl<fMT2tree->NGenLepts; ++ngl){
-        int id    = abs(fMT2tree->genlept[ngl].ID);
-        int mid   = abs(fMT2tree->genlept[ngl].MID);//from b
-        int gmid  = abs(fMT2tree->genlept[ngl].GMID);//from b
-        if(mid==6&&topf) continue;
-        else if(mid==6) { top = fMT2tree->genlept[ngl].Mlv; topf = true; }
-        if(mid==24&&gmid!=6&&Wf) continue;
-        if((id == 11 || id == 12 || id == 13 || id == 14 || id == 15 || id == 16) && mid==24 && gmid!=6){
-          W = fMT2tree->genlept[ngl].Mlv; Wf = true;
-        }
-        if(topf&&Wf){
-          hardgenlv = top+W;
-          break;
-        }
-      }
-      if(!Wf){//this might be wrong - but influence negligible anyway
-        for(int ngl = 0; ngl<fMT2tree->NGenLepts; ++ngl){
-          int id    = abs(fMT2tree->genlept[ngl].ID);
-          int mid   = abs(fMT2tree->genlept[ngl].MID);//from b
-          int gmid  = abs(fMT2tree->genlept[ngl].GMID);//from b
-          if(mid==6||gmid==6) continue;
-          if(gmid==24&&gmid==15&&Wf) continue;
-          if((id == 11 || id == 12 || id == 13 || id == 14 || id == 15 || id == 16) && mid==15 && gmid==24){
-            W = fMT2tree->genlept[ngl].Mlv; Wf = true;
-          }
-          if(topf&&Wf){
-            hardgenlv = top+W;
-            break;
-          }
-        }
-      }
-    
-    } else {
-      TLorentzVector top(0.,0.,0.,0.);
-      bool topf(false), Wf(false);
-      for(int ngl = 0; ngl<fMT2tree->NGenLepts; ++ngl){
-        int id    = abs(fMT2tree->genlept[ngl].ID);
-        int mid   = abs(fMT2tree->genlept[ngl].MID);//from b
-        int gmid  = abs(fMT2tree->genlept[ngl].GMID);//from b
-        if(mid==6&&topf) continue;
-        else if(mid==6) { top = fMT2tree->genlept[ngl].Mlv; topf = true; }
-        if(topf){
-          hardgenlv = top;
-          break;
-        }
-      }
-    }
-  }
-
-  float ISRweight=1.;
-  if(hardgenlv.Pt()>250.) ISRweight = 0.8;
-  else if(hardgenlv.Pt()>150.) ISRweight = 0.9;
-  else if(hardgenlv.Pt()>120.) ISRweight = 0.95;
-  else                         ISRweight = 1.;
-      
-  return ISRweight;
-
-}
-
-
-
-void getBTagScaleFactor( MT2tree* fMT2tree, MT2Region* region, float& btagSF, float& btagSFerr ) {
-
-  int nbjetsmin = region->nBJetsMin();
-  int nbjetsmax = region->nBJetsMax();
-
-  if( nbjetsmin != nbjetsmax ) {  // use "ge"
-
-    if( nbjetsmin >= 3 ) {
-
-      btagSF = fMT2tree->SFWeight.BTagCSV40ge3;
-      btagSFerr = fMT2tree->SFWeight.BTagCSV40ge3Error;
-
-    } else if( nbjetsmin == 2 ) {
-
-      btagSF = fMT2tree->SFWeight.BTagCSV40ge2;
-      btagSFerr = fMT2tree->SFWeight.BTagCSV40ge2Error;
-
-    } else if( nbjetsmin == 1 ) {
-
-      btagSF = fMT2tree->SFWeight.BTagCSV40ge1;
-      btagSFerr = fMT2tree->SFWeight.BTagCSV40ge1Error;
-
-    } else { // use "eq"
-
-      btagSF = 1.;
-      btagSFerr = 0.;
-
-    }
-
-  } else { // if nbjetsmin==nbjetsmax
-
-    if( nbjetsmin >= 3 ) {
-
-      btagSF = fMT2tree->SFWeight.BTagCSV40eq3;
-      btagSFerr = fMT2tree->SFWeight.BTagCSV40eq3Error;
-
-    } else if( nbjetsmin == 2 ) {
-
-      btagSF = fMT2tree->SFWeight.BTagCSV40eq2;
-      btagSFerr = fMT2tree->SFWeight.BTagCSV40eq2Error;
-
-    } else if( nbjetsmin == 1 ) {
-
-      btagSF = fMT2tree->SFWeight.BTagCSV40eq1;
-      btagSFerr = fMT2tree->SFWeight.BTagCSV40eq1Error;
-
-    } else {
-
-      btagSF = 1.;
-      btagSFerr = 0.;
-
-    }
-
-  }
-
-
-}
+//void getBTagScaleFactor( treeProducerSusyFullHad myTree, MT2Region* region, float& btagSF, float& btagSFerr ) {
+//
+//  int nbjetsmin = region->nBJetsMin();
+//  int nbjetsmax = region->nBJetsMax();
+//
+//  if( nbjetsmin != nbjetsmax ) {  // use "ge"
+//
+//    if( nbjetsmin >= 3 ) {
+//
+//      btagSF = fMT2tree->SFWeight.BTagCSV40ge3;
+//      btagSFerr = fMT2tree->SFWeight.BTagCSV40ge3Error;
+//
+//    } else if( nbjetsmin == 2 ) {
+//
+//      btagSF = fMT2tree->SFWeight.BTagCSV40ge2;
+//      btagSFerr = fMT2tree->SFWeight.BTagCSV40ge2Error;
+//
+//    } else if( nbjetsmin == 1 ) {
+//
+//      btagSF = fMT2tree->SFWeight.BTagCSV40ge1;
+//      btagSFerr = fMT2tree->SFWeight.BTagCSV40ge1Error;
+//
+//    } else { // use "eq"
+//
+//      btagSF = 1.;
+//      btagSFerr = 0.;
+//
+//    }
+//
+//  } else { // if nbjetsmin==nbjetsmax
+//
+//    if( nbjetsmin >= 3 ) {
+//
+//      btagSF = fMT2tree->SFWeight.BTagCSV40eq3;
+//      btagSFerr = fMT2tree->SFWeight.BTagCSV40eq3Error;
+//
+//    } else if( nbjetsmin == 2 ) {
+//
+//      btagSF = fMT2tree->SFWeight.BTagCSV40eq2;
+//      btagSFerr = fMT2tree->SFWeight.BTagCSV40eq2Error;
+//
+//    } else if( nbjetsmin == 1 ) {
+//
+//      btagSF = fMT2tree->SFWeight.BTagCSV40eq1;
+//      btagSFerr = fMT2tree->SFWeight.BTagCSV40eq1Error;
+//
+//    } else {
+//
+//      btagSF = 1.;
+//      btagSFerr = 0.;
+//
+//    }
+//
+//  }
+//
+//
+//}
 
 
 

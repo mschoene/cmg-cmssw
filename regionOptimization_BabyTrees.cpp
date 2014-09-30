@@ -63,7 +63,7 @@ int main( int argc, char* argv[] ) {
   //1. low HT / medium HT / high HT
   //2. low MT2 / medium MT2 / high MT2
 
-  std::string HTregion[] = {"lowHT_", "mediumLowHT_", "mediumHighHT", "highHT_"};
+  std::string HTregion[] = {"lowHT_", "mediumLowHT_", "mediumHighHT_", "highHT_"};
   std::string MT2region[] = {"lowMT2_", "mediumMT2_", "highMT2_"};
 
 

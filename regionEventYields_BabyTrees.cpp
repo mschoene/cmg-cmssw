@@ -125,12 +125,17 @@ int main( int argc, char* argv[] ) {
   std::cout << "-> Done merging. Start computing event yields." << std::endl;
 
 
-  std::string outputdir = "EventYields";
+  std::string outputdir = "EventYields_unWeighed";
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   TFile* outfile = TFile::Open(Form("%s/EventYields_%s.root", outputdir.c_str(), sampleName.c_str()), "recreate");
   outfile->cd();
   
+  //std::ofstream eventlist;
+  //eventlist.open(Form("%s/EventList_%s.txt", outputdir.c_str(), sampleName.c_str()));
+  //
+  //eventlist << "run\t lumi\t evt\t nTaus20\t nMuons10\t nElectrons10\t nVert\t nJet40\t jet_pt[1]\t ht\t deltaPhiMin\t diffMetMht\t mt2\n";
+
   std::ofstream logfile;
   logfile.open(Form("%s/EventYields_%s.txt", outputdir.c_str(), sampleName.c_str()));
   
@@ -215,7 +220,6 @@ MT2YieldAnalysis* computeYield( const MT2SampleBaby_basic& sample, std::vector<M
   treeProducerSusyFullHad myTree;
   myTree.Init(tree);
 
-
   std::ostringstream preselectionStream;
   preselectionStream << " " 
 		     << "(nTaus20==0 && nMuons10==0 && nElectrons10==0)" << " && "
@@ -287,6 +291,10 @@ std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID
   //Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents*sample.PU_avg_weight);
   Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents);
   std::cout << std::endl << "Weight " << weight <<std::endl; 
+  
+  //To remove
+  weight = 1;
+  //////
 
   // return event yield:
   std::vector<MT2YieldPreAnalysis*> EventYield;
@@ -323,7 +331,14 @@ std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID
   float fullweight_btagUp = weight;
   float fullweight_btagDown = weight;
 
+  // To remove
+  std::ofstream eventlist;
+  eventlist.open("EventYields_unWeighed/EventList_WJets400to600_RunLumiEvt.txt");
 
+  eventlist << "run\t lumi\t evt\t nTaus20\t nMuons10\t nElectrons10\t nVert\t nJet40\t jet_pt[1]\t ht\t deltaPhiMin\t diffMetMht\t mt2\n";
+  
+  int Nlines=0;
+  //
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
@@ -389,8 +404,6 @@ std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID
 	//
         //}
 	
-	fullweight = weight;
-
 	
 	for( unsigned iF=0; iF<fakeID.size(); ++iF ) {
 
@@ -410,6 +423,13 @@ std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID
 	  
           thisSimTruthYield->yield->Fill( 1, weight );
 
+	  //eventlist << "run\t lumi\t evt\t nTaus20\t nMuons10\t nElectrons10\t nVert\t nJet40\t jet_pt[1]\t ht\t deltaPhiMin\t diffMetMht\t mt2\n";
+	  if(njets >=3 && njets <=5 && nbjets==0 ){
+	    ++Nlines;
+	    //eventlist << myTree.run << "\t" << myTree.lumi << "\t" << myTree.evt << "\t" << myTree.nTaus20 << "\t" << myTree.nMuons10 << "\t" << myTree.nElectrons10 << "\t" << myTree.nVert << "\t" << myTree.nJet40 << "\t" << myTree.jet_pt[1] << "\t" << myTree.ht << "\t" << myTree.deltaPhiMin << "\t" << myTree.diffMetMht << "\t" << myTree.mt2 << std::endl;
+	    eventlist << myTree.run << "\t" << myTree.lumi << "\t" << myTree.evt << std::endl;
+	  }
+
 	}
 	
 	foundRegion = true; // found region, move on
@@ -419,6 +439,8 @@ std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID
     }  // for iHT
     
   } // for entries
+
+  eventlist << Nlines;
 
   for( unsigned i=0; i<EventYield.size(); ++i )
     EventYield[i]->addOverflow();
