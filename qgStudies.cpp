@@ -27,6 +27,7 @@ struct FlavorHistos {
 FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const std::string& name );
 void drawFlavorHistos( const std::string& outputdir, FlavorHistos fh, const std::string& savename, const std::string& axisName );
 float getMaxNorm( TH1F* h1 );
+void compareHistos( const std::string& outputdir, FlavorHistos fh1, const std::string& name1, const std::string& axisName1, FlavorHistos fh2, const std::string& name2, const std::string& axisName2 );
 
 
 
@@ -68,7 +69,9 @@ int main() {
   drawFlavorHistos( outputdir, fh_wjets, bg, bg_forPlots );
 
 
-  //compareHistos( outputdir, fh_signal1, signal1, signal1_forPlots, fh_wjets, bg, bg_forPlots );
+  compareHistos( outputdir, fh_signal1, signal1, signal1_forPlots, fh_wjets, bg, bg_forPlots );
+  compareHistos( outputdir, fh_signal2, signal2, signal2_forPlots, fh_wjets, bg, bg_forPlots );
+
 
   return 0;
 
@@ -187,26 +190,21 @@ void drawFlavorHistos( const std::string& outputdir, FlavorHistos fh, const std:
   float xMax = fh.h1_njets->GetXaxis()->GetXmax();
 
   float yMax_njets = getMaxNorm(fh.h1_njets);
-  float yMax_nquarks_partonFlavour = getMaxNorm(fh.h1_nquarks_partonFlavour);
   float yMax_nquarks_partonId = getMaxNorm(fh.h1_nquarks_partonId);
   float yMax_nquarks_qg05 = getMaxNorm(fh.h1_nquarks_qg05);
 
   float yMax = yMax_njets;
-  if( yMax_nquarks_partonFlavour>yMax ) yMax = yMax_nquarks_partonFlavour;
   if( yMax_nquarks_partonId>yMax ) yMax = yMax_nquarks_partonId;
   if( yMax_nquarks_qg05>yMax ) yMax = yMax_nquarks_qg05;
   yMax *= 1.2;
 
-  TH2D* h2_axes = new TH2D("axes", "", 10, 0., xMax, 10, 0., yMax );
+  TH2D* h2_axes = new TH2D("axes", "", 10, -0.5, xMax, 10, 0., yMax );
   h2_axes->SetXTitle("Jet Multiplicity");
   h2_axes->SetYTitle("Normalized to Unity");
   h2_axes->Draw();
 
   fh.h1_njets->SetLineWidth(2);
   fh.h1_njets->SetLineColor(kBlack);
-
-  fh.h1_nquarks_partonFlavour->SetLineWidth(2);
-  fh.h1_nquarks_partonFlavour->SetLineColor(46);
 
   fh.h1_nquarks_partonId->SetLineWidth(2);
   fh.h1_nquarks_partonId->SetLineColor(kRed+1);
@@ -219,13 +217,11 @@ void drawFlavorHistos( const std::string& outputdir, FlavorHistos fh, const std:
   legend->SetTextSize(0.035);
   legend->SetFillColor(0);
   legend->AddEntry( fh.h1_njets, "Jets", "L" );
-  //legend->AddEntry( fh.h1_nquarks_partonFlavour, "Quarks (mcFlavour)", "L" );
   legend->AddEntry( fh.h1_nquarks_partonId, "Quarks (MC Truth)", "L" );
   legend->AddEntry( fh.h1_nquarks_qg05, "Quarks (QGL>0.5)", "L" );
   legend->Draw("same");
 
   fh.h1_njets->DrawNormalized("histo same");
-  //fh.h1_nquarks_partonFlavour->DrawNormalized("histo same");
   fh.h1_nquarks_partonId->DrawNormalized("histo same");
   fh.h1_nquarks_qg05->DrawNormalized("histo same");
 
@@ -247,4 +243,66 @@ float getMaxNorm( TH1F* h1 ) {
 }
 
 
-//void  compareHistos( outputdir, fh_signal1, signal1, signal1_forPlots, fh_wjets, bg, bg_forPlots );
+
+void compareHistos( const std::string& outputdir, FlavorHistos fh1, const std::string& name1, const std::string& axisName1, FlavorHistos fh2, const std::string& name2, const std::string& axisName2 ) {
+
+  TCanvas* c1 = new TCanvas("c1", "", 600, 600 );
+  c1->cd();
+
+  float xMax = fh1.h1_njets->GetXaxis()->GetXmax();
+
+  float yMax_njets = getMaxNorm(fh2.h1_njets);
+  float yMax_nquarks_partonId = getMaxNorm(fh2.h1_nquarks_partonId);
+  float yMax_nquarks_qg05 = getMaxNorm(fh2.h1_nquarks_qg05);
+
+  float yMax = yMax_njets;
+  //if( yMax_nquarks_partonId>yMax ) yMax = yMax_nquarks_partonId;
+  if( yMax_nquarks_qg05>yMax ) yMax = yMax_nquarks_qg05;
+  yMax *= 1.2;
+
+  TH2D* h2_axes = new TH2D("axes", "", 10, -0.5, xMax, 10, 0., yMax );
+  h2_axes->SetXTitle("Jet Multiplicity");
+  h2_axes->SetYTitle("Normalized to Unity");
+  h2_axes->Draw();
+
+  fh1.h1_njets->SetLineWidth(2);
+  fh1.h1_njets->SetLineColor(46);
+  fh1.h1_nquarks_qg05->SetLineWidth(2);
+  fh1.h1_nquarks_qg05->SetLineStyle(2);
+  fh1.h1_nquarks_qg05->SetLineColor(kRed+2);
+
+  fh2.h1_njets->SetLineWidth(2);
+  fh2.h1_njets->SetLineColor(38);
+  fh2.h1_nquarks_qg05->SetLineWidth(2);
+  fh2.h1_nquarks_qg05->SetLineStyle(2);
+  fh2.h1_nquarks_qg05->SetLineColor(kBlue+2);
+
+  //fh.h1_nquarks_partonId->SetLineWidth(2);
+  //fh.h1_nquarks_partonId->SetLineColor(kRed+1);
+
+
+
+  TLegend* legend = new TLegend( 0.37, 0.65, 0.9, 0.9 );
+  legend->SetTextSize(0.035);
+  legend->SetFillColor(0);
+  legend->AddEntry( fh1.h1_njets, Form("%s (nJets)", axisName1.c_str()), "L" );
+  legend->AddEntry( fh1.h1_nquarks_qg05, Form("%s (QGL>0.5)", axisName1.c_str()), "L" );
+  legend->AddEntry( fh2.h1_njets, Form("%s (nJets)", axisName2.c_str()), "L" );
+  legend->AddEntry( fh2.h1_nquarks_qg05, Form("%s (QGL>0.5)", axisName2.c_str()), "L" );
+  legend->Draw("same");
+
+  fh1.h1_njets->DrawNormalized("histo same");
+  fh1.h1_nquarks_qg05->DrawNormalized("histo same");
+  fh2.h1_njets->DrawNormalized("histo same");
+  fh2.h1_nquarks_qg05->DrawNormalized("histo same");
+
+  gPad->RedrawAxis();
+
+  c1->SaveAs(Form("%s/%s_vs_%s.eps", outputdir.c_str(), name1.c_str(), name2.c_str()));
+  c1->SaveAs(Form("%s/%s_vs_%s.png", outputdir.c_str(), name1.c_str(), name2.c_str()));
+
+  delete c1;
+  delete h2_axes;
+
+
+}
