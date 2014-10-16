@@ -35,6 +35,11 @@ inclusivePlots_QCD: inclusivePlots_QCD.cpp MT2Region.o MT2RegionAnalysisUtilitie
 regionOptimization_BabyTrees: regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o
 	$(CC) -Wall $(INCLUDES) -o regionOptimization_BabyTrees regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o $(ROOTFLAG) $(EXTRALIBS)
 
+qgStudies: qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o
+	$(CC) -Wall $(INCLUDES) -o qgStudies qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o  $(ROOTFLAG) $(EXTRALIBS)
+
+
+
 
 MT2Common.o: src/MT2Common.cc
 	$(CC) -Wall $(INCLUDES) -c src/MT2Common.cc $(ROOTFLAG) $(EXTRALIBS)
@@ -54,6 +59,10 @@ DrawBase.o: $(CMSSW_BASE)/src/CommonTools/DrawBase.C
 
 fitTools.o: $(CMSSW_BASE)/src/CommonTools/fitTools.C
 	$(CC) -Wall $(INCLUDES) -c $(CMSSW_BASE)/src/CommonTools/fitTools.C $(ROOTFLAG) $(EXTRALIBS)
+
+
+localQGLikelihoodCalculator2.o: $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator2.cc
+	$(CC) -Wall $(INCLUDES) -c $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator2.cc $(ROOTFLAG) $(EXTRALIBS)
 
 
 
