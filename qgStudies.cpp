@@ -11,6 +11,8 @@
 
 #include "CommonTools/DrawBase.h"
 #include "QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator2.h"
+#include "QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator.h"
+#include "../QGDev/qgMiniTuple/macros/binFunctions.h"
 
 
 struct FlavorHistos {
@@ -33,13 +35,30 @@ struct FlavorHistos {
 };
 
 
-FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const std::string& name );
+struct RocStruct {
+
+  std::string legendName;
+  TH1F* h1_sig;
+  TH1F* h1_bg;
+
+};
+
+
+float qgCut_ = 0.5;
+int nentries_max = -1;
+
+
+FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const std::string& name, TFile* qgDistributionsFile );
 void drawFlavorHistos( const std::string& outputdir, FlavorHistos fh, const std::string& savename, const std::string& axisName );
 float getMaxNorm( TH1F* h1 );
 void compareMultHistos( const std::string& outputdir, FlavorHistos fh1, const std::string& name1, const std::string& axisName1, FlavorHistos fh2, const std::string& name2, const std::string& axisName2 );
 void compareQglHistos( const std::string& outputdir, FlavorHistos fh_signal1, const std::string& signal1, FlavorHistos fh_signal2, const std::string& signal2, FlavorHistos fh_bg, const std::string& bg );
 void compareSingleHistos( const std::string& outputdir, const std::string& savename, const std::string& axisName, TH1F* h1_signal1, const std::string& legendName_signal1, TH1F* h1_signal2, const std::string& legendName_signal2, TH1F* h1_bg, const std::string& legendName_bg );
 void writeHistosToFile( TFile* file, FlavorHistos fh, const std::string& name );
+void drawRoCs_singleSignal( const std::string& outputdir, const std::string& savename, const std::string& signal_forPlots, FlavorHistos fh_signal, const std::string& bg_forPlots, FlavorHistos fh_bg );
+TGraph* getSingleRoC( const std::string& name, TH1F* h1_signal, TH1F* h1_bg );
+int computeNquarksWithLikelihood( std::vector< std::pair< float, float> >  pair_pt_qgl, TFile* qgFile );
+float getSingleLikeli( std::vector< std::string > hypothesis, std::vector< std::pair<float, float> > pair_pt_qgl, TFile* file );
 
 
 
@@ -49,16 +68,25 @@ int main() {
 
   std::string dir = "/scratch/pandolf/CSA14_babytrees_QG/skim_mt2_200/";
 
+  std::string bg = "zjets";
+  std::string bg_forPlots;
 
-  TChain* tree_wjets = new TChain("mt2");
-  tree_wjets->Add(Form("%s/WJetsToLNu_HT*_PU_S14_POSTLS170_babytree_QG_post_skim.root/mt2", dir.c_str()));
+  TChain* tree_bg = new TChain("mt2");
+  if( bg == "wjets" ) {
+    tree_bg->Add(Form("%s/WJetsToLNu_HT*_PU_S14_POSTLS170_babytree_QG_post_skim.root/mt2", dir.c_str()));
+    bg_forPlots = "W+Jets";
+  } else if( bg == "zjets" ) {
+    tree_bg->Add(Form("%s/ZJetsToNuNu_HT*_PU_S14_POSTLS170_babytree_QG_post_skim.root/mt2", dir.c_str()));
+    bg_forPlots = "Z+Jets";
+  } else {
+    std::cout << "Unkown background type." << std::endl;
+    exit(11);
+  }
 
   std::string signal1 = "T1qqqq_2J_mGl1000_mLSP800";
   std::string signal2 = "T1qqqq_2J_mGl1400_mLSP100";
   std::string signal1_forPlots = "T1qqqq (1000, 800)";
   std::string signal2_forPlots = "T1qqqq (1400, 100)";
-  std::string bg = "wjets";
-  std::string bg_forPlots = "W+Jets";
 
   TChain* tree_signal1 = new TChain("mt2");
   tree_signal1->Add(Form("%s/SMS_%s_PU_S14_POSTLS170_babytree_QG_post_skim.root/mt2", dir.c_str(), signal1.c_str()));
@@ -66,40 +94,48 @@ int main() {
   TChain* tree_signal2 = new TChain("mt2");
   tree_signal2->Add(Form("%s/SMS_%s_PU_S14_POSTLS170_babytree_QG_post_skim.root/mt2", dir.c_str(), signal2.c_str()));
 
-  std::string qgfileName = "pdfsOnlyPt.root";
-  QGLikelihoodCalculator2* qglc = new QGLikelihoodCalculator2(qgfileName); 
+  //std::string qgfileName = "pdfsOnlyPt.root";
+  //QGLikelihoodCalculator2* qglc = new QGLikelihoodCalculator2(qgfileName); 
+  std::string qgfileName = "pdfQG_AK4chs_antib_NoQC_13TeV.root";
+  QGLikelihoodCalculator* qglc = new QGLikelihoodCalculator(qgfileName); 
 
   std::string outputdir = "QGStudiesPlots";
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
-  FlavorHistos fh_signal1 = getFlavorHistos(qglc, tree_signal1, signal1); 
+  TFile* qgFile = TFile::Open("outfileQG_zjet_SAVE.root");
+
+  FlavorHistos fh_signal1 = getFlavorHistos(qglc, tree_signal1, signal1, qgFile); 
   drawFlavorHistos( outputdir, fh_signal1, signal1, signal1_forPlots );
 
-  FlavorHistos fh_signal2 = getFlavorHistos(qglc, tree_signal2, signal2); 
+  FlavorHistos fh_signal2 = getFlavorHistos(qglc, tree_signal2, signal2, qgFile); 
   drawFlavorHistos( outputdir, fh_signal2, signal2, signal2_forPlots );
 
-  FlavorHistos fh_wjets   = getFlavorHistos(qglc, tree_wjets, bg );
-  drawFlavorHistos( outputdir, fh_wjets, bg, bg_forPlots );
+  FlavorHistos fh_bg   = getFlavorHistos(qglc, tree_bg, bg, qgFile );
+  drawFlavorHistos( outputdir, fh_bg, bg, bg_forPlots );
 
 
-  compareMultHistos( outputdir, fh_signal1, signal1, signal1_forPlots, fh_wjets, bg, bg_forPlots );
-  compareMultHistos( outputdir, fh_signal2, signal2, signal2_forPlots, fh_wjets, bg, bg_forPlots );
+  compareMultHistos( outputdir, fh_signal1, signal1, signal1_forPlots, fh_bg, bg, bg_forPlots );
+  compareMultHistos( outputdir, fh_signal2, signal2, signal2_forPlots, fh_bg, bg, bg_forPlots );
 
-  compareQglHistos( outputdir, fh_signal1, signal1_forPlots, fh_signal2, signal2_forPlots, fh_wjets, bg_forPlots );
+  compareQglHistos( outputdir, fh_signal1, signal1_forPlots, fh_signal2, signal2_forPlots, fh_bg, bg_forPlots );
 
 
-  compareSingleHistos( outputdir, "nquarksOverNjets", "N(quarks) / N(jets)", fh_signal1.h1_nquarksOverNjets, signal1_forPlots, fh_signal2.h1_nquarksOverNjets, signal2_forPlots, fh_wjets.h1_nquarksOverNjets, bg_forPlots );
+  drawRoCs_singleSignal( outputdir, Form("multrocs_%s_vs_%s", signal1.c_str(), bg.c_str()), signal1_forPlots, fh_signal1, bg_forPlots, fh_bg );
+  drawRoCs_singleSignal( outputdir, Form("multrocs_%s_vs_%s", signal2.c_str(), bg.c_str()), signal2_forPlots, fh_signal2, bg_forPlots, fh_bg );
+
+
+  compareSingleHistos( outputdir, "nquarksOverNjets", "N(quarks) / N(jets)", fh_signal1.h1_nquarksOverNjets, signal1_forPlots, fh_signal2.h1_nquarksOverNjets, signal2_forPlots, fh_bg.h1_nquarksOverNjets, bg_forPlots );
 
   std::cout << "N(quarks) / N(jets)" << std::endl;
   std::cout << signal1 << ":  " << fh_signal1.h1_nquarksOverNjets->GetMean() << std::endl;
   std::cout << signal2 << ":  " << fh_signal2.h1_nquarksOverNjets->GetMean() << std::endl;
-  std::cout << bg << ":  " << fh_wjets.h1_nquarksOverNjets->GetMean() << std::endl;
+  std::cout << bg << ":  " << fh_bg.h1_nquarksOverNjets->GetMean() << std::endl;
 
   TFile* outfile = TFile::Open("FlavorHistos.root", "recreate");
   outfile->cd();
   writeHistosToFile( outfile, fh_signal1, signal1 );
   writeHistosToFile( outfile, fh_signal2, signal2 );
-  writeHistosToFile( outfile, fh_wjets, bg );
+  writeHistosToFile( outfile, fh_bg, bg );
   outfile->Close();
 
   return 0;
@@ -107,9 +143,11 @@ int main() {
 }
 
 
-FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const std::string& name ) {
+FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const std::string& name, TFile* qgDistributionsFile ) {
 
 
+  float rho;
+  tree->SetBranchAddress( "rho", &rho );
   float evt_scale1fb;
   tree->SetBranchAddress( "evt_scale1fb", &evt_scale1fb );
   float mt2;
@@ -136,6 +174,8 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
   tree->SetBranchAddress( "jet_mult", jet_mult );
   float jet_axis2[100];
   tree->SetBranchAddress( "jet_axis2", jet_axis2 );
+  float jet_qgl[100];
+  tree->SetBranchAddress( "jet_qgl", jet_qgl );
   int jet_id[100];
   tree->SetBranchAddress( "jet_id", jet_id );
   int jet_puId[100];
@@ -155,7 +195,7 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
   h1_nquarks_qgLikeli     ->Sumw2();
 
 
-  TH1F* h1_nquarksOverNjets      = new TH1F(Form("nquarksOverNjets_%s",      name.c_str()), "", 50, 0., 2.);
+  TH1F* h1_nquarksOverNjets      = new TH1F(Form("nquarksOverNjets_%s",      name.c_str()), "", 10, 0., 1.0001);
   h1_nquarksOverNjets->Sumw2();
 
 
@@ -191,6 +231,7 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
 
 
   int nentries = tree->GetEntries();
+  if( nentries_max > 0 && nentries>nentries_max ) nentries = nentries_max;
  
   std::cout << "-> Starting loop on: " << name << std::endl;
 
@@ -198,7 +239,7 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
 
     tree->GetEntry(iEntry);
 
-    if( iEntry % 10000 == 0 ) std::cout << "  Entry: " << iEntry << " / " << nentries << std::endl;
+    if( iEntry % 20000 == 0 ) std::cout << "  Entry: " << iEntry << " / " << nentries << std::endl;
 
     if( ht < 450. ) continue;
     if( mt2 < 200. ) continue;
@@ -212,6 +253,8 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
     int nquarks_qgLikeli = 0;
 
 
+    std::vector< std::pair< float, float > > pairs_pt_qgl;
+
     for( unsigned i=0; i<njet && i<100; ++i ) {
 
       if( jet_pt[i]<40. ) continue; 
@@ -223,7 +266,8 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
       vars.push_back( jet_mult[i] );
       vars.push_back( jet_ptd[i] );
       vars.push_back( jet_axis2[i] );
-      float qgl = qglc->computeQGLikelihood( jet_pt[i], jet_eta[i], vars );
+      //float qgl = qglc->computeQGLikelihood( jet_pt[i], jet_eta[i], rho, vars );
+      float qgl = jet_qgl[i];
 
       if( njets<10 ) {
 
@@ -245,14 +289,22 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
       njets++;
       if( abs(jet_mcFlavour[i])<4 && jet_mcFlavour[i]!=0 ) nquarks_partonFlavour++;
       if( abs(jet_partonId[i])<4 && jet_partonId[i]!=0 ) nquarks_partonId++;
-      if( qgl>0.1 ) nquarks_qgCut++;
+      if( qgl>0.5 ) nquarks_qgCut++;
+
+      std::pair< float, float> newpair_pt_qgl;
+      newpair_pt_qgl.first = jet_pt[i];
+      newpair_pt_qgl.second = jet_qgl[i];
+      pairs_pt_qgl.push_back(newpair_pt_qgl);
 
     } // for jets
+
+    int nquarks_likeli = computeNquarksWithLikelihood( pairs_pt_qgl, qgDistributionsFile );
 
     h1_njets->Fill( njets, evt_scale1fb );
     h1_nquarks_partonFlavour->Fill( nquarks_partonFlavour, evt_scale1fb );
     h1_nquarks_partonId->Fill( nquarks_partonId, evt_scale1fb );
     h1_nquarks_qgCut->Fill( nquarks_qgCut, evt_scale1fb );
+    h1_nquarks_qgLikeli->Fill( nquarks_likeli, evt_scale1fb );
 
     h1_nquarksOverNjets->Fill( (float)nquarks_qgCut/njets, evt_scale1fb );
 
@@ -265,7 +317,7 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const 
   fh.h1_nquarks_partonFlavour = h1_nquarks_partonFlavour;
   fh.h1_nquarks_partonId = h1_nquarks_partonId;
   fh.h1_nquarks_qgCut = h1_nquarks_qgCut;
-  fh.h1_nquarks_qgLikeli = 0;
+  fh.h1_nquarks_qgLikeli = h1_nquarks_qgLikeli;
 
   fh.h1_nquarksOverNjets = h1_nquarksOverNjets;
 
@@ -318,7 +370,7 @@ void drawFlavorHistos( const std::string& outputdir, FlavorHistos fh, const std:
   legend->SetFillColor(0);
   legend->AddEntry( fh.h1_njets, "Jets", "L" );
   legend->AddEntry( fh.h1_nquarks_partonId, "Quarks (MC Truth)", "L" );
-  legend->AddEntry( fh.h1_nquarks_qgCut, "Quarks (QGL>0.5)", "L" );
+  legend->AddEntry( fh.h1_nquarks_qgCut, Form("Quarks (QGL>%.1f)", qgCut_), "L" );
   legend->Draw("same");
 
   fh.h1_njets->DrawNormalized("histo same");
@@ -370,12 +422,18 @@ void compareMultHistos( const std::string& outputdir, FlavorHistos fh1, const st
   fh1.h1_nquarks_qgCut->SetLineWidth(2);
   fh1.h1_nquarks_qgCut->SetLineStyle(2);
   fh1.h1_nquarks_qgCut->SetLineColor(kRed+2);
+  fh1.h1_nquarks_qgLikeli->SetLineWidth(2);
+  //fh1.h1_nquarks_qgLikeli->SetLineStyle(2);
+  fh1.h1_nquarks_qgLikeli->SetLineColor(kGreen);
 
   fh2.h1_njets->SetLineWidth(2);
   fh2.h1_njets->SetLineColor(38);
   fh2.h1_nquarks_qgCut->SetLineWidth(2);
   fh2.h1_nquarks_qgCut->SetLineStyle(2);
   fh2.h1_nquarks_qgCut->SetLineColor(kBlue+2);
+  fh2.h1_nquarks_qgLikeli->SetLineWidth(2);
+  //fh2.h1_nquarks_qgLikeli->SetLineStyle(2);
+  fh2.h1_nquarks_qgLikeli->SetLineColor(kGreen+3);
 
   //fh.h1_nquarks_partonId->SetLineWidth(2);
   //fh.h1_nquarks_partonId->SetLineColor(kRed+1);
@@ -386,15 +444,17 @@ void compareMultHistos( const std::string& outputdir, FlavorHistos fh1, const st
   legend->SetTextSize(0.035);
   legend->SetFillColor(0);
   legend->AddEntry( fh1.h1_njets, Form("%s (nJets)", axisName1.c_str()), "L" );
-  legend->AddEntry( fh1.h1_nquarks_qgCut, Form("%s (QG Cut)", axisName1.c_str()), "L" );
+  legend->AddEntry( fh1.h1_nquarks_qgCut, Form("%s (QG>%.1f)", axisName1.c_str(), qgCut_), "L" );
   legend->AddEntry( fh2.h1_njets, Form("%s (nJets)", axisName2.c_str()), "L" );
-  legend->AddEntry( fh2.h1_nquarks_qgCut, Form("%s (QG Cut)", axisName2.c_str()), "L" );
+  legend->AddEntry( fh2.h1_nquarks_qgCut, Form("%s (QG>%.1f)", axisName2.c_str(), qgCut_), "L" );
   legend->Draw("same");
 
   fh1.h1_njets->DrawNormalized("histo same");
   fh1.h1_nquarks_qgCut->DrawNormalized("histo same");
   fh2.h1_njets->DrawNormalized("histo same");
   fh2.h1_nquarks_qgCut->DrawNormalized("histo same");
+  fh2.h1_nquarks_qgLikeli->DrawNormalized("histo same");
+  fh1.h1_nquarks_qgLikeli->DrawNormalized("histo same");
 
   gPad->RedrawAxis();
 
@@ -510,7 +570,7 @@ void writeHistosToFile( TFile* file, FlavorHistos fh, const std::string& name ) 
   fh.h1_nquarks_partonFlavour->Write();
   fh.h1_nquarks_partonId->Write();
   fh.h1_nquarks_qgCut->Write();
-  //fh.h1_nquarks_qgLikeli->Write();
+  fh.h1_nquarks_qgLikeli->Write();
 
   fh.h1_nquarksOverNjets->Write();
 
@@ -527,5 +587,169 @@ void writeHistosToFile( TFile* file, FlavorHistos fh, const std::string& name ) 
   }
   
   file->cd();
+
+}
+
+
+
+
+void drawRoCs_singleSignal( const std::string& outputdir, const std::string& savename, const std::string& signal_forPlots, FlavorHistos fh_signal, const std::string& bg_forPlots, FlavorHistos fh_bg ) {
+
+  std::vector< RocStruct > vec_rocs;
+
+  RocStruct rs_njets;
+  rs_njets.legendName = "# Jets";
+  rs_njets.h1_sig = fh_signal.h1_njets;
+  rs_njets.h1_bg  = fh_bg    .h1_njets;
+  vec_rocs.push_back( rs_njets);
+
+  RocStruct rs_nquarks_mc;
+  rs_nquarks_mc.legendName = "# Quarks (MC)";
+  rs_nquarks_mc.h1_sig = fh_signal.h1_nquarks_partonId;
+  rs_nquarks_mc.h1_bg  = fh_bg    .h1_nquarks_partonId;
+  vec_rocs.push_back( rs_nquarks_mc );
+
+  RocStruct rs_nquarks_qgCut;
+  rs_nquarks_qgCut.legendName = std::string(Form("# Quarks (QG>%.1f)", qgCut_));
+  rs_nquarks_qgCut.h1_sig = fh_signal.h1_nquarks_qgCut;
+  rs_nquarks_qgCut.h1_bg  = fh_bg    .h1_nquarks_qgCut;
+  vec_rocs.push_back( rs_nquarks_qgCut );
+
+  RocStruct rs_nquarks_qgLikeli;
+  rs_nquarks_qgLikeli.legendName = std::string("# Quarks (Likelihood)");
+  rs_nquarks_qgLikeli.h1_sig = fh_signal.h1_nquarks_qgLikeli;
+  rs_nquarks_qgLikeli.h1_bg  = fh_bg    .h1_nquarks_qgLikeli;
+  vec_rocs.push_back( rs_nquarks_qgLikeli );
+
+
+  TCanvas* c1 = new TCanvas("c1", "", 600, 600 );
+  c1->cd();
+
+  TH2D* h2_axes = new TH2D("axes", "", 10, 0., 1.0001, 10, 0., 1.0001);
+  h2_axes->SetYTitle( Form( "%s Efficiency", signal_forPlots.c_str()) );
+  h2_axes->SetXTitle( Form( "%s Rejection", bg_forPlots.c_str()) );
+  h2_axes->Draw();
+
+  TLine* diag = new TLine( 0., 1., 1., 0.);
+  diag->Draw("same");
+
+  TLegend* legend = new TLegend( 0.2, 0.2, 0.55, 0.45 );
+  legend->SetFillColor(0);
+  legend->SetTextSize(0.038);
+
+  for( unsigned i=0; i<vec_rocs.size(); ++i ) {
+
+    TGraph* gr = getSingleRoC( Form("roc_%d", i), vec_rocs[i].h1_sig, vec_rocs[i].h1_bg );
+
+    gr->SetLineWidth(2);
+    gr->SetLineColor(i+1);
+    gr->Draw("L same");
+ 
+    legend->AddEntry( gr, vec_rocs[i].legendName.c_str(), "L" );
+
+  }
+
+
+  legend->Draw("same");
+  gPad->RedrawAxis();
+
+  c1->SaveAs( Form("%s/RoC_%s.eps", outputdir.c_str(), savename.c_str()) );
+  c1->SaveAs( Form("%s/RoC_%s.png", outputdir.c_str(), savename.c_str()) );
+
+  delete c1;
+  delete h2_axes;
+
+}
+
+
+TGraph* getSingleRoC( const std::string& name, TH1F* h1_signal, TH1F* h1_bg ) {
+
+  TGraph* gr_RoC = new TGraph(0);
+  gr_RoC->SetName(Form("roc_%s", name.c_str()));
+
+  int nbins = h1_signal->GetNbinsX();
+
+  for( unsigned ibin=1; ibin<nbins+1; ++ibin ) {
+
+    float eff_s = h1_signal->Integral( nbins-ibin, nbins )/h1_signal->Integral( 1, nbins );
+    float eff_b = h1_bg->Integral( nbins-ibin, nbins )/h1_bg->Integral( 1, nbins );
+    
+    gr_RoC->SetPoint( ibin-1, 1.-eff_b, eff_s );
+
+  }
+
+  return gr_RoC;
+
+}
+
+
+int computeNquarksWithLikelihood( std::vector< std::pair< float, float> >  pair_pt_qgl, TFile* qgFile ) {
+
+  int nquarks_found = -1;
+  float maxLikeli = 0.;
+
+  int njets = pair_pt_qgl.size();
+
+
+  for( unsigned nquarks=0; nquarks<njets+1; ++nquarks ) {
+
+    std::vector< std::string > hypothesis;
+    for( unsigned i=0; i<nquarks; ++i ) hypothesis.push_back("quark");
+    for( unsigned i=0; i<njets-nquarks; ++i ) hypothesis.push_back("gluon");
+
+    std::sort (hypothesis.begin(), hypothesis.end());
+
+    do {
+
+      float likeli = getSingleLikeli( hypothesis, pair_pt_qgl, qgFile );
+
+      if( likeli >= maxLikeli ) {
+        maxLikeli = likeli;
+        nquarks_found = nquarks;
+      }
+
+    } while ( std::next_permutation(hypothesis.begin(), hypothesis.end()) );
+
+  } // for nquarks
+
+
+  if( nquarks_found<0 ) {
+    std::cout << "Something mustve gone wrong" << std::endl;
+    exit(191);
+  }
+
+  return nquarks_found;
+
+}
+
+
+
+float getSingleLikeli( std::vector< std::string > hypothesis, std::vector< std::pair<float, float> > pair_pt_qgl, TFile* file ) {
+
+
+  TVectorT<float> *ptBins_t;
+  file->GetObject("ptBinsC", ptBins_t);
+  std::vector<float> ptBins;
+  for(int i = 0; i < ptBins_t->GetNoElements(); ++i) ptBins.push_back((*ptBins_t)[i]);
+
+
+  float likeli = 1.;
+  
+  for( unsigned i=0; i<hypothesis.size(); ++i ) {
+
+    int ibin = -1;
+    if( !getBinNumber( ptBins, pair_pt_qgl[i].first, ibin) ) {
+      std::cout << "THERE MUST BE A PROBLEM!" << std::endl;
+      std::cout << "pt: " << pair_pt_qgl[i].first << " ibin: " << ibin << std::endl;
+      return 0.;
+    }
+
+    TH1F* pdf = (TH1F*)file->Get( Form("qgl_old/qgl_old_%s_pt%d", hypothesis[i].c_str(), ibin) );
+    int qgBin = pdf->FindBin( pair_pt_qgl[i].second );
+    likeli *= pdf->GetBinContent( qgBin ) / pdf->Integral("width");
+
+  } // for
+
+  return likeli;
 
 }
