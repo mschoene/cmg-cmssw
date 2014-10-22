@@ -186,12 +186,12 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const s
   TH1F* h1_njets                 = new TH1F(Form("njets_%s",                 name.c_str()), "", nbins, -0.5, (float)nbins-0.5);
   TH1F* h1_nquarks_partonFlavour = new TH1F(Form("nquarks_partonFlavour_%s", name.c_str()), "", nbins, -0.5, (float)nbins-0.5);
   TH1F* h1_nquarks_partonId      = new TH1F(Form("nquarks_partonId_%s",      name.c_str()), "", nbins, -0.5, (float)nbins-0.5);
-  TH1F* h1_nquarks_qgCut          = new TH1F(Form("nquarks_qgCut_%s",          name.c_str()), "", nbins, -0.5, (float)nbins-0.5);
+  TH1F* h1_nquarks_qgCut         = new TH1F(Form("nquarks_qgCut_%s",         name.c_str()), "", nbins, -0.5, (float)nbins-0.5);
   TH1F* h1_nquarks_qgLikeli      = new TH1F(Form("nquarks_qgLikeli_%s",      name.c_str()), "", nbins, -0.5, (float)nbins-0.5);
   h1_njets                ->Sumw2();
   h1_nquarks_partonFlavour->Sumw2();
   h1_nquarks_partonId     ->Sumw2();
-  h1_nquarks_qgCut         ->Sumw2();
+  h1_nquarks_qgCut        ->Sumw2();
   h1_nquarks_qgLikeli     ->Sumw2();
 
 
@@ -423,7 +423,6 @@ void compareMultHistos( const std::string& outputdir, FlavorHistos fh1, const st
   fh1.h1_nquarks_qgCut->SetLineStyle(2);
   fh1.h1_nquarks_qgCut->SetLineColor(kRed+2);
   fh1.h1_nquarks_qgLikeli->SetLineWidth(2);
-  //fh1.h1_nquarks_qgLikeli->SetLineStyle(2);
   fh1.h1_nquarks_qgLikeli->SetLineColor(kGreen);
 
   fh2.h1_njets->SetLineWidth(2);
@@ -620,6 +619,7 @@ void drawRoCs_singleSignal( const std::string& outputdir, const std::string& sav
   rs_nquarks_qgLikeli.h1_sig = fh_signal.h1_nquarks_qgLikeli;
   rs_nquarks_qgLikeli.h1_bg  = fh_bg    .h1_nquarks_qgLikeli;
   vec_rocs.push_back( rs_nquarks_qgLikeli );
+
 
 
   TCanvas* c1 = new TCanvas("c1", "", 600, 600 );
