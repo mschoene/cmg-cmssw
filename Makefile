@@ -35,14 +35,23 @@ inclusivePlots_QCD: inclusivePlots_QCD.cpp MT2Region.o MT2RegionAnalysisUtilitie
 regionOptimization_BabyTrees: regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o
 	$(CC) -Wall $(INCLUDES) -o regionOptimization_BabyTrees regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o $(ROOTFLAG) $(EXTRALIBS)
 
-qgStudies: qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o
-	$(CC) -Wall $(INCLUDES) -o qgStudies qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o  $(ROOTFLAG) $(EXTRALIBS)
+qgStudies: qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o localQGLikelihoodCalculator.o
+	$(CC) -Wall $(INCLUDES) -o qgStudies qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o localQGLikelihoodCalculator.o  $(ROOTFLAG) $(EXTRALIBS)
+
+checkQGL: checkQGL.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o localQGLikelihoodCalculator.o
+	$(CC) -Wall $(INCLUDES) -o checkQGL checkQGL.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o localQGLikelihoodCalculator.o  $(ROOTFLAG) $(EXTRALIBS)
+
+check_mht: check_mht.cpp 
+	$(CC) -Wall $(INCLUDES) -o check_mht check_mht.cpp   $(ROOTFLAG) $(EXTRALIBS)
+
+checkClosestJet: checkClosestJet.cpp 
+	$(CC) -Wall $(INCLUDES) -o checkClosestJet checkClosestJet.cpp   $(ROOTFLAG) $(EXTRALIBS)
 
 
 
 
-MT2Common.o: src/MT2Common.cc
-	$(CC) -Wall $(INCLUDES) -c src/MT2Common.cc $(ROOTFLAG) $(EXTRALIBS)
+MT2Common.o: src/MT2Common.cc MT2Region.o
+	$(CC) -Wall $(INCLUDES) -c src/MT2Common.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
 
 MT2Region.o: src/MT2Region.cc
 	$(CC) -Wall $(INCLUDES) -c src/MT2Region.cc $(ROOTFLAG) $(EXTRALIBS)
@@ -63,6 +72,9 @@ fitTools.o: $(CMSSW_BASE)/src/CommonTools/fitTools.C
 
 localQGLikelihoodCalculator2.o: $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator2.cc
 	$(CC) -Wall $(INCLUDES) -c $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator2.cc $(ROOTFLAG) $(EXTRALIBS)
+
+localQGLikelihoodCalculator.o: $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator.cc
+	$(CC) -Wall $(INCLUDES) -c $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator.cc $(ROOTFLAG) $(EXTRALIBS)
 
 
 
