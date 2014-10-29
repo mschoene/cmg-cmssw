@@ -22,13 +22,13 @@
 //bool fbTagReweight = true;
 
 
-MT2YieldAnalysis* computeYield( const MT2SamplePostBaby& sample, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions );
-std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID, TTree* tree, MT2SamplePostBaby sample, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions );
+MT2YieldAnalysis* computeYield( const MT2SamplePostBaby& sample, MT2AnalysisRegions analysisRegions );
+std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID, TTree* tree, MT2SamplePostBaby sample, MT2AnalysisRegions analysisRegions );
 //float getISRCorrection( MT2tree* fMT2tree, const MT2SamplePostBaby& sample );
 //void getBTagScaleFactor( MT2tree* fMT2tree, MT2Region* region, float& btagSF, float& btagSFerr );
 MT2YieldAnalysis* mergeYields( std::vector<MT2YieldAnalysis*> EventYield, const std::string& n1, const std::string& n2="", const std::string& n3="", const std::string& n4="", const std::string& n5="" );
-std::vector<TH1D*> getYieldHistos( const std::string& prefix, const std::string& fakeID, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions, MT2YieldAnalysis* EventYield_tot, MT2YieldAnalysis* EventYield_bg, std::ofstream& logfile );
-std::vector<TH1D*> getSimTruthYieldHistos( const std::string& prefix, const std::string& fakeID, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions, MT2YieldAnalysis* EventYield_tot );
+std::vector<TH1D*> getYieldHistos( const std::string& prefix, const std::string& fakeID, MT2AnalysisRegions analysisRegions, MT2YieldAnalysis* EventYield_tot, MT2YieldAnalysis* EventYield_bg, std::ofstream& logfile );
+std::vector<TH1D*> getSimTruthYieldHistos( const std::string& prefix, const std::string& fakeID, MT2AnalysisRegions analysisRegions, MT2YieldAnalysis* EventYield_tot );
 
 
 
@@ -51,41 +51,7 @@ int main( int argc, char* argv[] ) {
   std::vector<MT2SamplePostBaby> fSamples = MT2Common::loadSamplesPostBaby(samplesFileName);
 
 
-
-  std::ostringstream HLT_metHT;
-  HLT_metHT << "";
-  //HLT_metHT << "( ( ("
-  //    << "trigger.HLT_PFMET150_v2 == 1 || trigger.HLT_PFMET150_v3 == 1 || trigger.HLT_PFMET150_v4 == 1 || "
-  //    << "trigger.HLT_PFMET150_v5 == 1 || trigger.HLT_PFMET150_v6 == 1 || trigger.HLT_PFMET150_v7 == 1 )"
-  //    << "||("
-  //    << "trigger.HLT_PFHT350_PFMET100_v3==1 || trigger.HLT_PFHT350_PFMET100_v4==1 || trigger.HLT_PFHT350_PFMET100_v5==1 || "
-  //    << "trigger.HLT_PFHT350_PFMET100_v6==1 || trigger.HLT_PFHT350_PFMET100_v7==1 || trigger.HLT_PFNoPUHT350_PFMET100_v1==1 || "
-  //    << "trigger.HLT_PFNoPUHT350_PFMET100_v3==1 || trigger.HLT_PFNoPUHT350_PFMET100_v4==1 ) ) &&TOBTECTagger<=8&&ExtraBeamHaloFilter==0)";
-
-  std::ostringstream HLT_HT;
-  HLT_HT << "";
-  //HLT_HT << "( ("
-  //    << "trigger.HLT_PFHT650_v5 == 1 || trigger.HLT_PFHT650_v6 == 1 || trigger.HLT_PFHT650_v7 == 1 || "
-  //    << "trigger.HLT_PFHT650_v8 == 1 || trigger.HLT_PFHT650_v9 == 1 || "
-  //    << "trigger.HLT_PFNoPUHT650_v1 == 1 || trigger.HLT_PFNoPUHT650_v3 == 1 || trigger.HLT_PFNoPUHT650_v4 == 1) &&TOBTECTagger<=8&&ExtraBeamHaloFilter==0)";
-
-
-
-  std::vector<MT2HTRegion> HTRegions;
-  HTRegions.push_back(MT2HTRegion("lowHT",    450.,    750., 200., HLT_metHT.str()));
-  HTRegions.push_back(MT2HTRegion("mediumHT", 750.,   1200.,  30., HLT_HT.str()));
-  HTRegions.push_back(MT2HTRegion("highHT",  1200., 100000.,  30., HLT_HT.str()));
-
-  std::vector<MT2SignalRegion> signalRegions;
-  signalRegions.push_back(MT2SignalRegion(2, 2, 0, 0));  // 2j0b
-  signalRegions.push_back(MT2SignalRegion(2, 2, 1, 2));  // 2j1to2b
-  signalRegions.push_back(MT2SignalRegion(3, 5, 0, 0));  // 3to5j0b
-  signalRegions.push_back(MT2SignalRegion(3, 5, 1, 1));  // 3to5j1b
-  signalRegions.push_back(MT2SignalRegion(3, 5, 2, 2));  // 3to5j2b
-  signalRegions.push_back(MT2SignalRegion(6, -1, 0, 0));  // 6j0b
-  signalRegions.push_back(MT2SignalRegion(6, -1, 1, 1));  // 6j1b
-  signalRegions.push_back(MT2SignalRegion(6, -1, 2, 2));  // 6j2b
-  signalRegions.push_back(MT2SignalRegion(-1, -1, 3, -1));  // 3b
+  MT2AnalysisRegions analysisRegions = MT2Common::getAnalysisRegions("8TeV");
 
 
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
@@ -93,7 +59,7 @@ int main( int argc, char* argv[] ) {
   
   std::vector<MT2YieldAnalysis*> EventYield;
   for( unsigned i=0; i<fSamples.size(); ++i )
-    EventYield.push_back( computeYield( fSamples[i], HTRegions, signalRegions ) );
+    EventYield.push_back( computeYield( fSamples[i], analysisRegions ) );
   
 
   system( "rm tmp.root" );
@@ -120,7 +86,7 @@ int main( int argc, char* argv[] ) {
   std::cout << "-> Done merging. Start computing event yields." << std::endl;
 
 
-  std::string outputdir = "EventYields_WJets-HT400to600_post";
+  std::string outputdir = "EventYields_" + sampleName;
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   TFile* outfile = TFile::Open(Form("%s/EventYields_%s.root", outputdir.c_str(), sampleName.c_str()), "recreate");
@@ -134,26 +100,28 @@ int main( int argc, char* argv[] ) {
   //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_data", "", HTRegions, signalRegions, EventYield_data, EventYield_allMC, logfile );
   
   // For topW yield:
-  std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_topW", "", HTRegions, signalRegions, EventYield_topW, EventYield_bg, logfile );
+  //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_topW", "", HTRegions, signalRegions, EventYield_topW, EventYield_bg, logfile );
   
   // For signal yield:
-  //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_signal", "", HTRegions, signalRegions, EventYield_signal, EventYield_allMC, logfile ); 
+  std::vector<TH1D*> vh1_signal = getYieldHistos( "EventYield_signal", "", analysisRegions, EventYield_signal, 0, logfile ); 
 
   // For all SM yield:
-  std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_MC", "", HTRegions, signalRegions, EventYield_allMC, EventYield_bg, logfile );
+  ////std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_MC", "", HTRegions, signalRegions, EventYield_allMC, EventYield_bg, logfile );
   //std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_WJets", "", HTRegions, signalRegions, EventYield_wjets, EventYield_bg, logfile );
 
-  std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_allMC );
+  ////std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_allMC );
   //std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_signal );
  
 
-  for( unsigned i=0; i<HTRegions.size(); ++i ) {
+  for( unsigned i=0; i<analysisRegions.getHTRegions().size(); ++i ) {
 
-    vh1_data[i]->Write();
-    
-    vh1_mc  [i]->Write();
-    
-    vh1_sim [i]->Write();
+    vh1_signal[i]->Write();
+
+    //vh1_data[i]->Write();
+    //
+    //vh1_mc  [i]->Write();
+    //
+    //vh1_sim [i]->Write();
  
   }
 
@@ -169,7 +137,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2YieldAnalysis* computeYield( const MT2SamplePostBaby& sample, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions ) {
+MT2YieldAnalysis* computeYield( const MT2SamplePostBaby& sample, MT2AnalysisRegions analysisRegions ) {
 
 
   std::cout << std::endl << std::endl;
@@ -223,7 +191,7 @@ MT2YieldAnalysis* computeYield( const MT2SamplePostBaby& sample, std::vector<MT2
   std::vector<std::string> fakeID;
   fakeID.push_back("");
     
-  std::vector<MT2YieldPreAnalysis*> v_EventYield = getEventYield( fakeID, tree_reduced, sample, HTRegions, signalRegions );
+  std::vector<MT2YieldPreAnalysis*> v_EventYield = getEventYield( fakeID, tree_reduced, sample, analysisRegions );
 
   MT2YieldAnalysis* EventYield = new MT2YieldAnalysis(sample.sname);
   for( unsigned i=0; i<fakeID.size(); ++i )
@@ -245,8 +213,11 @@ MT2YieldAnalysis* computeYield( const MT2SamplePostBaby& sample, std::vector<MT2
 
 
 
-std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID, TTree* tree, MT2SamplePostBaby sample, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions ) {
+std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID, TTree* tree, MT2SamplePostBaby sample, MT2AnalysisRegions analysisRegions ) {
 
+
+  std::vector<MT2HTRegion> HTRegions = analysisRegions.getHTRegions();
+  std::vector<MT2SignalRegion> signalRegions = analysisRegions.getSignalRegions();
 
   bool isData = false;
 
@@ -259,7 +230,7 @@ std::vector<MT2YieldPreAnalysis*> getEventYield( std::vector<std::string> fakeID
   std::vector<MT2YieldPreAnalysis*> EventYield;
   
   for( unsigned i=0; i<fakeID.size(); ++i ) {
-    MT2YieldPreAnalysis* this_EventYield = new MT2YieldPreAnalysis( sample.sname, HTRegions, signalRegions );
+    MT2YieldPreAnalysis* this_EventYield = new MT2YieldPreAnalysis( sample.sname, analysisRegions );
     EventYield.push_back( this_EventYield );
   }
 
@@ -435,7 +406,11 @@ MT2YieldAnalysis* mergeYields( std::vector<MT2YieldAnalysis*> EventYield, const 
 
 
 
-std::vector<TH1D*> getYieldHistos( const std::string& prefix, const std::string& fakeID, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions, MT2YieldAnalysis* EventYield_tot, MT2YieldAnalysis* EventYield_bg, std::ofstream& logfile ) {
+std::vector<TH1D*> getYieldHistos( const std::string& prefix, const std::string& fakeID, MT2AnalysisRegions analysisRegions, MT2YieldAnalysis* EventYield_tot, MT2YieldAnalysis* EventYield_bg, std::ofstream& logfile ) {
+
+
+  std::vector<MT2HTRegion> HTRegions = analysisRegions.getHTRegions();
+  std::vector<MT2SignalRegion> signalRegions = analysisRegions.getSignalRegions();
 
 
   int nHistos = HTRegions.size();
@@ -554,7 +529,11 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, const std::string&
 
 
 
-std::vector<TH1D*> getSimTruthYieldHistos( const std::string& prefix, const std::string& fakeID, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions, MT2YieldAnalysis* EventYield_tot ) {
+std::vector<TH1D*> getSimTruthYieldHistos( const std::string& prefix, const std::string& fakeID, MT2AnalysisRegions analysisRegions, MT2YieldAnalysis* EventYield_tot ) {
+
+
+  std::vector<MT2HTRegion> HTRegions = analysisRegions.getHTRegions();
+  std::vector<MT2SignalRegion> signalRegions = analysisRegions.getSignalRegions();
 
 
   int nHistos = HTRegions.size();

@@ -2,7 +2,7 @@
 #define MT2Region_h
 
 #include <string>
-
+#include <vector>
 
 
 
@@ -112,6 +112,25 @@ class MT2Region {
 
 
 
+class MT2AnalysisRegions {
+
+ public:
+
+  MT2AnalysisRegions( std::vector<MT2HTRegion> htRegions, std::vector<MT2SignalRegion> signalRegions );
+  MT2AnalysisRegions( const MT2AnalysisRegions& rhs );
+  ~MT2AnalysisRegions();
+
+  std::vector<MT2HTRegion> getHTRegions() const { return htRegions_; };
+  std::vector<MT2SignalRegion> getSignalRegions() const { return signalRegions_; };
+
+  MT2AnalysisRegions operator=( const MT2AnalysisRegions );
+
+ private:
+
+  std::vector<MT2HTRegion> htRegions_;
+  std::vector<MT2SignalRegion> signalRegions_;
+
+};
 
 
 #endif

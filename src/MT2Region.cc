@@ -7,6 +7,13 @@
 
 
 
+////////////////////////////////////////////////////////
+//
+//                    MT2HTRegion
+//
+////////////////////////////////////////////////////////
+
+
 MT2HTRegion::MT2HTRegion( const MT2HTRegion& rhs ) {
 
   name = rhs.name;
@@ -41,6 +48,14 @@ std::string MT2HTRegion::getName() const {
 }
 
 
+
+
+
+////////////////////////////////////////////////////////
+//
+//                  MT2SignalRegion
+//
+////////////////////////////////////////////////////////
 
 
 MT2SignalRegion::MT2SignalRegion(int njmin, int njmax, int nbmin, int nbmax ) {
@@ -230,4 +245,39 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
 
 
 
+
+////////////////////////////////////////////////////////
+//
+//                  MT2AnalysisRegions
+//
+////////////////////////////////////////////////////////
+
+
+
+MT2AnalysisRegions::MT2AnalysisRegions( std::vector<MT2HTRegion> htRegions, std::vector<MT2SignalRegion> signalRegions ) {
+
+  htRegions_ = htRegions;
+  signalRegions_ = signalRegions;
+
+}
+
+
+
+MT2AnalysisRegions::MT2AnalysisRegions( const MT2AnalysisRegions& rhs ) {
+
+  htRegions_ = rhs.getHTRegions();
+  signalRegions_ = rhs.getSignalRegions();
+
+}
+
+
+MT2AnalysisRegions::~MT2AnalysisRegions() {};
+
+
+MT2AnalysisRegions MT2AnalysisRegions::operator=( MT2AnalysisRegions rhs ) {
+
+  htRegions_ = rhs.getHTRegions();
+  signalRegions_ = rhs.getSignalRegions();
+
+}
 

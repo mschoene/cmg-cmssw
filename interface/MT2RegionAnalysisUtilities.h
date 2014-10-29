@@ -92,7 +92,7 @@ class MT2YieldPreAnalysis {
   MT2YieldPreAnalysis( const std::string& aSName ) {
     SName = aSName;
   }
-  MT2YieldPreAnalysis( const std::string& aSName, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions );
+  MT2YieldPreAnalysis( const std::string& aSName, MT2AnalysisRegions analysisRegions );
   ~MT2YieldPreAnalysis();
   
   

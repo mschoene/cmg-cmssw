@@ -215,7 +215,10 @@ void MT2RegionAnalysis::addOverflow() {
 
 
 
-MT2YieldPreAnalysis::MT2YieldPreAnalysis( const std::string& aSName, std::vector<MT2HTRegion> HTRegions, std::vector<MT2SignalRegion> signalRegions ) {
+MT2YieldPreAnalysis::MT2YieldPreAnalysis( const std::string& aSName, MT2AnalysisRegions analysisRegions ) {
+
+  std::vector<MT2HTRegion> HTRegions = analysisRegions.getHTRegions();
+  std::vector<MT2SignalRegion> signalRegions = analysisRegions.getSignalRegions();
 
   SName = aSName;
 
