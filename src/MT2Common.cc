@@ -1,4 +1,5 @@
 #include "../interface/MT2Common.h"
+#include "../interface/MT2Region.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -21,6 +22,55 @@ void MT2Common::getBins( float ht_min, int njet_min, int njet_max, int nbjet_min
 
 }
 
+
+
+MT2AnalysisRegions MT2Common::getAnalysisRegions( const std::string& set ) {
+
+
+  std::vector<MT2HTRegion> HTRegions;
+  std::vector<MT2SignalRegion> signalRegions;
+
+  if( set=="default" ) {
+
+    HTRegions.push_back(MT2HTRegion("lowHT",    450.,    575., 0.));
+    HTRegions.push_back(MT2HTRegion("mediumHT", 575.,   1000., 0.));
+    HTRegions.push_back(MT2HTRegion("highHT",  1000., 100000., 0.));
+
+    signalRegions.push_back(MT2SignalRegion(2,  3, 0,  0)); 
+    signalRegions.push_back(MT2SignalRegion(4, -1, 0,  0)); 
+    signalRegions.push_back(MT2SignalRegion(2,  3, 1,  2)); 
+    signalRegions.push_back(MT2SignalRegion(4, -1, 1,  2)); 
+    signalRegions.push_back(MT2SignalRegion(2, -1, 3, -1)); 
+
+
+  } else if( set=="8TeV" ) {
+
+    HTRegions.push_back(MT2HTRegion("lowHT",    450.,    750., 200., "" ));
+    HTRegions.push_back(MT2HTRegion("mediumHT", 750.,   1200.,  30., "" ));
+    HTRegions.push_back(MT2HTRegion("highHT",  1200., 100000.,  30., "" ));
+
+    signalRegions.push_back(MT2SignalRegion(2, 2, 0, 0));  // 2j0b
+    signalRegions.push_back(MT2SignalRegion(2, 2, 1, 2));  // 2j1to2b
+    signalRegions.push_back(MT2SignalRegion(3, 5, 0, 0));  // 3to5j0b
+    signalRegions.push_back(MT2SignalRegion(3, 5, 1, 1));  // 3to5j1b
+    signalRegions.push_back(MT2SignalRegion(3, 5, 2, 2));  // 3to5j2b
+    signalRegions.push_back(MT2SignalRegion(6, -1, 0, 0));  // 6j0b
+    signalRegions.push_back(MT2SignalRegion(6, -1, 1, 1));  // 6j1b
+    signalRegions.push_back(MT2SignalRegion(6, -1, 2, 2));  // 6j2b
+    signalRegions.push_back(MT2SignalRegion(-1, -1, 3, -1));  // 3b
+
+  } else {
+
+    std::cout << "[MT2Common::getAnalysisRegions] Analysis region set '" << set << "' not implemented yet. Exiting." << std::endl;
+    exit(917);
+
+  }
+
+
+
+  return MT2AnalysisRegions( HTRegions, signalRegions );
+
+}
 
 
 
@@ -140,11 +190,11 @@ void MT2Common::getBins( const std::string& signal_region, int &nBins, Double_t*
     nBins = nBins_tmp;
 
 
-  } else {
+  } else { // default binning
 
-    std::cout << "WARNING! Unknown signal_region: " << signal_region << std::endl;
-    std::cout << "-> Aborting." << std::endl;
-    exit(981);
+    const int nBins_tmp                        = 7;
+    bins = new Double_t[nBins_tmp+1]{ 100., 150., 200., 250., 300., 350., 400., 450.};
+    nBins = nBins_tmp;
 
   }
 
