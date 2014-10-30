@@ -49,6 +49,27 @@ std::string MT2HTRegion::getName() const {
 
 
 
+bool MT2HTRegion::operator==( const MT2HTRegion& rhs ) const {
+
+  return ( htMin==rhs.htMin && htMax==rhs.htMax && metMin==rhs.metMin && HLT_selection==rhs.HLT_selection ); 
+
+}
+
+
+bool MT2HTRegion::operator!=( const MT2HTRegion& rhs ) const {
+
+  return ( htMin!=rhs.htMin || htMax!=rhs.htMax || metMin!=rhs.metMin || HLT_selection!=rhs.HLT_selection ); 
+
+}
+
+
+bool MT2HTRegion::operator<( const MT2HTRegion& rhs ) const {
+
+  return ( htMin<rhs.htMin );
+
+}
+
+
 
 
 ////////////////////////////////////////////////////////
@@ -111,7 +132,39 @@ std::string MT2SignalRegion::getSingleSignalRegionString( const std::string& suf
 
 }
 
+
+bool MT2SignalRegion::operator==( const MT2SignalRegion& rhs ) const {
+
+  return ( nJetsMin==rhs.nJetsMin && nJetsMax==rhs.nJetsMax && nBJetsMin==rhs.nBJetsMin && nBJetsMax==rhs.nBJetsMax );
  
+}
+
+
+bool MT2SignalRegion::operator!=( const MT2SignalRegion& rhs ) const {
+
+  return ( nJetsMin!=rhs.nJetsMin || nJetsMax!=rhs.nJetsMax || nBJetsMin!=rhs.nBJetsMin || nBJetsMax!=rhs.nBJetsMax );
+ 
+}
+
+
+bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
+
+  if( nJetsMin!=rhs.nJetsMin ) {
+    return nJetsMin<rhs.nJetsMin;
+  } else {
+    return nBJetsMin<rhs.nBJetsMin;
+  }
+
+  return false;
+
+}
+
+
+
+
+
+
+
 
 
 void MT2Region::getBins( int &nBins, double*& bins) const {
@@ -245,39 +298,4 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
 
 
 
-
-////////////////////////////////////////////////////////
-//
-//                  MT2AnalysisRegions
-//
-////////////////////////////////////////////////////////
-
-
-
-MT2AnalysisRegions::MT2AnalysisRegions( std::vector<MT2HTRegion> htRegions, std::vector<MT2SignalRegion> signalRegions ) {
-
-  htRegions_ = htRegions;
-  signalRegions_ = signalRegions;
-
-}
-
-
-
-MT2AnalysisRegions::MT2AnalysisRegions( const MT2AnalysisRegions& rhs ) {
-
-  htRegions_ = rhs.getHTRegions();
-  signalRegions_ = rhs.getSignalRegions();
-
-}
-
-
-MT2AnalysisRegions::~MT2AnalysisRegions() {};
-
-
-MT2AnalysisRegions MT2AnalysisRegions::operator=( MT2AnalysisRegions rhs ) {
-
-  htRegions_ = rhs.getHTRegions();
-  signalRegions_ = rhs.getSignalRegions();
-
-}
 
