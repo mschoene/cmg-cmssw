@@ -1,5 +1,5 @@
 #include "../interface/MT2Analysis.h"
-
+#include "TFile.h"
 
 
 
@@ -33,6 +33,18 @@ void MT2Analysis::addOverflow() {
     it->second->addOverflow();
   for( std::map<MT2Region,MT2Estimate*>::iterator it=simTruthEstimates.begin(); it!=simTruthEstimates.end(); ++it ) 
     it->second->addOverflow();
+
+}
+
+
+
+std::set<MT2HTRegion> MT2Analysis::getHTRegions() {
+
+  std::set<MT2HTRegion> returnSet;
+  for( std::map<MT2Region,MT2EstimateSyst*>::iterator it=estimates.begin(); it!=estimates.end(); ++it )
+    returnSet.insert( *(it->first.htRegion()) );
+
+  return returnSet;
 
 }
 
@@ -96,5 +108,38 @@ MT2Analysis MT2Analysis::operator+( const MT2Analysis& rhs ) const {
 
 
   return *result;
+
+}
+
+
+
+
+void MT2Analysis::writeToFile( const std::string& fileName ) {
+
+  TFile* file = TFile::Open(fileName.c_str(), "recreate");
+  file->cd();
+
+  std::set<MT2HTRegion> htRegions = this->getHTRegions();
+  for( std::set<MT2HTRegion>::iterator it=htRegions.begin(); it!=htRegions.end(); ++it ) {
+    file->cd();
+    file->mkdir(it->name.c_str());
+  }
+
+  
+  for( std::map<MT2Region,MT2EstimateSyst*>::iterator it=this->estimates.begin(); it!=this->estimates.end(); ++it ) {
+    file->cd();
+    file->cd(it->first.htRegion()->name.c_str());
+    it->second->yield->Write();
+    it->second->yield_btagUp->Write();
+    it->second->yield_btagDown->Write();
+  }
+
+  for( std::map<MT2Region,MT2Estimate*>::iterator it=this->simTruthEstimates.begin(); it!=this->simTruthEstimates.end(); ++it ) {
+    file->cd();
+    file->cd(it->first.htRegion()->name.c_str());
+    it->second->yield->Write();
+  }
+  
+  file->Close();
 
 }

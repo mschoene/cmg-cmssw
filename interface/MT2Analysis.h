@@ -3,6 +3,7 @@
 
 
 #include <map>
+#include <set>
 #include "interface/MT2AnalysisManager.h"
 #include "interface/MT2Region.h"
 #include "interface/MT2Estimate.h"
@@ -19,10 +20,14 @@ class MT2Analysis {
 
   void addOverflow();
 
+  std::set<MT2HTRegion> getHTRegions();
+
+
   void add(const MT2Analysis& rhs);
   MT2Analysis operator+( const MT2Analysis& rhs ) const;
   const MT2Analysis& operator=( const MT2Analysis& rhs );
 
+  void writeToFile( const std::string& fileName );
 
   std::map<MT2Region,MT2EstimateSyst*> estimates;
   std::map<MT2Region,MT2Estimate*> simTruthEstimates;
