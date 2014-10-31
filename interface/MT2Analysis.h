@@ -162,24 +162,24 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
   
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
 
-    float htMin  = it->region.htRegion()->htMin;
-    float htMax  = it->region.htRegion()->htMax;
-    float metMin = it->region.htRegion()->metMin;
+    float htMin  = (*it)->region->htRegion()->htMin;
+    float htMax  = (*it)->region->htRegion()->htMax;
+    float metMin = (*it)->region->htRegion()->metMin;
 
     if( ht<htMin || ht>htMax ) continue;
     if( met<metMin ) continue;
 
-    int njetsmin  = it->region.signalRegion()->nJetsMin;
-    int njetsmax  = it->region.signalRegion()->nJetsMax;
-    int nbjetsmin = it->region.signalRegion()->nBJetsMin;
-    int nbjetsmax = it->region.signalRegion()->nBJetsMax;
+    int njetsmin  = (*it)->region->sigRegion()->nJetsMin;
+    int njetsmax  = (*it)->region->sigRegion()->nJetsMax;
+    int nbjetsmin = (*it)->region->sigRegion()->nBJetsMin;
+    int nbjetsmax = (*it)->region->sigRegion()->nBJetsMax;
 
     if( njetsmin >0 && njets <njetsmin  ) continue;
     if( njetsmax >0 && njets >njetsmax  ) continue;
     if( nbjetsmin>0 && nbjets<nbjetsmin ) continue;
     if( nbjetsmax>0 && nbjets>nbjetsmax ) continue;
 
-    region = &(it->region);
+    region = (*it)->region;
 
   }  // for
 
@@ -195,8 +195,8 @@ T* MT2Analysis<T>::get( MT2Region* r ) const {
   T* t = 0;
 
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
-    if( it->region == r ) {
-      t = it;
+    if( (*it)->region == r ) {
+      t = *it;
       break;
     }
   }
@@ -223,8 +223,8 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName ) {
   TFile* file = TFile::Open(fileName.c_str(), "recreate");
   file->cd();
 
-  std::set<MT2HTRegion> htRegions = this->getHTRegions();
-  for( std::set<MT2HTRegion>::iterator it=htRegions.begin(); it!=htRegions.end(); ++it ) {
+  std::vector<MT2HTRegion> htRegions = this->getHTRegions();
+  for( std::vector<MT2HTRegion>::iterator it=htRegions.begin(); it!=htRegions.end(); ++it ) {
     file->cd();
     file->mkdir(it->name.c_str());
   }
@@ -232,8 +232,8 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName ) {
   
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
     file->cd();
-    file->cd(it->first.htRegion()->name.c_str());
-    it->second->write();
+    file->cd((*it)->region->htRegion()->name.c_str());
+    (*it)->write();
   }
 
   file->Close();
@@ -241,5 +241,16 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName ) {
   std::cout << "-> Written data to file: " << fileName << std::endl;
 
 }
+
+
+
+template<class T> 
+void MT2Analysis<T>::addOverflow() {
+
+  for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) 
+    (*it)->addOverflow();
+
+}
+
 
 #endif
