@@ -16,7 +16,7 @@
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-class mt2 {
+class MT2Tree {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -477,8 +477,8 @@ public :
    TBranch        *b_evt_nEvts;   //!
    TBranch        *b_evt_id;   //!
 
-   mt2(TTree *tree=0);
-   virtual ~mt2();
+   MT2Tree(TTree *tree=0);
+   virtual ~MT2Tree();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -491,7 +491,7 @@ public :
 #endif
 
 #ifdef mt2_cxx
-mt2::mt2(TTree *tree) : fChain(0) 
+MT2Tree::MT2Tree(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -506,19 +506,19 @@ mt2::mt2(TTree *tree) : fChain(0)
 //   Init(tree);
 }
 
-mt2::~mt2()
+MT2Tree::~MT2Tree()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t mt2::GetEntry(Long64_t entry)
+Int_t MT2Tree::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t mt2::LoadTree(Long64_t entry)
+Long64_t MT2Tree::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -531,7 +531,7 @@ Long64_t mt2::LoadTree(Long64_t entry)
    return centry;
 }
 
-void mt2::Init(TTree *tree)
+void MT2Tree::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -776,7 +776,7 @@ void mt2::Init(TTree *tree)
    Notify();
 }
 
-Bool_t mt2::Notify()
+Bool_t MT2Tree::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -787,14 +787,14 @@ Bool_t mt2::Notify()
    return kTRUE;
 }
 
-void mt2::Show(Long64_t entry)
+void MT2Tree::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t mt2::Cut(Long64_t entry)
+Int_t MT2Tree::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
