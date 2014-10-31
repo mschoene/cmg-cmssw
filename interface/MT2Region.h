@@ -27,6 +27,12 @@ class MT2HTRegion {
 
   std::string HLT_selection;
 
+
+  bool operator==( const MT2HTRegion& rhs ) const;
+  bool operator!=( const MT2HTRegion& rhs ) const;
+  bool operator<( const MT2HTRegion& rhs ) const;
+
+
  private:
 
 };
@@ -53,6 +59,10 @@ class MT2SignalRegion {
   int nJetsMax;
   int nBJetsMin;
   int nBJetsMax;
+
+  bool operator==( const MT2SignalRegion& rhs ) const;
+  bool operator!=( const MT2SignalRegion& rhs ) const;
+  bool operator<( const MT2SignalRegion& rhs ) const;
 
 
  private:
@@ -102,6 +112,23 @@ class MT2Region {
   int nBJetsMax() { return sigRegion_->nBJetsMax; };
 
 
+  bool operator==( const MT2Region& rhs ) const {
+    return ( *htRegion_==*(rhs.htRegion()) && *sigRegion_==*(rhs.sigRegion()) );
+  }
+
+  bool operator!=( const MT2Region& rhs ) const {
+    return ( *htRegion_!=*(rhs.htRegion()) || *sigRegion_!=*(rhs.sigRegion()) );
+  }
+
+  bool operator<( const MT2Region& rhs ) const {
+    if( *htRegion_!=*(rhs.htRegion()) ) {
+      return *htRegion_<*(rhs.htRegion());
+    } else {
+      return *sigRegion_<*(rhs.sigRegion());
+    }
+    return false;
+  }
+
 
  private:
   
@@ -111,26 +138,6 @@ class MT2Region {
 };
 
 
-
-class MT2AnalysisRegions {
-
- public:
-
-  MT2AnalysisRegions( std::vector<MT2HTRegion> htRegions, std::vector<MT2SignalRegion> signalRegions );
-  MT2AnalysisRegions( const MT2AnalysisRegions& rhs );
-  ~MT2AnalysisRegions();
-
-  std::vector<MT2HTRegion> getHTRegions() const { return htRegions_; };
-  std::vector<MT2SignalRegion> getSignalRegions() const { return signalRegions_; };
-
-  MT2AnalysisRegions operator=( const MT2AnalysisRegions );
-
- private:
-
-  std::vector<MT2HTRegion> htRegions_;
-  std::vector<MT2SignalRegion> signalRegions_;
-
-};
 
 
 #endif
