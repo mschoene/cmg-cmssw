@@ -14,8 +14,8 @@ int main() {
   // create a signal region structure with the 8TeV definitions of signal regions:
   MT2Analysis<MT2EstimateSyst> *analysis = new MT2Analysis<MT2EstimateSyst>("pippo", "8TeV", 702);
 
-  float ht = 1200.;
-  float met = 10.;
+  float ht = 1000.;
+  float met = 200.;
   int njets = 4;
   int nbjets = 1;
   float mt2 = 305.;
