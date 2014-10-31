@@ -30,7 +30,11 @@ class MT2EstimateSyst : public MT2Estimate {
 
   virtual void addOverflow();
 
-  //virtual void writeTable( const std::string& fileName ) const;
+  virtual void write() const {
+    MT2Estimate::write();
+    yield_btagUp->Write();
+    yield_btagDown->Write();
+  }
 
  private:
 
