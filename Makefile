@@ -23,8 +23,8 @@ computeLostLepton_BabyTrees: computeLostLepton_BabyTrees.cpp MT2Region.o MT2Lost
 regionEventYields_BabyTrees: regionEventYields_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o
 	$(CC) -Wall $(INCLUDES) -o regionEventYields_BabyTrees regionEventYields_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o $(ROOTFLAG) $(EXTRALIBS)
 
-regionEventYields_postBabyTrees: regionEventYields_postBabyTrees.cpp MT2Region.o MT2Analysis.o MT2Common.o MT2AnalysisManager.o MT2Estimate.o MT2EstimateSyst.o 
-	$(CC) -Wall $(INCLUDES) -o regionEventYields_postBabyTrees regionEventYields_postBabyTrees.cpp MT2Region.o MT2Analysis.o MT2Common.o MT2AnalysisManager.o MT2Estimate.o MT2EstimateSyst.o $(ROOTFLAG) $(EXTRALIBS) -fpermissive
+regionEventYields_postBabyTrees: regionEventYields_postBabyTrees.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o 
+	$(CC) -Wall $(INCLUDES) -o regionEventYields_postBabyTrees regionEventYields_postBabyTrees.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o $(ROOTFLAG) $(EXTRALIBS) -fpermissive
 
 inclusivePlots_BabyTrees: inclusivePlots_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o
 	$(CC) -Wall $(INCLUDES) -o inclusivePlots_BabyTrees inclusivePlots_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Common.o $(ROOTFLAG) $(EXTRALIBS)
@@ -44,11 +44,9 @@ checkQGL: checkQGL.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o loca
 check_mht: check_mht.cpp 
 	$(CC) -Wall $(INCLUDES) -o check_mht check_mht.cpp   $(ROOTFLAG) $(EXTRALIBS)
 
-prova: prova.cpp MT2Region.o MT2Analysis.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o
-	$(CC) -Wall $(INCLUDES) -o prova prova.cpp MT2Region.o MT2Analysis.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o $(ROOTFLAG) $(EXTRALIBS)
+prova: prova.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o
+	$(CC) -Wall $(INCLUDES) -o prova prova.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o $(ROOTFLAG) $(EXTRALIBS)
 
-prova2: prova2.cpp
-	$(CC) -Wall $(INCLUDES) -o prova2 prova2.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 
 
@@ -69,17 +67,9 @@ MT2EstimateSyst.o: src/MT2EstimateSyst.cc MT2Region.o MT2Estimate.o
 MT2LostLeptonUtilities.o: src/MT2LostLeptonUtilities.cc MT2Region.o
 	$(CC) -Wall $(INCLUDES) -c src/MT2LostLeptonUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
 
-MT2RegionAnalysisUtilities.o: src/MT2RegionAnalysisUtilities.cc MT2Region.o MT2AnalysisManager.o
-	$(CC) -Wall $(INCLUDES) -c src/MT2RegionAnalysisUtilities.cc MT2Region.o MT2AnalysisManager.o $(ROOTFLAG) $(EXTRALIBS)
+MT2RegionAnalysisUtilities.o: src/MT2RegionAnalysisUtilities.cc MT2Region.o
+	$(CC) -Wall $(INCLUDES) -c src/MT2RegionAnalysisUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
 
-MT2AnalysisManager.o: src/MT2AnalysisManager.cc MT2Region.o
-	$(CC) -Wall $(INCLUDES) -c src/MT2AnalysisManager.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
-
-MT2Analysis.o: interface/MT2Analysis.h MT2Region.o 
-	$(CC) -Wall $(INCLUDES) -c interface/MT2Analysis.h MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
-
-#MT2Analysis.o: src/MT2Analysis.cc MT2Region.o MT2Estimate.o MT2EstimateSyst.o MT2AnalysisManager.o
-#	$(CC) -Wall $(INCLUDES) -c src/MT2Analysis.cc MT2Region.o MT2Region.o MT2Estimate.o MT2EstimateSyst.o MT2AnalysisManager.o $(ROOTFLAG) $(EXTRALIBS)
 
 
 
