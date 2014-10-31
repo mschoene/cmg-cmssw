@@ -37,9 +37,6 @@ class MT2Common {
   MT2Common();
   ~MT2Common();
 
-  static void getBins( float ht_min, int njet_min, int njet_max, int nbjet_min, int nbjet_max, int &nBins, Double_t* bins);
-  static void getBins( const std::string& signal_region, int &nBins, Double_t* bins);
-
   static std::string getSignalRegion( float ht_min, int njet_min, int njet_max, int nbjet_min, int nbjet_max);
   static std::string getSingleSignalRegionString( int n_min , int n_max, const std::string& suffix );
 
