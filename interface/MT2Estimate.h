@@ -59,7 +59,9 @@ class MT2Estimate {
   virtual void addOverflow();
   void addOverflowSingleHisto( TH1D* yield );
 
-  //virtual void writeTable( const std::string& fileName ) const;
+  virtual void write() const {
+    yield->Write();
+  }
 
  private:
 
