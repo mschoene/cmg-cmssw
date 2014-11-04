@@ -11,8 +11,9 @@ class MT2HTRegion {
 
  public:
 
+  MT2HTRegion( const std::string& name );
   MT2HTRegion( const MT2HTRegion& rhs );
-  MT2HTRegion( const std::string& aname, float ahtMin, float ahtMax, float ametMin, const std::string& aHLT_selection="" );
+  MT2HTRegion( float ahtMin, float ahtMax, float ametMin, const std::string& aHLT_selection="" );
   ~MT2HTRegion() {};
 
 
@@ -20,7 +21,6 @@ class MT2HTRegion {
   std::string getName() const;
 
 
-  std::string name;
   float htMin;
   float htMax;
   float metMin;
@@ -45,6 +45,7 @@ class MT2SignalRegion {
 
  public:
 
+  MT2SignalRegion( const std::string& name );
   MT2SignalRegion( int njmin, int njmax, int nbmin, int nbmax );
   MT2SignalRegion( const MT2SignalRegion& rhs );
 
@@ -82,7 +83,7 @@ class MT2Region {
     sigRegion_ = new MT2SignalRegion(*(region.sigRegion()));
   }
 
-  MT2Region( MT2HTRegion* htRegion, MT2SignalRegion* sigRegion ) {
+  MT2Region( const MT2HTRegion* htRegion, const MT2SignalRegion* sigRegion ) {
     htRegion_ = new MT2HTRegion(*htRegion);
     sigRegion_ = new MT2SignalRegion(*sigRegion);
   }
