@@ -47,6 +47,9 @@ check_mht: check_mht.cpp
 prova: prova.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o
 	$(CC) -Wall $(INCLUDES) -o prova prova.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o $(ROOTFLAG) $(EXTRALIBS)
 
+provaRead: provaRead.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o
+	$(CC) -Wall $(INCLUDES) -o provaRead provaRead.cpp MT2Region.o MT2Common.o MT2Estimate.o MT2EstimateSyst.o $(ROOTFLAG) $(EXTRALIBS)
+
 
 
 
