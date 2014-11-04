@@ -63,7 +63,6 @@ std::vector<MT2Sample> MT2Common::loadSamples(const std::string& filename) {
 
   //char ParName[100];                                                                                                                                                                                                           
   char StringValue[1000];
-  float ParValue;
 
   std::cout << "------------------------------------" << std::endl;
   std::cout << "Sample File  " << filename << std::endl;
