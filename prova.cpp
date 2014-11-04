@@ -40,7 +40,7 @@ int main() {
 
   // the command below calls the method addOverflow() for all elements in the MT2Analysis
   // so make sure that if you implement a new class, it has that method implemented
-  analysis->addOverflow();
+  analysis->finalize();
 
   // write the histograms to a file:
   analysis->writeToFile("prova.root");
