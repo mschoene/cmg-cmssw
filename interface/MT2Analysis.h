@@ -442,6 +442,8 @@ MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const
   if( analyses.size()>1 ) {
     std::cout << "[MT2Analysis::readFromFile] WARNING!!! Multiple analyses found, but reading only one ('" << analysis->name << "')" << std::endl;
     std::cout << "[MT2Analysis::readFromFile] (if you want to read all of them you should use readAllFromFile)" << std::endl;
+  } else {
+    std::cout << "[MT2Analysis::readFromFile] Grabbed MT2Analysis '" << analysis->name << "' from file " << fileName << std::endl;
   }
 
   return analysis;
