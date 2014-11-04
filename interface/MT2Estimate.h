@@ -4,7 +4,7 @@
 
 #include "MT2Region.h"
 #include "TH1D.h"
-#include "TList.h"
+#include "TFile.h"
 
 
 
@@ -64,7 +64,7 @@ class MT2Estimate {
     yield->Write();
   }
 
-  virtual void getStuffFromList( TList* list );
+  virtual void getShit( TFile* file, const std::string& path );
 
 
  private:
