@@ -33,6 +33,7 @@ int main() {
   // it will return a null pointer if the event doesnt fall in any region (eg if it has too low HT)
   if( est!=0 ) {
     // if you found a valid region, you can use the pointer, for example filling histograms
+    std::cout << "filling region: " << est->region->getName() << std::endl;
     est->yield->Fill( mt2, weight );
     est->yield_btagUp->Fill( mt2, weight_btagUp );
     est->yield_btagDown->Fill( mt2, weight_btagDown );
