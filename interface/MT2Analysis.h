@@ -39,7 +39,8 @@ class MT2Analysis {
   void add( const MT2Analysis& rhs );
 
 
-  static std::set<MT2Analysis*> readFromFile( const std::string& fileName );
+  static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
+  static std::set<MT2Analysis*> readAllFromFile( const std::string& fileName );
   void writeToFile( const std::string& fileName );
 
   void finalize();
@@ -300,12 +301,12 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName ) {
 
 
 template<class T> 
-std::set<MT2Analysis<T>*> MT2Analysis<T>::readFromFile( const std::string& fileName ) {
+std::set<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName ) {
 
   TFile* file = TFile::Open( fileName.c_str(), "READ" );
 
   if( file==0 ) {
-   std::cout << "[MT2Analysis::readFromFile] Didn't find file: " << fileName << "!! Exiting" << std::endl;
+   std::cout << "[MT2Analysis::readAllFromFile] Didn't find file: " << fileName << "!! Exiting" << std::endl;
    exit(733);
   }
 
@@ -385,7 +386,6 @@ std::set<MT2Analysis<T>*> MT2Analysis<T>::readFromFile( const std::string& fileN
       std::string path = analysisName + "/" + htRegionName;
       file->cd(path.c_str());
 
-      TList* hists = gDirectory->GetListOfKeys();
 
       std::set<MT2SignalRegion> sigRegions = analysis->getSignalRegions();
 
@@ -394,8 +394,7 @@ std::set<MT2Analysis<T>*> MT2Analysis<T>::readFromFile( const std::string& fileN
         MT2Region thisRegion( &htRegion, &(*iSR) );
 
         T* thisT = analysis->get(&thisRegion);
-        thisT->yield->Fill(600.);
-        //thisT->getStuffFromList( hists );
+        thisT->getShit( file, path );
 
       } // for signal regions        
 
@@ -406,11 +405,49 @@ std::set<MT2Analysis<T>*> MT2Analysis<T>::readFromFile( const std::string& fileN
   } // while analysis names
 
 
-  file->Close();
-
   return analyses;
   
 }
+
+
+
+template<class T> 
+MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const std::string& matchName ) {
+
+  std::set<MT2Analysis<T>*> analyses = readAllFromFile(fileName);
+
+  if( analyses.size()==0 ) {
+    std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
+    return 0;
+  }
+
+
+  MT2Analysis<T>* analysis = 0;
+  if( matchName=="" ) {
+    analysis = *(analyses.begin());
+  } else {
+    for( typename std::set<MT2Analysis<T>*>::iterator iAn=analyses.begin(); iAn!=analyses.end(); ++iAn ) {
+      if( (*iAn)->name == matchName ) {
+        analysis = *iAn;
+        break;
+      }
+    }
+    if( analysis==0 ) {
+      std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis named '" << matchName << "' in file " << fileName << std::endl;
+      return 0;
+    }
+  }
+
+
+  if( analyses.size()>1 ) {
+    std::cout << "[MT2Analysis::readFromFile] WARNING!!! Multiple analyses found, but reading only one ('" << analysis->name << "')" << std::endl;
+    std::cout << "[MT2Analysis::readFromFile] (if you want to read all of them you should use readAllFromFile)" << std::endl;
+  }
+
+  return analysis;
+
+}
+
 
 
 
