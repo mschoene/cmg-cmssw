@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Aug 28 12:24:19 2014 by ROOT version 5.32/00
+// Tue Nov  4 19:17:38 2014 by ROOT version 5.34/10
 // from TTree mt2/treeProducerSusyFullHad
-// found on file: /scratch/mmasciov/WJetsToLNu_HT400to600_PU_S14_POSTLS170_babyTree_post.root
+// found on file: /scratch/mmasciov/CSA14_babytrees_AllDiffMetMht/QCD_Pt300to470_PU_S14_POSTLS170_babytree_AllDiffMetMht.root
 //////////////////////////////////////////////////////////
 
 #ifndef mt2_h
@@ -26,11 +26,18 @@ public :
    Int_t           lumi;
    Int_t           evt;
    Int_t           isData;
+   Int_t           HLT_htXprescale;
+   Int_t           HLT_DoubleEl;
+   Int_t           HLT_Photons;
+   Int_t           HLT_SingleMu;
    Int_t           HLT_ht350met100;
-   Int_t           HLT_HT650;
    Int_t           HLT_MET150;
+   Int_t           HLT_MuEG;
+   Int_t           HLT_HT650;
+   Int_t           HLT_DoubleMu;
    Float_t         puWeight;
    Int_t           nTrueInt;
+   Float_t         genWeight;
    Float_t         rho;
    Int_t           nVert;
    Int_t           nJet25;
@@ -65,18 +72,66 @@ public :
    Int_t           GenSusyMNeutralino4;
    Int_t           GenSusyMChargino;
    Int_t           GenSusyMChargino2;
-   Int_t           nBJet40;
    Float_t         ht;
-   Float_t         deltaPhiMin;
-   Float_t         diffMetMht;
    Float_t         mht_pt;
    Float_t         mht_phi;
+   Float_t         diffMetMht;
+   Float_t         deltaPhiMin;
+   Float_t         ht_had;
+   Float_t         mht_had_pt;
+   Float_t         mht_had_phi;
+   Float_t         diffMetMht_had;
+   Float_t         deltaPhiMin_had;
+   Float_t         tkmet_pt;
+   Float_t         tkmet_phi;
+   Int_t           nBJet40;
    Int_t           nMuons10;
    Int_t           nElectrons10;
    Int_t           nTaus20;
    Int_t           nGammas20;
-   Float_t         mt2;
+   Float_t         mt2_had;
+   Float_t         mt2_bb;
    Float_t         mt2_gen;
+   Float_t         mt2;
+   Float_t         gamma_mt2;
+   Float_t         zll_mt2;
+   Int_t           gamma_nJet40;
+   Int_t           gamma_nBJet40;
+   Float_t         gamma_ht;
+   Float_t         gamma_deltaPhiMin;
+   Float_t         gamma_diffMetMht;
+   Float_t         gamma_mht_pt;
+   Float_t         gamma_mht_phi;
+   Float_t         gamma_diffMetMht_had;
+   Float_t         gamma_mht_had_pt;
+   Float_t         gamma_mht_had_phi;
+   Float_t         zll_deltaPhiMin;
+   Float_t         zll_diffMetMht;
+   Float_t         zll_mht_pt;
+   Float_t         zll_mht_phi;
+   Float_t         zll_met_pt;
+   Float_t         zll_met_phi;
+   Float_t         zll_invmass;
+   Float_t         pseudoJet2_pt;
+   Float_t         pseudoJet2_eta;
+   Float_t         pseudoJet2_phi;
+   Float_t         pseudoJet2_mass;
+   Float_t         pseudoJet1_pt;
+   Float_t         pseudoJet1_eta;
+   Float_t         pseudoJet1_phi;
+   Float_t         pseudoJet1_mass;
+   Float_t         pseudoViaKtJet1_had_pt;
+   Float_t         pseudoViaKtJet1_had_eta;
+   Float_t         pseudoViaKtJet1_had_phi;
+   Float_t         pseudoViaKtJet1_had_mass;
+   Float_t         gamma_met_pt;
+   Float_t         gamma_met_eta;
+   Float_t         gamma_met_phi;
+   Float_t         gamma_met_mass;
+   Float_t         pseudoViaKtJet2_had_pt;
+   Float_t         pseudoViaKtJet2_had_eta;
+   Float_t         pseudoViaKtJet2_had_phi;
+   Float_t         pseudoViaKtJet2_had_mass;
    Float_t         met_pt;
    Float_t         met_eta;
    Float_t         met_phi;
@@ -85,26 +140,30 @@ public :
    Float_t         met_genPt;
    Float_t         met_genPhi;
    Float_t         met_genEta;
+   Float_t         pseudoJet1_had_pt;
+   Float_t         pseudoJet1_had_eta;
+   Float_t         pseudoJet1_had_phi;
+   Float_t         pseudoJet1_had_mass;
+   Float_t         gamma_metNoPU_pt;
+   Float_t         gamma_metNoPU_eta;
+   Float_t         gamma_metNoPU_phi;
+   Float_t         gamma_metNoPU_mass;
+   Float_t         pseudoJet2_had_pt;
+   Float_t         pseudoJet2_had_eta;
+   Float_t         pseudoJet2_had_phi;
+   Float_t         pseudoJet2_had_mass;
+   Float_t         gamma_pseudoJet1_pt;
+   Float_t         gamma_pseudoJet1_eta;
+   Float_t         gamma_pseudoJet1_phi;
+   Float_t         gamma_pseudoJet1_mass;
    Float_t         metNoPU_pt;
    Float_t         metNoPU_eta;
    Float_t         metNoPU_phi;
    Float_t         metNoPU_mass;
-   Float_t         pseudoJet1_pt;
-   Float_t         pseudoJet1_eta;
-   Float_t         pseudoJet1_phi;
-   Float_t         pseudoJet1_mass;
-   Float_t         pseudoJet2_pt;
-   Float_t         pseudoJet2_eta;
-   Float_t         pseudoJet2_phi;
-   Float_t         pseudoJet2_mass;
-   Int_t           nGenQuark;
-   Float_t         GenQuark_pt[10];   //[nGenQuark]
-   Float_t         GenQuark_eta[10];   //[nGenQuark]
-   Float_t         GenQuark_phi[10];   //[nGenQuark]
-   Float_t         GenQuark_mass[10];   //[nGenQuark]
-   Int_t           GenQuark_pdgId[10];   //[nGenQuark]
-   Float_t         GenQuark_charge[10];   //[nGenQuark]
-   Int_t           GenQuark_sourceId[10];   //[nGenQuark]
+   Float_t         gamma_pseudoJet2_pt;
+   Float_t         gamma_pseudoJet2_eta;
+   Float_t         gamma_pseudoJet2_phi;
+   Float_t         gamma_pseudoJet2_mass;
    Int_t           ngenPart;
    Float_t         genPart_pt[200];   //[ngenPart]
    Float_t         genPart_eta[200];   //[ngenPart]
@@ -112,25 +171,28 @@ public :
    Float_t         genPart_mass[200];   //[ngenPart]
    Int_t           genPart_pdgId[200];   //[ngenPart]
    Float_t         genPart_charge[200];   //[ngenPart]
+   Int_t           genPart_status[200];   //[ngenPart]
    Int_t           genPart_motherId[200];   //[ngenPart]
    Int_t           genPart_grandmaId[200];   //[ngenPart]
-   Int_t           nGenTop;
-   Float_t         GenTop_pt[10];   //[nGenTop]
-   Float_t         GenTop_eta[10];   //[nGenTop]
-   Float_t         GenTop_phi[10];   //[nGenTop]
-   Float_t         GenTop_mass[10];   //[nGenTop]
-   Int_t           GenTop_pdgId[10];   //[nGenTop]
-   Float_t         GenTop_charge[10];   //[nGenTop]
+   Int_t           ngenTau;
+   Float_t         genTau_pt[20];   //[ngenTau]
+   Float_t         genTau_eta[20];   //[ngenTau]
+   Float_t         genTau_phi[20];   //[ngenTau]
+   Float_t         genTau_mass[20];   //[ngenTau]
+   Int_t           genTau_pdgId[20];   //[ngenTau]
+   Float_t         genTau_charge[20];   //[ngenTau]
+   Int_t           genTau_status[20];   //[ngenTau]
+   Int_t           genTau_sourceId[20];   //[ngenTau]
    Int_t           nisoTrack;
-   Float_t         isoTrack_pt[10];   //[nisoTrack]
-   Float_t         isoTrack_eta[10];   //[nisoTrack]
-   Float_t         isoTrack_phi[10];   //[nisoTrack]
-   Float_t         isoTrack_mass[10];   //[nisoTrack]
-   Int_t           isoTrack_pdgId[10];   //[nisoTrack]
-   Int_t           isoTrack_charge[10];   //[nisoTrack]
-   Float_t         isoTrack_dz[10];   //[nisoTrack]
-   Float_t         isoTrack_absIso[10];   //[nisoTrack]
-   Int_t           isoTrack_mcMatchId[10];   //[nisoTrack]
+   Float_t         isoTrack_pt[20];   //[nisoTrack]
+   Float_t         isoTrack_eta[20];   //[nisoTrack]
+   Float_t         isoTrack_phi[20];   //[nisoTrack]
+   Float_t         isoTrack_mass[20];   //[nisoTrack]
+   Int_t           isoTrack_pdgId[20];   //[nisoTrack]
+   Int_t           isoTrack_charge[20];   //[nisoTrack]
+   Float_t         isoTrack_dz[20];   //[nisoTrack]
+   Float_t         isoTrack_absIso[20];   //[nisoTrack]
+   Int_t           isoTrack_mcMatchId[20];   //[nisoTrack]
    Int_t           njet;
    Float_t         jet_pt[100];   //[njet]
    Float_t         jet_eta[100];   //[njet]
@@ -145,103 +207,107 @@ public :
    Float_t         jet_area[100];   //[njet]
    Int_t           jet_puId[100];   //[njet]
    Int_t           jet_id[100];   //[njet]
+   Float_t         jet_ptd[100];   //[njet]
+   Float_t         jet_axis2[100];   //[njet]
+   Int_t           jet_mult[100];   //[njet]
+   Float_t         jet_qgl[100];   //[njet]
+   Int_t           jet_partonId[100];   //[njet]
+   Int_t           jet_partonMotherId[100];   //[njet]
    Int_t           nlep;
-   Float_t         lep_pt[10];   //[nlep]
-   Float_t         lep_eta[10];   //[nlep]
-   Float_t         lep_phi[10];   //[nlep]
-   Float_t         lep_mass[10];   //[nlep]
-   Int_t           lep_pdgId[10];   //[nlep]
-   Int_t           lep_charge[10];   //[nlep]
-   Float_t         lep_dxy[10];   //[nlep]
-   Float_t         lep_dz[10];   //[nlep]
-   Float_t         lep_edxy[10];   //[nlep]
-   Float_t         lep_edz[10];   //[nlep]
-   Float_t         lep_ip3d[10];   //[nlep]
-   Float_t         lep_sip3d[10];   //[nlep]
-   Int_t           lep_tightId[10];   //[nlep]
-   Int_t           lep_convVeto[10];   //[nlep]
-   Int_t           lep_lostHits[10];   //[nlep]
-   Int_t           lep_looseIdSusy[10];   //[nlep]
-   Float_t         lep_relIso03[10];   //[nlep]
-   Float_t         lep_relIso04[10];   //[nlep]
-   Float_t         lep_chargedHadRelIso03[10];   //[nlep]
-   Float_t         lep_chargedHadRelIso04[10];   //[nlep]
-   Int_t           lep_convVetoFull[10];   //[nlep]
-   Int_t           lep_eleCutIdCSA14_25ns_v1[10];   //[nlep]
-   Int_t           lep_eleCutIdCSA14_50ns_v1[10];   //[nlep]
-   Int_t           lep_eleMVAId[10];   //[nlep]
-   Int_t           lep_tightCharge[10];   //[nlep]
-   Float_t         lep_mvaId[10];   //[nlep]
-   Float_t         lep_mvaIdTrig[10];   //[nlep]
-   Float_t         lep_nStations[10];   //[nlep]
-   Float_t         lep_trkKink[10];   //[nlep]
-   Int_t           lep_trackerLayers[10];   //[nlep]
-   Int_t           lep_pixelLayers[10];   //[nlep]
-   Float_t         lep_mvaTTH[10];   //[nlep]
-   Float_t         lep_jetPtRatio[10];   //[nlep]
-   Float_t         lep_jetBTagCSV[10];   //[nlep]
-   Float_t         lep_jetDR[10];   //[nlep]
-   Int_t           lep_mcMatchId[10];   //[nlep]
-   Int_t           lep_mcMatchAny[10];   //[nlep]
-   Int_t           lep_mcMatchTau[10];   //[nlep]
-   Int_t           nGenLepFromTau;
-   Float_t         GenLepFromTau_pt[10];   //[nGenLepFromTau]
-   Float_t         GenLepFromTau_eta[10];   //[nGenLepFromTau]
-   Float_t         GenLepFromTau_phi[10];   //[nGenLepFromTau]
-   Float_t         GenLepFromTau_mass[10];   //[nGenLepFromTau]
-   Int_t           GenLepFromTau_pdgId[10];   //[nGenLepFromTau]
-   Float_t         GenLepFromTau_charge[10];   //[nGenLepFromTau]
-   Int_t           GenLepFromTau_sourceId[10];   //[nGenLepFromTau]
+   Float_t         lep_pt[50];   //[nlep]
+   Float_t         lep_eta[50];   //[nlep]
+   Float_t         lep_phi[50];   //[nlep]
+   Float_t         lep_mass[50];   //[nlep]
+   Int_t           lep_pdgId[50];   //[nlep]
+   Int_t           lep_charge[50];   //[nlep]
+   Float_t         lep_dxy[50];   //[nlep]
+   Float_t         lep_dz[50];   //[nlep]
+   Float_t         lep_edxy[50];   //[nlep]
+   Float_t         lep_edz[50];   //[nlep]
+   Float_t         lep_ip3d[50];   //[nlep]
+   Float_t         lep_sip3d[50];   //[nlep]
+   Int_t           lep_tightId[50];   //[nlep]
+   Int_t           lep_convVeto[50];   //[nlep]
+   Int_t           lep_lostHits[50];   //[nlep]
+   Int_t           lep_looseIdSusy[50];   //[nlep]
+   Float_t         lep_relIso03[50];   //[nlep]
+   Float_t         lep_relIso04[50];   //[nlep]
+   Float_t         lep_chargedHadRelIso03[50];   //[nlep]
+   Float_t         lep_chargedHadRelIso04[50];   //[nlep]
+   Int_t           lep_convVetoFull[50];   //[nlep]
+   Int_t           lep_eleCutIdCSA14_25ns_v1[50];   //[nlep]
+   Int_t           lep_eleCutIdCSA14_50ns_v1[50];   //[nlep]
+   Int_t           lep_eleMVAId[50];   //[nlep]
+   Int_t           lep_tightCharge[50];   //[nlep]
+   Float_t         lep_mvaId[50];   //[nlep]
+   Float_t         lep_mvaIdTrig[50];   //[nlep]
+   Float_t         lep_nStations[50];   //[nlep]
+   Float_t         lep_trkKink[50];   //[nlep]
+   Float_t         lep_caloCompatibility[50];   //[nlep]
+   Float_t         lep_globalTrackChi2[50];   //[nlep]
+   Int_t           lep_trackerLayers[50];   //[nlep]
+   Int_t           lep_pixelLayers[50];   //[nlep]
+   Float_t         lep_mvaTTH[50];   //[nlep]
+   Float_t         lep_jetPtRatio[50];   //[nlep]
+   Float_t         lep_jetBTagCSV[50];   //[nlep]
+   Float_t         lep_jetDR[50];   //[nlep]
+   Int_t           lep_mcMatchId[50];   //[nlep]
+   Int_t           lep_mcMatchAny[50];   //[nlep]
+   Int_t           lep_mcMatchTau[50];   //[nlep]
+   Int_t           ngenLepFromTau;
+   Float_t         genLepFromTau_pt[1];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_eta[1];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_phi[1];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_mass[1];   //[ngenLepFromTau]
+   Int_t           genLepFromTau_pdgId[1];   //[ngenLepFromTau]
+   Float_t         genLepFromTau_charge[1];   //[ngenLepFromTau]
+   Int_t           genLepFromTau_status[1];   //[ngenLepFromTau]
+   Int_t           genLepFromTau_sourceId[1];   //[ngenLepFromTau]
    Int_t           ngamma;
-   Float_t         gamma_pt[10];   //[ngamma]
-   Float_t         gamma_eta[10];   //[ngamma]
-   Float_t         gamma_phi[10];   //[ngamma]
-   Float_t         gamma_mass[10];   //[ngamma]
-   Int_t           gamma_pdgId[10];   //[ngamma]
-   Int_t           gamma_idCutBased[10];   //[ngamma]
-   Float_t         gamma_hOverE[10];   //[ngamma]
-   Float_t         gamma_r9[10];   //[ngamma]
-   Float_t         gamma_sigmaIetaIeta[10];   //[ngamma]
-   Float_t         gamma_chHadIso[10];   //[ngamma]
-   Float_t         gamma_neuHadIso[10];   //[ngamma]
-   Float_t         gamma_phIso[10];   //[ngamma]
-   Int_t           gamma_mcMatchId[10];   //[ngamma]
+   Float_t         gamma_pt[50];   //[ngamma]
+   Float_t         gamma_eta[50];   //[ngamma]
+   Float_t         gamma_phi[50];   //[ngamma]
+   Float_t         gamma_mass[50];   //[ngamma]
+   Int_t           gamma_pdgId[50];   //[ngamma]
+   Int_t           gamma_idCutBased[50];   //[ngamma]
+   Float_t         gamma_hOverE[50];   //[ngamma]
+   Float_t         gamma_r9[50];   //[ngamma]
+   Float_t         gamma_sigmaIetaIeta[50];   //[ngamma]
+   Float_t         gamma_chHadIso[50];   //[ngamma]
+   Float_t         gamma_neuHadIso[50];   //[ngamma]
+   Float_t         gamma_phIso[50];   //[ngamma]
+   Int_t           gamma_mcMatchId[50];   //[ngamma]
    Int_t           nGenP6StatusThree;
-   Float_t         GenP6StatusThree_pt[1];   //[nGenP6StatusThree]
-   Float_t         GenP6StatusThree_eta[1];   //[nGenP6StatusThree]
-   Float_t         GenP6StatusThree_phi[1];   //[nGenP6StatusThree]
-   Float_t         GenP6StatusThree_mass[1];   //[nGenP6StatusThree]
-   Int_t           GenP6StatusThree_pdgId[1];   //[nGenP6StatusThree]
-   Float_t         GenP6StatusThree_charge[1];   //[nGenP6StatusThree]
-   Int_t           GenP6StatusThree_motherId[1];   //[nGenP6StatusThree]
-   Int_t           GenP6StatusThree_grandmaId[1];   //[nGenP6StatusThree]
-   Int_t           nGenLep;
-   Float_t         GenLep_pt[10];   //[nGenLep]
-   Float_t         GenLep_eta[10];   //[nGenLep]
-   Float_t         GenLep_phi[10];   //[nGenLep]
-   Float_t         GenLep_mass[10];   //[nGenLep]
-   Int_t           GenLep_pdgId[10];   //[nGenLep]
-   Float_t         GenLep_charge[10];   //[nGenLep]
-   Int_t           GenLep_sourceId[10];   //[nGenLep]
+   Float_t         GenP6StatusThree_pt[20];   //[nGenP6StatusThree]
+   Float_t         GenP6StatusThree_eta[20];   //[nGenP6StatusThree]
+   Float_t         GenP6StatusThree_phi[20];   //[nGenP6StatusThree]
+   Float_t         GenP6StatusThree_mass[20];   //[nGenP6StatusThree]
+   Int_t           GenP6StatusThree_pdgId[20];   //[nGenP6StatusThree]
+   Float_t         GenP6StatusThree_charge[20];   //[nGenP6StatusThree]
+   Int_t           GenP6StatusThree_status[20];   //[nGenP6StatusThree]
+   Int_t           GenP6StatusThree_motherId[20];   //[nGenP6StatusThree]
+   Int_t           GenP6StatusThree_grandmaId[20];   //[nGenP6StatusThree]
+   Int_t           ngenLep;
+   Float_t         genLep_pt[20];   //[ngenLep]
+   Float_t         genLep_eta[20];   //[ngenLep]
+   Float_t         genLep_phi[20];   //[ngenLep]
+   Float_t         genLep_mass[20];   //[ngenLep]
+   Int_t           genLep_pdgId[20];   //[ngenLep]
+   Float_t         genLep_charge[20];   //[ngenLep]
+   Int_t           genLep_status[20];   //[ngenLep]
+   Int_t           genLep_sourceId[20];   //[ngenLep]
    Int_t           ntau;
-   Float_t         tau_pt[10];   //[ntau]
-   Float_t         tau_eta[10];   //[ntau]
-   Float_t         tau_phi[10];   //[ntau]
-   Float_t         tau_mass[10];   //[ntau]
-   Int_t           tau_pdgId[10];   //[ntau]
-   Int_t           tau_charge[10];   //[ntau]
-   Float_t         tau_dxy[10];   //[ntau]
-   Float_t         tau_dz[10];   //[ntau]
-   Int_t           tau_idCI3hit[10];   //[ntau]
-   Float_t         tau_isoCI3hit[10];   //[ntau]
-   Int_t           tau_mcMatchId[10];   //[ntau]
-   Int_t           nGenBQuark;
-   Float_t         GenBQuark_pt[10];   //[nGenBQuark]
-   Float_t         GenBQuark_eta[10];   //[nGenBQuark]
-   Float_t         GenBQuark_phi[10];   //[nGenBQuark]
-   Float_t         GenBQuark_mass[10];   //[nGenBQuark]
-   Int_t           GenBQuark_pdgId[10];   //[nGenBQuark]
-   Float_t         GenBQuark_charge[10];   //[nGenBQuark]
+   Float_t         tau_pt[20];   //[ntau]
+   Float_t         tau_eta[20];   //[ntau]
+   Float_t         tau_phi[20];   //[ntau]
+   Float_t         tau_mass[20];   //[ntau]
+   Int_t           tau_pdgId[20];   //[ntau]
+   Int_t           tau_charge[20];   //[ntau]
+   Float_t         tau_dxy[20];   //[ntau]
+   Float_t         tau_dz[20];   //[ntau]
+   Int_t           tau_idCI3hit[20];   //[ntau]
+   Float_t         tau_isoCI3hit[20];   //[ntau]
+   Int_t           tau_mcMatchId[20];   //[ntau]
    Float_t         evt_scale1fb;
    Float_t         evt_xsec;
    Float_t         evt_kfactor;
@@ -254,11 +320,18 @@ public :
    TBranch        *b_lumi;   //!
    TBranch        *b_evt;   //!
    TBranch        *b_isData;   //!
+   TBranch        *b_HLT_htXprescale;   //!
+   TBranch        *b_HLT_DoubleEl;   //!
+   TBranch        *b_HLT_Photons;   //!
+   TBranch        *b_HLT_SingleMu;   //!
    TBranch        *b_HLT_ht350met100;   //!
-   TBranch        *b_HLT_HT650;   //!
    TBranch        *b_HLT_MET150;   //!
+   TBranch        *b_HLT_MuEG;   //!
+   TBranch        *b_HLT_HT650;   //!
+   TBranch        *b_HLT_DoubleMu;   //!
    TBranch        *b_puWeight;   //!
    TBranch        *b_nTrueInt;   //!
+   TBranch        *b_genWeight;   //!
    TBranch        *b_rho;   //!
    TBranch        *b_nVert;   //!
    TBranch        *b_nJet25;   //!
@@ -293,18 +366,66 @@ public :
    TBranch        *b_GenSusyMNeutralino4;   //!
    TBranch        *b_GenSusyMChargino;   //!
    TBranch        *b_GenSusyMChargino2;   //!
-   TBranch        *b_nBJet40;   //!
    TBranch        *b_ht;   //!
-   TBranch        *b_deltaPhiMin;   //!
-   TBranch        *b_diffMetMht;   //!
    TBranch        *b_mht_pt;   //!
    TBranch        *b_mht_phi;   //!
+   TBranch        *b_diffMetMht;   //!
+   TBranch        *b_deltaPhiMin;   //!
+   TBranch        *b_ht_had;   //!
+   TBranch        *b_mht_had_pt;   //!
+   TBranch        *b_mht_had_phi;   //!
+   TBranch        *b_diffMetMht_had;   //!
+   TBranch        *b_deltaPhiMin_had;   //!
+   TBranch        *b_tkmet_pt;   //!
+   TBranch        *b_tkmet_phi;   //!
+   TBranch        *b_nBJet40;   //!
    TBranch        *b_nMuons10;   //!
    TBranch        *b_nElectrons10;   //!
    TBranch        *b_nTaus20;   //!
    TBranch        *b_nGammas20;   //!
-   TBranch        *b_mt2;   //!
+   TBranch        *b_mt2_had;   //!
+   TBranch        *b_mt2_bb;   //!
    TBranch        *b_mt2_gen;   //!
+   TBranch        *b_mt2;   //!
+   TBranch        *b_gamma_mt2;   //!
+   TBranch        *b_zll_mt2;   //!
+   TBranch        *b_gamma_nJet40;   //!
+   TBranch        *b_gamma_nBJet40;   //!
+   TBranch        *b_gamma_ht;   //!
+   TBranch        *b_gamma_deltaPhiMin;   //!
+   TBranch        *b_gamma_diffMetMht;   //!
+   TBranch        *b_gamma_mht_pt;   //!
+   TBranch        *b_gamma_mht_phi;   //!
+   TBranch        *b_gamma_diffMetMht_had;   //!
+   TBranch        *b_gamma_mht_had_pt;   //!
+   TBranch        *b_gamma_mht_had_phi;   //!
+   TBranch        *b_zll_deltaPhiMin;   //!
+   TBranch        *b_zll_diffMetMht;   //!
+   TBranch        *b_zll_mht_pt;   //!
+   TBranch        *b_zll_mht_phi;   //!
+   TBranch        *b_zll_met_pt;   //!
+   TBranch        *b_zll_met_phi;   //!
+   TBranch        *b_zll_invmass;   //!
+   TBranch        *b_pseudoJet2_pt;   //!
+   TBranch        *b_pseudoJet2_eta;   //!
+   TBranch        *b_pseudoJet2_phi;   //!
+   TBranch        *b_pseudoJet2_mass;   //!
+   TBranch        *b_pseudoJet1_pt;   //!
+   TBranch        *b_pseudoJet1_eta;   //!
+   TBranch        *b_pseudoJet1_phi;   //!
+   TBranch        *b_pseudoJet1_mass;   //!
+   TBranch        *b_pseudoViaKtJet1_had_pt;   //!
+   TBranch        *b_pseudoViaKtJet1_had_eta;   //!
+   TBranch        *b_pseudoViaKtJet1_had_phi;   //!
+   TBranch        *b_pseudoViaKtJet1_had_mass;   //!
+   TBranch        *b_gamma_met_pt;   //!
+   TBranch        *b_gamma_met_eta;   //!
+   TBranch        *b_gamma_met_phi;   //!
+   TBranch        *b_gamma_met_mass;   //!
+   TBranch        *b_pseudoViaKtJet2_had_pt;   //!
+   TBranch        *b_pseudoViaKtJet2_had_eta;   //!
+   TBranch        *b_pseudoViaKtJet2_had_phi;   //!
+   TBranch        *b_pseudoViaKtJet2_had_mass;   //!
    TBranch        *b_met_pt;   //!
    TBranch        *b_met_eta;   //!
    TBranch        *b_met_phi;   //!
@@ -313,26 +434,30 @@ public :
    TBranch        *b_met_genPt;   //!
    TBranch        *b_met_genPhi;   //!
    TBranch        *b_met_genEta;   //!
+   TBranch        *b_pseudoJet1_had_pt;   //!
+   TBranch        *b_pseudoJet1_had_eta;   //!
+   TBranch        *b_pseudoJet1_had_phi;   //!
+   TBranch        *b_pseudoJet1_had_mass;   //!
+   TBranch        *b_gamma_metNoPU_pt;   //!
+   TBranch        *b_gamma_metNoPU_eta;   //!
+   TBranch        *b_gamma_metNoPU_phi;   //!
+   TBranch        *b_gamma_metNoPU_mass;   //!
+   TBranch        *b_pseudoJet2_had_pt;   //!
+   TBranch        *b_pseudoJet2_had_eta;   //!
+   TBranch        *b_pseudoJet2_had_phi;   //!
+   TBranch        *b_pseudoJet2_had_mass;   //!
+   TBranch        *b_gamma_pseudoJet1_pt;   //!
+   TBranch        *b_gamma_pseudoJet1_eta;   //!
+   TBranch        *b_gamma_pseudoJet1_phi;   //!
+   TBranch        *b_gamma_pseudoJet1_mass;   //!
    TBranch        *b_metNoPU_pt;   //!
    TBranch        *b_metNoPU_eta;   //!
    TBranch        *b_metNoPU_phi;   //!
    TBranch        *b_metNoPU_mass;   //!
-   TBranch        *b_pseudoJet1_pt;   //!
-   TBranch        *b_pseudoJet1_eta;   //!
-   TBranch        *b_pseudoJet1_phi;   //!
-   TBranch        *b_pseudoJet1_mass;   //!
-   TBranch        *b_pseudoJet2_pt;   //!
-   TBranch        *b_pseudoJet2_eta;   //!
-   TBranch        *b_pseudoJet2_phi;   //!
-   TBranch        *b_pseudoJet2_mass;   //!
-   TBranch        *b_nGenQuark;   //!
-   TBranch        *b_GenQuark_pt;   //!
-   TBranch        *b_GenQuark_eta;   //!
-   TBranch        *b_GenQuark_phi;   //!
-   TBranch        *b_GenQuark_mass;   //!
-   TBranch        *b_GenQuark_pdgId;   //!
-   TBranch        *b_GenQuark_charge;   //!
-   TBranch        *b_GenQuark_sourceId;   //!
+   TBranch        *b_gamma_pseudoJet2_pt;   //!
+   TBranch        *b_gamma_pseudoJet2_eta;   //!
+   TBranch        *b_gamma_pseudoJet2_phi;   //!
+   TBranch        *b_gamma_pseudoJet2_mass;   //!
    TBranch        *b_ngenPart;   //!
    TBranch        *b_genPart_pt;   //!
    TBranch        *b_genPart_eta;   //!
@@ -340,15 +465,18 @@ public :
    TBranch        *b_genPart_mass;   //!
    TBranch        *b_genPart_pdgId;   //!
    TBranch        *b_genPart_charge;   //!
+   TBranch        *b_genPart_status;   //!
    TBranch        *b_genPart_motherId;   //!
    TBranch        *b_genPart_grandmaId;   //!
-   TBranch        *b_nGenTop;   //!
-   TBranch        *b_GenTop_pt;   //!
-   TBranch        *b_GenTop_eta;   //!
-   TBranch        *b_GenTop_phi;   //!
-   TBranch        *b_GenTop_mass;   //!
-   TBranch        *b_GenTop_pdgId;   //!
-   TBranch        *b_GenTop_charge;   //!
+   TBranch        *b_ngenTau;   //!
+   TBranch        *b_genTau_pt;   //!
+   TBranch        *b_genTau_eta;   //!
+   TBranch        *b_genTau_phi;   //!
+   TBranch        *b_genTau_mass;   //!
+   TBranch        *b_genTau_pdgId;   //!
+   TBranch        *b_genTau_charge;   //!
+   TBranch        *b_genTau_status;   //!
+   TBranch        *b_genTau_sourceId;   //!
    TBranch        *b_nisoTrack;   //!
    TBranch        *b_isoTrack_pt;   //!
    TBranch        *b_isoTrack_eta;   //!
@@ -373,6 +501,12 @@ public :
    TBranch        *b_jet_area;   //!
    TBranch        *b_jet_puId;   //!
    TBranch        *b_jet_id;   //!
+   TBranch        *b_jet_ptd;   //!
+   TBranch        *b_jet_axis2;   //!
+   TBranch        *b_jet_mult;   //!
+   TBranch        *b_jet_qgl;   //!
+   TBranch        *b_jet_partonId;   //!
+   TBranch        *b_jet_partonMotherId;   //!
    TBranch        *b_nlep;   //!
    TBranch        *b_lep_pt;   //!
    TBranch        *b_lep_eta;   //!
@@ -403,6 +537,8 @@ public :
    TBranch        *b_lep_mvaIdTrig;   //!
    TBranch        *b_lep_nStations;   //!
    TBranch        *b_lep_trkKink;   //!
+   TBranch        *b_lep_caloCompatibility;   //!
+   TBranch        *b_lep_globalTrackChi2;   //!
    TBranch        *b_lep_trackerLayers;   //!
    TBranch        *b_lep_pixelLayers;   //!
    TBranch        *b_lep_mvaTTH;   //!
@@ -412,14 +548,15 @@ public :
    TBranch        *b_lep_mcMatchId;   //!
    TBranch        *b_lep_mcMatchAny;   //!
    TBranch        *b_lep_mcMatchTau;   //!
-   TBranch        *b_nGenLepFromTau;   //!
-   TBranch        *b_GenLepFromTau_pt;   //!
-   TBranch        *b_GenLepFromTau_eta;   //!
-   TBranch        *b_GenLepFromTau_phi;   //!
-   TBranch        *b_GenLepFromTau_mass;   //!
-   TBranch        *b_GenLepFromTau_pdgId;   //!
-   TBranch        *b_GenLepFromTau_charge;   //!
-   TBranch        *b_GenLepFromTau_sourceId;   //!
+   TBranch        *b_ngenLepFromTau;   //!
+   TBranch        *b_genLepFromTau_pt;   //!
+   TBranch        *b_genLepFromTau_eta;   //!
+   TBranch        *b_genLepFromTau_phi;   //!
+   TBranch        *b_genLepFromTau_mass;   //!
+   TBranch        *b_genLepFromTau_pdgId;   //!
+   TBranch        *b_genLepFromTau_charge;   //!
+   TBranch        *b_genLepFromTau_status;   //!
+   TBranch        *b_genLepFromTau_sourceId;   //!
    TBranch        *b_ngamma;   //!
    TBranch        *b_gamma_pt;   //!
    TBranch        *b_gamma_eta;   //!
@@ -441,16 +578,18 @@ public :
    TBranch        *b_GenP6StatusThree_mass;   //!
    TBranch        *b_GenP6StatusThree_pdgId;   //!
    TBranch        *b_GenP6StatusThree_charge;   //!
+   TBranch        *b_GenP6StatusThree_status;   //!
    TBranch        *b_GenP6StatusThree_motherId;   //!
    TBranch        *b_GenP6StatusThree_grandmaId;   //!
-   TBranch        *b_nGenLep;   //!
-   TBranch        *b_GenLep_pt;   //!
-   TBranch        *b_GenLep_eta;   //!
-   TBranch        *b_GenLep_phi;   //!
-   TBranch        *b_GenLep_mass;   //!
-   TBranch        *b_GenLep_pdgId;   //!
-   TBranch        *b_GenLep_charge;   //!
-   TBranch        *b_GenLep_sourceId;   //!
+   TBranch        *b_ngenLep;   //!
+   TBranch        *b_genLep_pt;   //!
+   TBranch        *b_genLep_eta;   //!
+   TBranch        *b_genLep_phi;   //!
+   TBranch        *b_genLep_mass;   //!
+   TBranch        *b_genLep_pdgId;   //!
+   TBranch        *b_genLep_charge;   //!
+   TBranch        *b_genLep_status;   //!
+   TBranch        *b_genLep_sourceId;   //!
    TBranch        *b_ntau;   //!
    TBranch        *b_tau_pt;   //!
    TBranch        *b_tau_eta;   //!
@@ -463,13 +602,6 @@ public :
    TBranch        *b_tau_idCI3hit;   //!
    TBranch        *b_tau_isoCI3hit;   //!
    TBranch        *b_tau_mcMatchId;   //!
-   TBranch        *b_nGenBQuark;   //!
-   TBranch        *b_GenBQuark_pt;   //!
-   TBranch        *b_GenBQuark_eta;   //!
-   TBranch        *b_GenBQuark_phi;   //!
-   TBranch        *b_GenBQuark_mass;   //!
-   TBranch        *b_GenBQuark_pdgId;   //!
-   TBranch        *b_GenBQuark_charge;   //!
    TBranch        *b_evt_scale1fb;   //!
    TBranch        *b_evt_xsec;   //!
    TBranch        *b_evt_kfactor;   //!
@@ -493,12 +625,12 @@ public :
 #ifdef mt2_cxx
 MT2Tree::MT2Tree(TTree *tree) : fChain(0) 
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
+//// if parameter tree is not specified (or zero), connect the file
+//// used to generate this class and read the Tree.
 //   if (tree == 0) {
-//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/mmasciov/WJetsToLNu_HT400to600_PU_S14_POSTLS170_babyTree_post.root");
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/mmasciov/CSA14_babytrees_AllDiffMetMht/QCD_Pt300to470_PU_S14_POSTLS170_babytree_AllDiffMetMht.root");
 //      if (!f || !f->IsOpen()) {
-//         f = new TFile("/scratch/mmasciov/WJetsToLNu_HT400to600_PU_S14_POSTLS170_babyTree_post.root");
+//         f = new TFile("/scratch/mmasciov/CSA14_babytrees_AllDiffMetMht/QCD_Pt300to470_PU_S14_POSTLS170_babytree_AllDiffMetMht.root");
 //      }
 //      f->GetObject("mt2",tree);
 //
@@ -551,11 +683,18 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("lumi", &lumi, &b_lumi);
    fChain->SetBranchAddress("evt", &evt, &b_evt);
    fChain->SetBranchAddress("isData", &isData, &b_isData);
+   fChain->SetBranchAddress("HLT_htXprescale", &HLT_htXprescale, &b_HLT_htXprescale);
+   fChain->SetBranchAddress("HLT_DoubleEl", &HLT_DoubleEl, &b_HLT_DoubleEl);
+   fChain->SetBranchAddress("HLT_Photons", &HLT_Photons, &b_HLT_Photons);
+   fChain->SetBranchAddress("HLT_SingleMu", &HLT_SingleMu, &b_HLT_SingleMu);
    fChain->SetBranchAddress("HLT_ht350met100", &HLT_ht350met100, &b_HLT_ht350met100);
-   fChain->SetBranchAddress("HLT_HT650", &HLT_HT650, &b_HLT_HT650);
    fChain->SetBranchAddress("HLT_MET150", &HLT_MET150, &b_HLT_MET150);
+   fChain->SetBranchAddress("HLT_MuEG", &HLT_MuEG, &b_HLT_MuEG);
+   fChain->SetBranchAddress("HLT_HT650", &HLT_HT650, &b_HLT_HT650);
+   fChain->SetBranchAddress("HLT_DoubleMu", &HLT_DoubleMu, &b_HLT_DoubleMu);
    fChain->SetBranchAddress("puWeight", &puWeight, &b_puWeight);
    fChain->SetBranchAddress("nTrueInt", &nTrueInt, &b_nTrueInt);
+   fChain->SetBranchAddress("genWeight", &genWeight, &b_genWeight);
    fChain->SetBranchAddress("rho", &rho, &b_rho);
    fChain->SetBranchAddress("nVert", &nVert, &b_nVert);
    fChain->SetBranchAddress("nJet25", &nJet25, &b_nJet25);
@@ -590,18 +729,66 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("GenSusyMNeutralino4", &GenSusyMNeutralino4, &b_GenSusyMNeutralino4);
    fChain->SetBranchAddress("GenSusyMChargino", &GenSusyMChargino, &b_GenSusyMChargino);
    fChain->SetBranchAddress("GenSusyMChargino2", &GenSusyMChargino2, &b_GenSusyMChargino2);
-   fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
    fChain->SetBranchAddress("ht", &ht, &b_ht);
-   fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
-   fChain->SetBranchAddress("diffMetMht", &diffMetMht, &b_diffMetMht);
    fChain->SetBranchAddress("mht_pt", &mht_pt, &b_mht_pt);
    fChain->SetBranchAddress("mht_phi", &mht_phi, &b_mht_phi);
+   fChain->SetBranchAddress("diffMetMht", &diffMetMht, &b_diffMetMht);
+   fChain->SetBranchAddress("deltaPhiMin", &deltaPhiMin, &b_deltaPhiMin);
+   fChain->SetBranchAddress("ht_had", &ht_had, &b_ht_had);
+   fChain->SetBranchAddress("mht_had_pt", &mht_had_pt, &b_mht_had_pt);
+   fChain->SetBranchAddress("mht_had_phi", &mht_had_phi, &b_mht_had_phi);
+   fChain->SetBranchAddress("diffMetMht_had", &diffMetMht_had, &b_diffMetMht_had);
+   fChain->SetBranchAddress("deltaPhiMin_had", &deltaPhiMin_had, &b_deltaPhiMin_had);
+   fChain->SetBranchAddress("tkmet_pt", &tkmet_pt, &b_tkmet_pt);
+   fChain->SetBranchAddress("tkmet_phi", &tkmet_phi, &b_tkmet_phi);
+   fChain->SetBranchAddress("nBJet40", &nBJet40, &b_nBJet40);
    fChain->SetBranchAddress("nMuons10", &nMuons10, &b_nMuons10);
    fChain->SetBranchAddress("nElectrons10", &nElectrons10, &b_nElectrons10);
    fChain->SetBranchAddress("nTaus20", &nTaus20, &b_nTaus20);
    fChain->SetBranchAddress("nGammas20", &nGammas20, &b_nGammas20);
-   fChain->SetBranchAddress("mt2", &mt2, &b_mt2);
+   fChain->SetBranchAddress("mt2_had", &mt2_had, &b_mt2_had);
+   fChain->SetBranchAddress("mt2_bb", &mt2_bb, &b_mt2_bb);
    fChain->SetBranchAddress("mt2_gen", &mt2_gen, &b_mt2_gen);
+   fChain->SetBranchAddress("mt2", &mt2, &b_mt2);
+   fChain->SetBranchAddress("gamma_mt2", &gamma_mt2, &b_gamma_mt2);
+   fChain->SetBranchAddress("zll_mt2", &zll_mt2, &b_zll_mt2);
+   fChain->SetBranchAddress("gamma_nJet40", &gamma_nJet40, &b_gamma_nJet40);
+   fChain->SetBranchAddress("gamma_nBJet40", &gamma_nBJet40, &b_gamma_nBJet40);
+   fChain->SetBranchAddress("gamma_ht", &gamma_ht, &b_gamma_ht);
+   fChain->SetBranchAddress("gamma_deltaPhiMin", &gamma_deltaPhiMin, &b_gamma_deltaPhiMin);
+   fChain->SetBranchAddress("gamma_diffMetMht", &gamma_diffMetMht, &b_gamma_diffMetMht);
+   fChain->SetBranchAddress("gamma_mht_pt", &gamma_mht_pt, &b_gamma_mht_pt);
+   fChain->SetBranchAddress("gamma_mht_phi", &gamma_mht_phi, &b_gamma_mht_phi);
+   fChain->SetBranchAddress("gamma_diffMetMht_had", &gamma_diffMetMht_had, &b_gamma_diffMetMht_had);
+   fChain->SetBranchAddress("gamma_mht_had_pt", &gamma_mht_had_pt, &b_gamma_mht_had_pt);
+   fChain->SetBranchAddress("gamma_mht_had_phi", &gamma_mht_had_phi, &b_gamma_mht_had_phi);
+   fChain->SetBranchAddress("zll_deltaPhiMin", &zll_deltaPhiMin, &b_zll_deltaPhiMin);
+   fChain->SetBranchAddress("zll_diffMetMht", &zll_diffMetMht, &b_zll_diffMetMht);
+   fChain->SetBranchAddress("zll_mht_pt", &zll_mht_pt, &b_zll_mht_pt);
+   fChain->SetBranchAddress("zll_mht_phi", &zll_mht_phi, &b_zll_mht_phi);
+   fChain->SetBranchAddress("zll_met_pt", &zll_met_pt, &b_zll_met_pt);
+   fChain->SetBranchAddress("zll_met_phi", &zll_met_phi, &b_zll_met_phi);
+   fChain->SetBranchAddress("zll_invmass", &zll_invmass, &b_zll_invmass);
+   fChain->SetBranchAddress("pseudoJet2_pt", &pseudoJet2_pt, &b_pseudoJet2_pt);
+   fChain->SetBranchAddress("pseudoJet2_eta", &pseudoJet2_eta, &b_pseudoJet2_eta);
+   fChain->SetBranchAddress("pseudoJet2_phi", &pseudoJet2_phi, &b_pseudoJet2_phi);
+   fChain->SetBranchAddress("pseudoJet2_mass", &pseudoJet2_mass, &b_pseudoJet2_mass);
+   fChain->SetBranchAddress("pseudoJet1_pt", &pseudoJet1_pt, &b_pseudoJet1_pt);
+   fChain->SetBranchAddress("pseudoJet1_eta", &pseudoJet1_eta, &b_pseudoJet1_eta);
+   fChain->SetBranchAddress("pseudoJet1_phi", &pseudoJet1_phi, &b_pseudoJet1_phi);
+   fChain->SetBranchAddress("pseudoJet1_mass", &pseudoJet1_mass, &b_pseudoJet1_mass);
+   fChain->SetBranchAddress("pseudoViaKtJet1_had_pt", &pseudoViaKtJet1_had_pt, &b_pseudoViaKtJet1_had_pt);
+   fChain->SetBranchAddress("pseudoViaKtJet1_had_eta", &pseudoViaKtJet1_had_eta, &b_pseudoViaKtJet1_had_eta);
+   fChain->SetBranchAddress("pseudoViaKtJet1_had_phi", &pseudoViaKtJet1_had_phi, &b_pseudoViaKtJet1_had_phi);
+   fChain->SetBranchAddress("pseudoViaKtJet1_had_mass", &pseudoViaKtJet1_had_mass, &b_pseudoViaKtJet1_had_mass);
+   fChain->SetBranchAddress("gamma_met_pt", &gamma_met_pt, &b_gamma_met_pt);
+   fChain->SetBranchAddress("gamma_met_eta", &gamma_met_eta, &b_gamma_met_eta);
+   fChain->SetBranchAddress("gamma_met_phi", &gamma_met_phi, &b_gamma_met_phi);
+   fChain->SetBranchAddress("gamma_met_mass", &gamma_met_mass, &b_gamma_met_mass);
+   fChain->SetBranchAddress("pseudoViaKtJet2_had_pt", &pseudoViaKtJet2_had_pt, &b_pseudoViaKtJet2_had_pt);
+   fChain->SetBranchAddress("pseudoViaKtJet2_had_eta", &pseudoViaKtJet2_had_eta, &b_pseudoViaKtJet2_had_eta);
+   fChain->SetBranchAddress("pseudoViaKtJet2_had_phi", &pseudoViaKtJet2_had_phi, &b_pseudoViaKtJet2_had_phi);
+   fChain->SetBranchAddress("pseudoViaKtJet2_had_mass", &pseudoViaKtJet2_had_mass, &b_pseudoViaKtJet2_had_mass);
    fChain->SetBranchAddress("met_pt", &met_pt, &b_met_pt);
    fChain->SetBranchAddress("met_eta", &met_eta, &b_met_eta);
    fChain->SetBranchAddress("met_phi", &met_phi, &b_met_phi);
@@ -610,26 +797,30 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("met_genPt", &met_genPt, &b_met_genPt);
    fChain->SetBranchAddress("met_genPhi", &met_genPhi, &b_met_genPhi);
    fChain->SetBranchAddress("met_genEta", &met_genEta, &b_met_genEta);
+   fChain->SetBranchAddress("pseudoJet1_had_pt", &pseudoJet1_had_pt, &b_pseudoJet1_had_pt);
+   fChain->SetBranchAddress("pseudoJet1_had_eta", &pseudoJet1_had_eta, &b_pseudoJet1_had_eta);
+   fChain->SetBranchAddress("pseudoJet1_had_phi", &pseudoJet1_had_phi, &b_pseudoJet1_had_phi);
+   fChain->SetBranchAddress("pseudoJet1_had_mass", &pseudoJet1_had_mass, &b_pseudoJet1_had_mass);
+   fChain->SetBranchAddress("gamma_metNoPU_pt", &gamma_metNoPU_pt, &b_gamma_metNoPU_pt);
+   fChain->SetBranchAddress("gamma_metNoPU_eta", &gamma_metNoPU_eta, &b_gamma_metNoPU_eta);
+   fChain->SetBranchAddress("gamma_metNoPU_phi", &gamma_metNoPU_phi, &b_gamma_metNoPU_phi);
+   fChain->SetBranchAddress("gamma_metNoPU_mass", &gamma_metNoPU_mass, &b_gamma_metNoPU_mass);
+   fChain->SetBranchAddress("pseudoJet2_had_pt", &pseudoJet2_had_pt, &b_pseudoJet2_had_pt);
+   fChain->SetBranchAddress("pseudoJet2_had_eta", &pseudoJet2_had_eta, &b_pseudoJet2_had_eta);
+   fChain->SetBranchAddress("pseudoJet2_had_phi", &pseudoJet2_had_phi, &b_pseudoJet2_had_phi);
+   fChain->SetBranchAddress("pseudoJet2_had_mass", &pseudoJet2_had_mass, &b_pseudoJet2_had_mass);
+   fChain->SetBranchAddress("gamma_pseudoJet1_pt", &gamma_pseudoJet1_pt, &b_gamma_pseudoJet1_pt);
+   fChain->SetBranchAddress("gamma_pseudoJet1_eta", &gamma_pseudoJet1_eta, &b_gamma_pseudoJet1_eta);
+   fChain->SetBranchAddress("gamma_pseudoJet1_phi", &gamma_pseudoJet1_phi, &b_gamma_pseudoJet1_phi);
+   fChain->SetBranchAddress("gamma_pseudoJet1_mass", &gamma_pseudoJet1_mass, &b_gamma_pseudoJet1_mass);
    fChain->SetBranchAddress("metNoPU_pt", &metNoPU_pt, &b_metNoPU_pt);
    fChain->SetBranchAddress("metNoPU_eta", &metNoPU_eta, &b_metNoPU_eta);
    fChain->SetBranchAddress("metNoPU_phi", &metNoPU_phi, &b_metNoPU_phi);
    fChain->SetBranchAddress("metNoPU_mass", &metNoPU_mass, &b_metNoPU_mass);
-   fChain->SetBranchAddress("pseudoJet1_pt", &pseudoJet1_pt, &b_pseudoJet1_pt);
-   fChain->SetBranchAddress("pseudoJet1_eta", &pseudoJet1_eta, &b_pseudoJet1_eta);
-   fChain->SetBranchAddress("pseudoJet1_phi", &pseudoJet1_phi, &b_pseudoJet1_phi);
-   fChain->SetBranchAddress("pseudoJet1_mass", &pseudoJet1_mass, &b_pseudoJet1_mass);
-   fChain->SetBranchAddress("pseudoJet2_pt", &pseudoJet2_pt, &b_pseudoJet2_pt);
-   fChain->SetBranchAddress("pseudoJet2_eta", &pseudoJet2_eta, &b_pseudoJet2_eta);
-   fChain->SetBranchAddress("pseudoJet2_phi", &pseudoJet2_phi, &b_pseudoJet2_phi);
-   fChain->SetBranchAddress("pseudoJet2_mass", &pseudoJet2_mass, &b_pseudoJet2_mass);
-   fChain->SetBranchAddress("nGenQuark", &nGenQuark, &b_nGenQuark);
-   fChain->SetBranchAddress("GenQuark_pt", &GenQuark_pt, &b_GenQuark_pt);
-   fChain->SetBranchAddress("GenQuark_eta", &GenQuark_eta, &b_GenQuark_eta);
-   fChain->SetBranchAddress("GenQuark_phi", &GenQuark_phi, &b_GenQuark_phi);
-   fChain->SetBranchAddress("GenQuark_mass", &GenQuark_mass, &b_GenQuark_mass);
-   fChain->SetBranchAddress("GenQuark_pdgId", &GenQuark_pdgId, &b_GenQuark_pdgId);
-   fChain->SetBranchAddress("GenQuark_charge", &GenQuark_charge, &b_GenQuark_charge);
-   fChain->SetBranchAddress("GenQuark_sourceId", &GenQuark_sourceId, &b_GenQuark_sourceId);
+   fChain->SetBranchAddress("gamma_pseudoJet2_pt", &gamma_pseudoJet2_pt, &b_gamma_pseudoJet2_pt);
+   fChain->SetBranchAddress("gamma_pseudoJet2_eta", &gamma_pseudoJet2_eta, &b_gamma_pseudoJet2_eta);
+   fChain->SetBranchAddress("gamma_pseudoJet2_phi", &gamma_pseudoJet2_phi, &b_gamma_pseudoJet2_phi);
+   fChain->SetBranchAddress("gamma_pseudoJet2_mass", &gamma_pseudoJet2_mass, &b_gamma_pseudoJet2_mass);
    fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
    fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
    fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);
@@ -637,15 +828,18 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("genPart_mass", genPart_mass, &b_genPart_mass);
    fChain->SetBranchAddress("genPart_pdgId", genPart_pdgId, &b_genPart_pdgId);
    fChain->SetBranchAddress("genPart_charge", genPart_charge, &b_genPart_charge);
+   fChain->SetBranchAddress("genPart_status", genPart_status, &b_genPart_status);
    fChain->SetBranchAddress("genPart_motherId", genPart_motherId, &b_genPart_motherId);
    fChain->SetBranchAddress("genPart_grandmaId", genPart_grandmaId, &b_genPart_grandmaId);
-   fChain->SetBranchAddress("nGenTop", &nGenTop, &b_nGenTop);
-   fChain->SetBranchAddress("GenTop_pt", &GenTop_pt, &b_GenTop_pt);
-   fChain->SetBranchAddress("GenTop_eta", &GenTop_eta, &b_GenTop_eta);
-   fChain->SetBranchAddress("GenTop_phi", &GenTop_phi, &b_GenTop_phi);
-   fChain->SetBranchAddress("GenTop_mass", &GenTop_mass, &b_GenTop_mass);
-   fChain->SetBranchAddress("GenTop_pdgId", &GenTop_pdgId, &b_GenTop_pdgId);
-   fChain->SetBranchAddress("GenTop_charge", &GenTop_charge, &b_GenTop_charge);
+   fChain->SetBranchAddress("ngenTau", &ngenTau, &b_ngenTau);
+   fChain->SetBranchAddress("genTau_pt", &genTau_pt, &b_genTau_pt);
+   fChain->SetBranchAddress("genTau_eta", &genTau_eta, &b_genTau_eta);
+   fChain->SetBranchAddress("genTau_phi", &genTau_phi, &b_genTau_phi);
+   fChain->SetBranchAddress("genTau_mass", &genTau_mass, &b_genTau_mass);
+   fChain->SetBranchAddress("genTau_pdgId", &genTau_pdgId, &b_genTau_pdgId);
+   fChain->SetBranchAddress("genTau_charge", &genTau_charge, &b_genTau_charge);
+   fChain->SetBranchAddress("genTau_status", &genTau_status, &b_genTau_status);
+   fChain->SetBranchAddress("genTau_sourceId", &genTau_sourceId, &b_genTau_sourceId);
    fChain->SetBranchAddress("nisoTrack", &nisoTrack, &b_nisoTrack);
    fChain->SetBranchAddress("isoTrack_pt", isoTrack_pt, &b_isoTrack_pt);
    fChain->SetBranchAddress("isoTrack_eta", isoTrack_eta, &b_isoTrack_eta);
@@ -670,6 +864,12 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_area", jet_area, &b_jet_area);
    fChain->SetBranchAddress("jet_puId", jet_puId, &b_jet_puId);
    fChain->SetBranchAddress("jet_id", jet_id, &b_jet_id);
+   fChain->SetBranchAddress("jet_ptd", jet_ptd, &b_jet_ptd);
+   fChain->SetBranchAddress("jet_axis2", jet_axis2, &b_jet_axis2);
+   fChain->SetBranchAddress("jet_mult", jet_mult, &b_jet_mult);
+   fChain->SetBranchAddress("jet_qgl", jet_qgl, &b_jet_qgl);
+   fChain->SetBranchAddress("jet_partonId", jet_partonId, &b_jet_partonId);
+   fChain->SetBranchAddress("jet_partonMotherId", jet_partonMotherId, &b_jet_partonMotherId);
    fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
    fChain->SetBranchAddress("lep_pt", lep_pt, &b_lep_pt);
    fChain->SetBranchAddress("lep_eta", lep_eta, &b_lep_eta);
@@ -700,6 +900,8 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_mvaIdTrig", lep_mvaIdTrig, &b_lep_mvaIdTrig);
    fChain->SetBranchAddress("lep_nStations", lep_nStations, &b_lep_nStations);
    fChain->SetBranchAddress("lep_trkKink", lep_trkKink, &b_lep_trkKink);
+   fChain->SetBranchAddress("lep_caloCompatibility", lep_caloCompatibility, &b_lep_caloCompatibility);
+   fChain->SetBranchAddress("lep_globalTrackChi2", lep_globalTrackChi2, &b_lep_globalTrackChi2);
    fChain->SetBranchAddress("lep_trackerLayers", lep_trackerLayers, &b_lep_trackerLayers);
    fChain->SetBranchAddress("lep_pixelLayers", lep_pixelLayers, &b_lep_pixelLayers);
    fChain->SetBranchAddress("lep_mvaTTH", lep_mvaTTH, &b_lep_mvaTTH);
@@ -709,14 +911,15 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_mcMatchId", lep_mcMatchId, &b_lep_mcMatchId);
    fChain->SetBranchAddress("lep_mcMatchAny", lep_mcMatchAny, &b_lep_mcMatchAny);
    fChain->SetBranchAddress("lep_mcMatchTau", lep_mcMatchTau, &b_lep_mcMatchTau);
-   fChain->SetBranchAddress("nGenLepFromTau", &nGenLepFromTau, &b_nGenLepFromTau);
-   fChain->SetBranchAddress("GenLepFromTau_pt", GenLepFromTau_pt, &b_GenLepFromTau_pt);
-   fChain->SetBranchAddress("GenLepFromTau_eta", GenLepFromTau_eta, &b_GenLepFromTau_eta);
-   fChain->SetBranchAddress("GenLepFromTau_phi", GenLepFromTau_phi, &b_GenLepFromTau_phi);
-   fChain->SetBranchAddress("GenLepFromTau_mass", GenLepFromTau_mass, &b_GenLepFromTau_mass);
-   fChain->SetBranchAddress("GenLepFromTau_pdgId", GenLepFromTau_pdgId, &b_GenLepFromTau_pdgId);
-   fChain->SetBranchAddress("GenLepFromTau_charge", GenLepFromTau_charge, &b_GenLepFromTau_charge);
-   fChain->SetBranchAddress("GenLepFromTau_sourceId", GenLepFromTau_sourceId, &b_GenLepFromTau_sourceId);
+   fChain->SetBranchAddress("ngenLepFromTau", &ngenLepFromTau, &b_ngenLepFromTau);
+   fChain->SetBranchAddress("genLepFromTau_pt", &genLepFromTau_pt, &b_genLepFromTau_pt);
+   fChain->SetBranchAddress("genLepFromTau_eta", &genLepFromTau_eta, &b_genLepFromTau_eta);
+   fChain->SetBranchAddress("genLepFromTau_phi", &genLepFromTau_phi, &b_genLepFromTau_phi);
+   fChain->SetBranchAddress("genLepFromTau_mass", &genLepFromTau_mass, &b_genLepFromTau_mass);
+   fChain->SetBranchAddress("genLepFromTau_pdgId", &genLepFromTau_pdgId, &b_genLepFromTau_pdgId);
+   fChain->SetBranchAddress("genLepFromTau_charge", &genLepFromTau_charge, &b_genLepFromTau_charge);
+   fChain->SetBranchAddress("genLepFromTau_status", &genLepFromTau_status, &b_genLepFromTau_status);
+   fChain->SetBranchAddress("genLepFromTau_sourceId", &genLepFromTau_sourceId, &b_genLepFromTau_sourceId);
    fChain->SetBranchAddress("ngamma", &ngamma, &b_ngamma);
    fChain->SetBranchAddress("gamma_pt", gamma_pt, &b_gamma_pt);
    fChain->SetBranchAddress("gamma_eta", gamma_eta, &b_gamma_eta);
@@ -738,16 +941,18 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("GenP6StatusThree_mass", &GenP6StatusThree_mass, &b_GenP6StatusThree_mass);
    fChain->SetBranchAddress("GenP6StatusThree_pdgId", &GenP6StatusThree_pdgId, &b_GenP6StatusThree_pdgId);
    fChain->SetBranchAddress("GenP6StatusThree_charge", &GenP6StatusThree_charge, &b_GenP6StatusThree_charge);
+   fChain->SetBranchAddress("GenP6StatusThree_status", &GenP6StatusThree_status, &b_GenP6StatusThree_status);
    fChain->SetBranchAddress("GenP6StatusThree_motherId", &GenP6StatusThree_motherId, &b_GenP6StatusThree_motherId);
    fChain->SetBranchAddress("GenP6StatusThree_grandmaId", &GenP6StatusThree_grandmaId, &b_GenP6StatusThree_grandmaId);
-   fChain->SetBranchAddress("nGenLep", &nGenLep, &b_nGenLep);
-   fChain->SetBranchAddress("GenLep_pt", GenLep_pt, &b_GenLep_pt);
-   fChain->SetBranchAddress("GenLep_eta", GenLep_eta, &b_GenLep_eta);
-   fChain->SetBranchAddress("GenLep_phi", GenLep_phi, &b_GenLep_phi);
-   fChain->SetBranchAddress("GenLep_mass", GenLep_mass, &b_GenLep_mass);
-   fChain->SetBranchAddress("GenLep_pdgId", GenLep_pdgId, &b_GenLep_pdgId);
-   fChain->SetBranchAddress("GenLep_charge", GenLep_charge, &b_GenLep_charge);
-   fChain->SetBranchAddress("GenLep_sourceId", GenLep_sourceId, &b_GenLep_sourceId);
+   fChain->SetBranchAddress("ngenLep", &ngenLep, &b_ngenLep);
+   fChain->SetBranchAddress("genLep_pt", &genLep_pt, &b_genLep_pt);
+   fChain->SetBranchAddress("genLep_eta", &genLep_eta, &b_genLep_eta);
+   fChain->SetBranchAddress("genLep_phi", &genLep_phi, &b_genLep_phi);
+   fChain->SetBranchAddress("genLep_mass", &genLep_mass, &b_genLep_mass);
+   fChain->SetBranchAddress("genLep_pdgId", &genLep_pdgId, &b_genLep_pdgId);
+   fChain->SetBranchAddress("genLep_charge", &genLep_charge, &b_genLep_charge);
+   fChain->SetBranchAddress("genLep_status", &genLep_status, &b_genLep_status);
+   fChain->SetBranchAddress("genLep_sourceId", &genLep_sourceId, &b_genLep_sourceId);
    fChain->SetBranchAddress("ntau", &ntau, &b_ntau);
    fChain->SetBranchAddress("tau_pt", tau_pt, &b_tau_pt);
    fChain->SetBranchAddress("tau_eta", tau_eta, &b_tau_eta);
@@ -760,13 +965,6 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("tau_idCI3hit", tau_idCI3hit, &b_tau_idCI3hit);
    fChain->SetBranchAddress("tau_isoCI3hit", tau_isoCI3hit, &b_tau_isoCI3hit);
    fChain->SetBranchAddress("tau_mcMatchId", tau_mcMatchId, &b_tau_mcMatchId);
-   fChain->SetBranchAddress("nGenBQuark", &nGenBQuark, &b_nGenBQuark);
-   fChain->SetBranchAddress("GenBQuark_pt", &GenBQuark_pt, &b_GenBQuark_pt);
-   fChain->SetBranchAddress("GenBQuark_eta", &GenBQuark_eta, &b_GenBQuark_eta);
-   fChain->SetBranchAddress("GenBQuark_phi", &GenBQuark_phi, &b_GenBQuark_phi);
-   fChain->SetBranchAddress("GenBQuark_mass", &GenBQuark_mass, &b_GenBQuark_mass);
-   fChain->SetBranchAddress("GenBQuark_pdgId", &GenBQuark_pdgId, &b_GenBQuark_pdgId);
-   fChain->SetBranchAddress("GenBQuark_charge", &GenBQuark_charge, &b_GenBQuark_charge);
    fChain->SetBranchAddress("evt_scale1fb", &evt_scale1fb, &b_evt_scale1fb);
    fChain->SetBranchAddress("evt_xsec", &evt_xsec, &b_evt_xsec);
    fChain->SetBranchAddress("evt_kfactor", &evt_kfactor, &b_evt_kfactor);
