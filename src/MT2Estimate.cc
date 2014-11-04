@@ -83,10 +83,8 @@ MT2Estimate MT2Estimate::operator+( const MT2Estimate& rhs ) const {
 
 
 
-void MT2Estimate::getStuffFromList( TList* list ) {
+void MT2Estimate::getShit( TFile* file, const std::string& path ) {
 
-  TH1D* thisYield = (TH1D*)list->FindObject( yield->GetName() );
-
-  *yield = *thisYield;
+  yield = (TH1D*)file->Get(Form("%s/%s", path.c_str(), yield->GetName()));
 
 }

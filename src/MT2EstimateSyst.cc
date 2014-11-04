@@ -40,6 +40,17 @@ void MT2EstimateSyst::addOverflow() {
 
 
 
+void MT2EstimateSyst::getShit( TFile* file, const std::string& path ) {
+
+  MT2Estimate::getShit(file, path);
+  yield_btagUp = (TH1D*)file->Get(Form("%s/%s", path.c_str(), yield_btagUp->GetName()));
+  yield_btagDown = (TH1D*)file->Get(Form("%s/%s", path.c_str(), yield_btagDown->GetName()));
+
+
+}
+
+
+
 
 MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const {
 

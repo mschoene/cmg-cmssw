@@ -30,6 +30,8 @@ class MT2EstimateSyst : public MT2Estimate {
 
   virtual void addOverflow();
 
+  virtual void getShit( TFile* file, const std::string& path );
+
   virtual void write() const {
     MT2Estimate::write();
     yield_btagUp->Write();
