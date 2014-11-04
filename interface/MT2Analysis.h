@@ -236,11 +236,11 @@ MT2Analysis<T> MT2Analysis<T>::operator+( const MT2Analysis& rhs ) {
   htRegions_ = rhs.getHTRegions();
   signalRegions_ = rhs.getSignalRegions();
 
-  for( unsigned iHT=0; iHT<htRegions_.size(); ++iHT ) {
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
 
-    for( unsigned iSR=0; iSR<signalRegions_.size(); ++iSR ) {
+      MT2Region thisRegion(&(*iHT), &(*iSR));
 
-      MT2Region* thisRegion = new MT2Region( &(htRegions_[iHT]), &(signalRegions_[iSR]) );
       T* t1 = this->get(thisRegion); 
       T* t2 = rhs.get(thisRegion); 
       if( t2==0 ) {
