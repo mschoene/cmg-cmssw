@@ -4,6 +4,7 @@
 
 #include "MT2Region.h"
 #include "TH1D.h"
+#include "TList.h"
 
 
 
@@ -62,6 +63,9 @@ class MT2Estimate {
   virtual void write() const {
     yield->Write();
   }
+
+  virtual void getStuffFromList( TList* list );
+
 
  private:
 
