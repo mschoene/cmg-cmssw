@@ -1,10 +1,12 @@
 #include "../interface/MT2Region.h"
 
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <stdio.h>
 #include <cstdlib>
 
-
+#include "TH1F.h"
 
 
 ////////////////////////////////////////////////////////
@@ -14,9 +16,57 @@
 ////////////////////////////////////////////////////////
 
 
+
+MT2HTRegion::MT2HTRegion( const std::string& name ) {
+
+  // this constructor parses the name
+  // the name has to be passed in the format:
+  // HT[htMin]to[htMax]_met[metMin]
+  // where :
+  //   - htMin, htMax and metMin have to be integers
+  //   - htMax is allowed to be "Inf"
+  //   - if metMax is omitted it is assumed to be 0
+
+
+  std::stringstream ss(name);
+  std::vector<std::string> parts;
+  std::string item;
+  while(std::getline(ss, item, '_')) {
+    parts.push_back(item);
+  }
+
+
+  if( parts.size()!=1 && parts.size()!=2 ) {
+    std::cout << "[MT2HTRegion]::MT2HTRegion ERROR! Unrecognized MT2HTRegion name: " << name << std::endl;
+    exit(455);
+  }
+
+
+  int htMin(-1), htMax(-1), metMin(0);
+
+  char htMax_char[100];
+  sscanf( parts[0].c_str(), "HT%dto%s", &htMin, htMax_char);
+  std::string htMax_str(htMax_char);
+  if( htMax_str=="Inf" ) 
+    htMax = -1;
+  else
+    sscanf( parts[0].c_str(), "HT%dto%d", &htMin, &htMax);
+
+
+  if( parts.size()==2 )  // also a met cut
+    sscanf( parts[1].c_str(), "met%d", &metMin);
+  
+
+  this->htMin  = htMin;
+  this->htMax  = htMax;
+  this->metMin = metMin;
+
+}
+
+
+
 MT2HTRegion::MT2HTRegion( const MT2HTRegion& rhs ) {
 
-  name = rhs.name;
   htMin = rhs.htMin;
   htMax = rhs.htMax;
   metMin = rhs.metMin;
@@ -26,9 +76,8 @@ MT2HTRegion::MT2HTRegion( const MT2HTRegion& rhs ) {
 
 
 
-MT2HTRegion::MT2HTRegion( const std::string& aname, float ahtMin, float ahtMax, float ametMin, const std::string& aHLT_selection ) {
+MT2HTRegion::MT2HTRegion( float ahtMin, float ahtMax, float ametMin, const std::string& aHLT_selection ) {
 
-  name = aname;
   htMin = ahtMin;
   htMax = ahtMax;
   metMin = ametMin;
@@ -39,8 +88,14 @@ MT2HTRegion::MT2HTRegion( const std::string& aname, float ahtMin, float ahtMax, 
 
 std::string MT2HTRegion::getName() const {
 
+  std::string htMax_str(Form("%.0f", htMax));
+  if( htMax==-1 ) htMax_str = "Inf";
+
   char n[512];
-  sprintf( n, "HTge%.0f", htMin );
+  if( metMin > 0. )
+    sprintf( n, "HT%.0fto%s_met%.0f", htMin, htMax_str.c_str(), metMin );
+  else
+    sprintf( n, "HT%.0fto%s", htMin, htMax_str.c_str() );
   std::string n_str(n);
 
   return n_str;
@@ -72,11 +127,60 @@ bool MT2HTRegion::operator<( const MT2HTRegion& rhs ) const {
 
 
 
+
+
 ////////////////////////////////////////////////////////
 //
 //                  MT2SignalRegion
 //
 ////////////////////////////////////////////////////////
+
+
+MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
+
+  std::stringstream ss(name);
+  std::vector<std::string> parts;
+  std::string item;
+  while(std::getline(ss, item, '_')) {
+    parts.push_back(item);
+  }
+
+  if( parts.size()!=2 ) {
+    std::cout << "[MT2SignalRegion]::MT2SignalRegion ERROR! Unrecognized MT2SignalRegion name: " << name << std::endl;
+    exit(457);
+  }
+
+
+  int jMin(-1), jMax(-1);
+
+  char jMax_char[100];
+  sscanf( parts[0].c_str(), "j%dto%s", &jMin, jMax_char);
+  std::string jMax_str(jMax_char);
+  if( jMax_str=="Inf" ) 
+    jMax = -1;
+  else
+    sscanf( parts[0].c_str(), "j%dto%d", &jMin, &jMax);
+
+
+  int bMin(-1), bMax(-1);
+
+  char bMax_char[100];
+  sscanf( parts[1].c_str(), "b%dto%s", &bMin, bMax_char);
+  std::string bMax_str(bMax_char);
+  if( bMax_str=="Inf" ) 
+    bMax = -1;
+  else
+    sscanf( parts[1].c_str(), "b%dto%d", &bMin, &bMax);
+
+
+  nJetsMin  = jMin;
+  nJetsMax  = jMax;
+  nBJetsMin = bMin;
+  nBJetsMax = bMax;
+  
+}
+
+
 
 
 MT2SignalRegion::MT2SignalRegion(int njmin, int njmax, int nbmin, int nbmax ) {
@@ -104,10 +208,10 @@ MT2SignalRegion::MT2SignalRegion( const MT2SignalRegion& rhs ) {
 
 std::string MT2SignalRegion::getName() const {
  
-  std::string jString = getSingleSignalRegionString( "j", nJetsMin, nJetsMax   );
+  std::string jString = getSingleSignalRegionString( "j", nJetsMin,  nJetsMax  );
   std::string bString = getSingleSignalRegionString( "b", nBJetsMin, nBJetsMax );
 
-  std::string signal_region = jString + bString;
+  std::string signal_region = jString + "_" + bString;
 
   return signal_region;
 
@@ -117,16 +221,13 @@ std::string MT2SignalRegion::getName() const {
 
 std::string MT2SignalRegion::getSingleSignalRegionString( const std::string& suffix, int n_min , int n_max ) const {
 
-  if( n_min==-1 && n_max==-1 ) return std::string("");
-  if( n_max==-1 ) n_max=n_min;
+  std::string n_min_str(Form("%d", n_min));
+  std::string n_max_str(Form("%d", n_max));
 
-  char signal_region_ch[64];
-  if( n_max!=n_min )
-    sprintf( signal_region_ch, "%dto%d%s", n_min, n_max, suffix.c_str() );
-  else 
-    sprintf( signal_region_ch, "%d%s", n_min, suffix.c_str() );
+  if( n_max<0 ) n_max_str="Inf";
+  if( n_min<0 ) n_min_str=(suffix=="j") ? "2" : "0";
   
-  std::string signal_region(signal_region_ch);
+  std::string signal_region(Form("%s%sto%s", suffix.c_str(), n_min_str.c_str(), n_max_str.c_str()));
 
   return signal_region;
 
@@ -171,6 +272,7 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
 
   std::string regionName = this->getName();
 
+/*
   if( regionName == "HTge1200_2j0b" ) {
     const int nBins_tmp                      = 6;
     bins = new double[nBins_tmp+1]{120, 150, 200, 260, 350, 550, 900};
@@ -283,19 +385,28 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
     const int nBins_tmp                        = 2;
     bins = new double[nBins_tmp+1]{200, 280, 400};
     nBins = nBins_tmp;
+*/
 
 
-  } else {
+  if( regionName == "pippo" ) {
 
-    std::cout << "[MT2Region::getBins] WARNING! Unknown regionName: " << regionName << std::endl;
-    std::cout << "-> Aborting." << std::endl;
-    exit(981);
+    // put your bins here
+    
+  } else { // default binning
+
+    const int nBins_tmp = 6;
+    bins = new double[nBins_tmp+1];
+    bins[0] = 100.; 
+    bins[1] = 150.; 
+    bins[2] = 200.; 
+    bins[3] = 250.; 
+    bins[4] = 300.; 
+    bins[5] = 350.; 
+    bins[6] = 400.; 
+    bins[7] = 450.; 
+    nBins = nBins_tmp;
 
   }
 
 
 }
-
-
-
-
