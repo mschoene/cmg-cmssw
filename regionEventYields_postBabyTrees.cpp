@@ -185,6 +185,8 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
 
   TFile* tmpFile = TFile::Open("tmp.root", "recreate");
   tmpFile->cd();
+
+  std::cout << "-> Skimming tree by applying preselection." << std::endl;
   TTree* tree_reduced = tree->CopyTree(cuts);
 
     
@@ -197,6 +199,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
   //cout << endl << "Weight " << weight <<endl; 
 
 
+  std::cout << "-> Setting up MT2Analysis with name: " << sample.sname << std::endl;
   MT2Analysis<MT2EstimateSyst>* analysis = new MT2Analysis<MT2EstimateSyst>( sample.sname, regionsSet, sample.id );
 
   
@@ -217,16 +220,22 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
     float mt2  = myTree.mt2;
     int njets  = myTree.nJet40;
     int nbjets = myTree.nBJet40;
+    if( ht>600 ) continue;
 
+    std::cout << "x1" << std::endl;
     Double_t weight = myTree.evt_scale1fb; 
+    std::cout << "x2" << std::endl;
 
     float fullweight_btagUp = weight;
     float fullweight_btagDown = weight;
 
 
 
+    std::cout << "x3" << std::endl;
+    std::cout << "looking for ht: " << ht << " njets: " << njets << " nbjets: " << nbjets << " met: " << met << std::endl;
     MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met );
     if( thisEstimate==0 ) continue;
+    std::cout << "Found region: " << thisEstimate->region->getName() << std::endl;
 
     if( isData ) {
       //// fix HLT selection here
@@ -234,11 +243,14 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
       //ttf_hlt.push_back(this_ttf);
     }   
 
-
+    std::cout << "thisEstimate->yield         : " << thisEstimate->yield          << std::endl;
+    std::cout << "thisEstimate->yield_btagUp  : " << thisEstimate->yield_btagUp   << std::endl;
+    std::cout << "thisEstimate->yield_btagDown: " << thisEstimate->yield_btagDown << std::endl;
     thisEstimate->yield         ->Fill(600., weight );
     thisEstimate->yield_btagUp  ->Fill(600., fullweight_btagUp );
     thisEstimate->yield_btagDown->Fill(600., fullweight_btagDown );
 
+    std::cout << "x4" << std::endl;
     
   } // for entries
 
@@ -303,7 +315,6 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
   std::set<MT2SignalRegion> signalRegions = EventYield_tot->getSignalRegions();
 
 
-  int nHistos = HTRegions.size();
   int nBins = signalRegions.size();
 
 
@@ -316,8 +327,6 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
   
   for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
 
-  //for( int i=0; i<nHistos; ++i ) {
-
     TH1D* h1 = new TH1D(Form("%s_%s", prefix.c_str(), iHT->getName().c_str()), "", nBins, 0., nBins);
     h1->Sumw2();
 
@@ -329,7 +338,7 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
     logfile << std::endl << "HT region: " << iHT->getName() << std::endl;
 
     int iBin = 0;
-    //for( int j=0; j<nBins; ++j ) {
+    
     for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
   
       iBin += 1;

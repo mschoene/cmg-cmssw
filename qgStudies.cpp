@@ -48,7 +48,7 @@ float qgCut_ = 0.5;
 int nentries_max = -1;
 
 
-FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const std::string& name, TFile* qgDistributionsFile );
+FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const std::string& name, TFile* qgDistributionsFile );
 void drawFlavorHistos( const std::string& outputdir, FlavorHistos fh, const std::string& savename, const std::string& axisName );
 float getMaxNorm( TH1F* h1 );
 void compareMultHistos( const std::string& outputdir, FlavorHistos fh1, const std::string& name1, const std::string& axisName1, FlavorHistos fh2, const std::string& name2, const std::string& axisName2 );
@@ -94,48 +94,48 @@ int main() {
   TChain* tree_signal2 = new TChain("mt2");
   tree_signal2->Add(Form("%s/SMS_%s_PU_S14_POSTLS170_babytree_QG_post_skim.root/mt2", dir.c_str(), signal2.c_str()));
 
-  //std::string qgfileName = "pdfsOnlyPt.root";
-  //QGLikelihoodCalculator2* qglc = new QGLikelihoodCalculator2(qgfileName); 
-  std::string qgfileName = "pdfQG_AK4chs_antib_NoQC_13TeV.root";
-  QGLikelihoodCalculator* qglc = new QGLikelihoodCalculator(qgfileName); 
+  std::string qgfileName = "pdfsOnlyPt.root";
+  QGLikelihoodCalculator2* qglc = new QGLikelihoodCalculator2(qgfileName); 
+  //std::string qgfileName = "pdfQG_AK4chs_antib_NoQC_13TeV.root";
+  //QGLikelihoodCalculator* qglc = new QGLikelihoodCalculator(qgfileName); 
 
   std::string outputdir = "QGStudiesPlots";
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
   TFile* qgFile = TFile::Open("outfileQG_zjet_SAVE.root");
 
-  FlavorHistos fh_signal1 = getFlavorHistos(qglc, tree_signal1, signal1, qgFile); 
-  drawFlavorHistos( outputdir, fh_signal1, signal1, signal1_forPlots );
+  //FlavorHistos fh_signal1 = getFlavorHistos(qglc, tree_signal1, signal1, qgFile); 
+  //drawFlavorHistos( outputdir, fh_signal1, signal1, signal1_forPlots );
 
   FlavorHistos fh_signal2 = getFlavorHistos(qglc, tree_signal2, signal2, qgFile); 
   drawFlavorHistos( outputdir, fh_signal2, signal2, signal2_forPlots );
 
-  FlavorHistos fh_bg   = getFlavorHistos(qglc, tree_bg, bg, qgFile );
-  drawFlavorHistos( outputdir, fh_bg, bg, bg_forPlots );
+  //FlavorHistos fh_bg   = getFlavorHistos(qglc, tree_bg, bg, qgFile );
+  //drawFlavorHistos( outputdir, fh_bg, bg, bg_forPlots );
 
 
-  compareMultHistos( outputdir, fh_signal1, signal1, signal1_forPlots, fh_bg, bg, bg_forPlots );
-  compareMultHistos( outputdir, fh_signal2, signal2, signal2_forPlots, fh_bg, bg, bg_forPlots );
+  //compareMultHistos( outputdir, fh_signal1, signal1, signal1_forPlots, fh_bg, bg, bg_forPlots );
+  //compareMultHistos( outputdir, fh_signal2, signal2, signal2_forPlots, fh_bg, bg, bg_forPlots );
 
-  compareQglHistos( outputdir, fh_signal1, signal1_forPlots, fh_signal2, signal2_forPlots, fh_bg, bg_forPlots );
-
-
-  drawRoCs_singleSignal( outputdir, Form("multrocs_%s_vs_%s", signal1.c_str(), bg.c_str()), signal1_forPlots, fh_signal1, bg_forPlots, fh_bg );
-  drawRoCs_singleSignal( outputdir, Form("multrocs_%s_vs_%s", signal2.c_str(), bg.c_str()), signal2_forPlots, fh_signal2, bg_forPlots, fh_bg );
+  //compareQglHistos( outputdir, fh_signal1, signal1_forPlots, fh_signal2, signal2_forPlots, fh_bg, bg_forPlots );
 
 
-  compareSingleHistos( outputdir, "nquarksOverNjets", "N(quarks) / N(jets)", fh_signal1.h1_nquarksOverNjets, signal1_forPlots, fh_signal2.h1_nquarksOverNjets, signal2_forPlots, fh_bg.h1_nquarksOverNjets, bg_forPlots );
+  //drawRoCs_singleSignal( outputdir, Form("multrocs_%s_vs_%s", signal1.c_str(), bg.c_str()), signal1_forPlots, fh_signal1, bg_forPlots, fh_bg );
+  //drawRoCs_singleSignal( outputdir, Form("multrocs_%s_vs_%s", signal2.c_str(), bg.c_str()), signal2_forPlots, fh_signal2, bg_forPlots, fh_bg );
 
-  std::cout << "N(quarks) / N(jets)" << std::endl;
-  std::cout << signal1 << ":  " << fh_signal1.h1_nquarksOverNjets->GetMean() << std::endl;
-  std::cout << signal2 << ":  " << fh_signal2.h1_nquarksOverNjets->GetMean() << std::endl;
-  std::cout << bg << ":  " << fh_bg.h1_nquarksOverNjets->GetMean() << std::endl;
+
+  //compareSingleHistos( outputdir, "nquarksOverNjets", "N(quarks) / N(jets)", fh_signal1.h1_nquarksOverNjets, signal1_forPlots, fh_signal2.h1_nquarksOverNjets, signal2_forPlots, fh_bg.h1_nquarksOverNjets, bg_forPlots );
+
+  //std::cout << "N(quarks) / N(jets)" << std::endl;
+  //std::cout << signal1 << ":  " << fh_signal1.h1_nquarksOverNjets->GetMean() << std::endl;
+  //std::cout << signal2 << ":  " << fh_signal2.h1_nquarksOverNjets->GetMean() << std::endl;
+  //std::cout << bg << ":  " << fh_bg.h1_nquarksOverNjets->GetMean() << std::endl;
 
   TFile* outfile = TFile::Open("FlavorHistos.root", "recreate");
   outfile->cd();
-  writeHistosToFile( outfile, fh_signal1, signal1 );
+  //writeHistosToFile( outfile, fh_signal1, signal1 );
   writeHistosToFile( outfile, fh_signal2, signal2 );
-  writeHistosToFile( outfile, fh_bg, bg );
+  //writeHistosToFile( outfile, fh_bg, bg );
   outfile->Close();
 
   return 0;
@@ -143,7 +143,7 @@ int main() {
 }
 
 
-FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const std::string& name, TFile* qgDistributionsFile ) {
+FlavorHistos getFlavorHistos( QGLikelihoodCalculator2* qglc, TTree* tree, const std::string& name, TFile* qgDistributionsFile ) {
 
 
   float rho;
@@ -244,6 +244,7 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const s
     if( ht < 450. ) continue;
     if( mt2 < 200. ) continue;
     if( nJet40 < 2 ) continue;
+    if( jet_pt[1] < 100. ) continue;
     if( nBJet40 != 0 ) continue;
 
     int njets = 0;
@@ -258,7 +259,8 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const s
     for( unsigned i=0; i<njet && i<100; ++i ) {
 
       if( jet_pt[i]<40. ) continue; 
-      if( fabs(jet_eta[i])>2.5 ) continue; 
+      if( fabs(jet_eta[i])>1. ) continue; 
+      //if( fabs(jet_eta[i])>2.5 ) continue; 
       if( jet_id[i]==0 ) continue; 
       if( jet_puId[i]==0 ) continue; 
 
@@ -266,8 +268,9 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const s
       vars.push_back( jet_mult[i] );
       vars.push_back( jet_ptd[i] );
       vars.push_back( jet_axis2[i] );
+      float qgl = qglc->computeQGLikelihood( jet_pt[i], jet_eta[i], vars );
       //float qgl = qglc->computeQGLikelihood( jet_pt[i], jet_eta[i], rho, vars );
-      float qgl = jet_qgl[i];
+      //float qgl = jet_qgl[i];
 
       if( njets<10 ) {
 
@@ -298,15 +301,16 @@ FlavorHistos getFlavorHistos( QGLikelihoodCalculator* qglc, TTree* tree, const s
 
     } // for jets
 
-    int nquarks_likeli = computeNquarksWithLikelihood( pairs_pt_qgl, qgDistributionsFile );
+    nquarks_qgLikeli = computeNquarksWithLikelihood( pairs_pt_qgl, qgDistributionsFile );
 
     h1_njets->Fill( njets, evt_scale1fb );
     h1_nquarks_partonFlavour->Fill( nquarks_partonFlavour, evt_scale1fb );
     h1_nquarks_partonId->Fill( nquarks_partonId, evt_scale1fb );
     h1_nquarks_qgCut->Fill( nquarks_qgCut, evt_scale1fb );
-    h1_nquarks_qgLikeli->Fill( nquarks_likeli, evt_scale1fb );
+    h1_nquarks_qgLikeli->Fill( nquarks_qgLikeli, evt_scale1fb );
 
-    h1_nquarksOverNjets->Fill( (float)nquarks_qgCut/njets, evt_scale1fb );
+    h1_nquarksOverNjets->Fill( (float)nquarks_qgLikeli/(float)njets, evt_scale1fb );
+    //h1_nquarksOverNjets->Fill( (float)nquarks_qgCut/njets, evt_scale1fb );
 
   } // for entries
 
