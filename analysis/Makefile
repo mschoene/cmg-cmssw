@@ -4,7 +4,7 @@ CFLAGS = -Wall -c -g -fpermissive
 ROOFIT_INCLUDE := $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep INCLUDE= | sed 's|INCLUDE=||')
 ROOFIT_LIBDIR := $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep LIBDIR= | sed 's|LIBDIR=||')
 
-INCLUDES = -I. -I$(ROOTSYS)/include -I$(ROOFIT_INCLUDE)/ -I$(CMSSW_BASE)/src -I$(CMSSW_BASE)/src/CommonTools -I$(CMSSW_BASE)/src/UserCode/mmasciov/ -I$(CMSSW_BASE)/src/CondFormats/JetMETObjects/interface 
+INCLUDES = -I. -I.. -I$(ROOTSYS)/include -I$(ROOFIT_INCLUDE)/ -I$(CMSSW_BASE)/src -I$(CMSSW_BASE)/src/CommonTools -I$(CMSSW_BASE)/src/UserCode/mmasciov/ -I$(CMSSW_BASE)/src/CondFormats/JetMETObjects/interface 
 
 ROOTSYS ?= ERROR_RootSysIsNotDefined
 
@@ -55,23 +55,23 @@ provaRead: provaRead.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateSyst.o
 
 
 
-MT2Sample.o: src/MT2Sample.cc 
-	$(CC) -Wall $(INCLUDES) -c src/MT2Sample.cc $(ROOTFLAG) $(EXTRALIBS)
+MT2Sample.o: ../src/MT2Sample.cc 
+	$(CC) -Wall $(INCLUDES) -c ../src/MT2Sample.cc $(ROOTFLAG) $(EXTRALIBS)
 
-MT2Region.o: src/MT2Region.cc
-	$(CC) -Wall $(INCLUDES) -c src/MT2Region.cc $(ROOTFLAG) $(EXTRALIBS)
+MT2Region.o: ../src/MT2Region.cc
+	$(CC) -Wall $(INCLUDES) -c ../src/MT2Region.cc $(ROOTFLAG) $(EXTRALIBS)
 
-MT2Estimate.o: src/MT2Estimate.cc MT2Region.o
-	$(CC) -Wall $(INCLUDES) -c src/MT2Estimate.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
+MT2Estimate.o: ../src/MT2Estimate.cc MT2Region.o
+	$(CC) -Wall $(INCLUDES) -c ../src/MT2Estimate.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
 
-MT2EstimateSyst.o: src/MT2EstimateSyst.cc MT2Region.o MT2Estimate.o
-	$(CC) -Wall $(INCLUDES) -c src/MT2EstimateSyst.cc MT2Region.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS)
+MT2EstimateSyst.o: ../src/MT2EstimateSyst.cc MT2Region.o MT2Estimate.o
+	$(CC) -Wall $(INCLUDES) -c ../src/MT2EstimateSyst.cc MT2Region.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS)
 
-MT2LostLeptonUtilities.o: src/MT2LostLeptonUtilities.cc MT2Region.o
-	$(CC) -Wall $(INCLUDES) -c src/MT2LostLeptonUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
+MT2LostLeptonUtilities.o: ../src/MT2LostLeptonUtilities.cc MT2Region.o
+	$(CC) -Wall $(INCLUDES) -c ../src/MT2LostLeptonUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
 
-MT2RegionAnalysisUtilities.o: src/MT2RegionAnalysisUtilities.cc MT2Region.o
-	$(CC) -Wall $(INCLUDES) -c src/MT2RegionAnalysisUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
+MT2RegionAnalysisUtilities.o: ../src/MT2RegionAnalysisUtilities.cc MT2Region.o
+	$(CC) -Wall $(INCLUDES) -c ../src/MT2RegionAnalysisUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
 
 
 

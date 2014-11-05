@@ -6,11 +6,10 @@
 
 #include <TTreeFormula.h>
 
-#include "interface/MT2Sample.h"
+#include "interface/MT2Common.h"
 #include "interface/MT2Region.h"
 #include "interface/MT2Analysis.h"
-#include "interface/MT2EstimateSyst.h"
-//#include "interface/MT2RegionAnalysisUtilities.h"
+#include "interface/MT2Estimate.h"
 
 #define mt2_cxx
 #include "mt2.h"
@@ -26,8 +25,6 @@
 MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const MT2Sample& sample, const std::string& regionsSet );
 MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector< MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& name, int id_min, int id_max=-1 );
 
-//std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2EstimateSyst>* EventYield_tot, MT2Analysis<MT2EstimateSyst>* EventYield_bg, std::ofstream& logfile );
-//std::vector<TH1D*> getSimTruthYieldHistos( const std::string& prefix, const std::string& fakeID, MT2AnalysisManager* manager, MT2YieldAnalysis* EventYield_tot );
 
 
 
@@ -36,7 +33,7 @@ int main( int argc, char* argv[] ) {
 
 
   if( argc!=2 ) {
-    std::cout << "USAGE: ./regionEventYields_postBabyTrees [samplesFileName]" << std::endl;
+    std::cout << "USAGE: ./computeZinvFromGamma [samplesFileName]" << std::endl;
     std::cout << "Exiting." << std::endl;
     exit(11);
   }
@@ -47,7 +44,7 @@ int main( int argc, char* argv[] ) {
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading samples from file: " << samplesFileName << std::endl;
 
-  std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName);
+  std::vector<MT2Sample> fSamples = MT2Common::loadSamples(samplesFileName);
   if( fSamples.size()==0 ) {
     std::cout << "There must be an error: samples is empty!" << std::endl;
     exit(1209);
@@ -185,8 +182,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
 
   TFile* tmpFile = TFile::Open("tmp.root", "recreate");
   tmpFile->cd();
-
-  std::cout << "-> Skimming tree by applying preselection." << std::endl;
   TTree* tree_reduced = tree->CopyTree(cuts);
 
     
@@ -199,7 +194,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
   //cout << endl << "Weight " << weight <<endl; 
 
 
-  std::cout << "-> Setting up MT2Analysis with name: " << sample.sname << std::endl;
   MT2Analysis<MT2EstimateSyst>* analysis = new MT2Analysis<MT2EstimateSyst>( sample.sname, regionsSet, sample.id );
 
   
@@ -220,7 +214,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
     float mt2  = myTree.mt2;
     int njets  = myTree.nJet40;
     int nbjets = myTree.nBJet40;
-    if( ht>600 ) continue;
 
     Double_t weight = myTree.evt_scale1fb; 
 
@@ -238,6 +231,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
       //ttf_hlt.push_back(this_ttf);
     }   
 
+
     thisEstimate->yield         ->Fill(600., weight );
     thisEstimate->yield_btagUp  ->Fill(600., fullweight_btagUp );
     thisEstimate->yield_btagDown->Fill(600., fullweight_btagDown );
@@ -246,7 +240,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
   } // for entries
 
 
-  analysis->finalize();
+  analysis->addOverflow();
   
 
   delete tree;
@@ -302,10 +296,11 @@ MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector<MT2Analysis<MT2EstimateSy
 std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2EstimateSyst>* EventYield_tot, MT2Analysis<MT2EstimateSyst>* EventYield_bg, std::ofstream& logfile ) {
 
 
-  std::set<MT2HTRegion> HTRegions = EventYield_tot->getHTRegions();
-  std::set<MT2SignalRegion> signalRegions = EventYield_tot->getSignalRegions();
+  std::vector<MT2HTRegion> HTRegions = EventYield_tot->getHTRegions();
+  std::vector<MT2SignalRegion> signalRegions = EventYield_tot->getSignalRegions();
 
 
+  int nHistos = HTRegions.size();
   int nBins = signalRegions.size();
 
 
@@ -316,27 +311,25 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
   
   logfile << std::endl << std::endl <<  "Event yield for sample " << prefix.c_str() << std::endl;
   
-  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
+  for( int i=0; i<nHistos; ++i ) {
 
-    TH1D* h1 = new TH1D(Form("%s_%s", prefix.c_str(), iHT->getName().c_str()), "", nBins, 0., nBins);
+    TH1D* h1 = new TH1D(Form("%s_%s", prefix.c_str(), HTRegions[i].name.c_str()), "", nBins, 0., nBins);
     h1->Sumw2();
 
     //float EventYield_sum = 0;
     //float statErr_sum = 0;
 
     std::cout << std::endl << std::endl;
-    std::cout << "HT region: " << iHT->getName() << std::endl;
-    logfile << std::endl << "HT region: " << iHT->getName() << std::endl;
+    std::cout << "HT region: " << HTRegions[i].name.c_str() << std::endl;
+    logfile << std::endl << "HT region: " << HTRegions[i].name.c_str() << std::endl;
 
-    int iBin = 0;
-    
-    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+    for( int j=0; j<nBins; ++j ) {
   
-      iBin += 1;
+      int iBin = j+1;
 
-      MT2Region thisRegion( &(*iHT), &(*iSR) );
+      MT2Region thisRegion( &HTRegions[i], &signalRegions[j] );
 
-      h1->GetXaxis()->SetBinLabel(iBin, iSR->getName().c_str());
+      h1->GetXaxis()->SetBinLabel(iBin, signalRegions[j].getName().c_str());
 
       MT2EstimateSyst* thisEstimate_tot = EventYield_tot->get( &thisRegion );
 
@@ -388,7 +381,7 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
       //h1->SetBinContent( iBin, EventYield );
 
       std::cout << std::endl;
-      std::cout << "Signal region: " << iSR->getName().c_str() << std::endl;  
+      std::cout << "Signal region: " << signalRegions[j].getName().c_str() << std::endl;  
      
       //std::cout << "tot: " << tot << std::endl;
       //std::cout << "bg: " << bg << std::endl;
