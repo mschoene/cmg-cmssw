@@ -86,13 +86,9 @@ int main( int argc, char* argv[] ) {
 
   std::cout << "-> Done merging. Let me add a couple of them together." << std::endl;
 
-  //MT2Analysis<MT2EstimateSyst>* EventYield_topW   = new MT2Analysis<MT2EstimateSyst>(*EventYield_top  + *EventYield_wjets);
-  //MT2Analysis<MT2EstimateSyst>* EventYield_bg     = new MT2Analysis<MT2EstimateSyst>(*EventYield_qcd + *EventYield_other);
-  //MT2Analysis<MT2EstimateSyst>* EventYield_allMC  = new MT2Analysis<MT2EstimateSyst>(*EventYield_topW + *EventYield_qcd + *EventYield_other);
-
-  MT2Analysis<MT2EstimateSyst>* EventYield_topW   = 0;
-  MT2Analysis<MT2EstimateSyst>* EventYield_bg     = 0;
-  MT2Analysis<MT2EstimateSyst>* EventYield_allMC  = 0;
+  MT2Analysis<MT2EstimateSyst>* EventYield_topW   = (EventYield_top!=0 && EventYield_wjets!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_top  + *EventYield_wjets) : 0;
+  MT2Analysis<MT2EstimateSyst>* EventYield_bg     = (EventYield_qcd!=0 && EventYield_other!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_qcd + *EventYield_other) : 0;
+  MT2Analysis<MT2EstimateSyst>* EventYield_allMC  = (EventYield_topW!=0 && EventYield_other!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_topW + *EventYield_qcd + *EventYield_other) : 0;
 
 
 
@@ -299,7 +295,7 @@ MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector<MT2Analysis<MT2EstimateSy
 
 
 
-/*
+
 std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2EstimateSyst>* EventYield_tot, MT2Analysis<MT2EstimateSyst>* EventYield_bg, std::ofstream& logfile ) {
 
 
@@ -338,7 +334,15 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
 
       h1->GetXaxis()->SetBinLabel(iBin, signalRegions[j].getName().c_str());
 
-      MT2EstimateSyst* thisEstimate_tot = EventYield_tot->get
+      MT2EstimateSyst* thisEstimate_tot = EventYield_tot->get( &thisRegion );
+
+      if( thisEstimate_tot==0 ) {
+        std::cout << "This should not be possible!" << std::endl;
+        exit(93);
+      }
+
+      double err_histo = 0;
+      float tot = thisEstimate_tot->yield->IntegralAndError(0, 2, err_histo);
 
       //int tot = 0;
       //
@@ -354,8 +358,8 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
       //}
       //else ;
 
-      double err_histo = 0;
-      float  tot = (EventYield_tot!=0 && EventYield_tot->f[fakeID.c_str()]!=0) ? EventYield_tot->f[fakeID.c_str()]->getRegion(thisRegion.getName())->yield->IntegralAndError(0, 2, err_histo) : 0.;
+      //double err_histo = 0;
+      //float  tot = (EventYield_tot!=0 && EventYield_tot->f[fakeID.c_str()]!=0) ? EventYield_tot->f[fakeID.c_str()]->getRegion(thisRegion.getName())->yield->IntegralAndError(0, 2, err_histo) : 0.;
       //float  bg = (EventYield_bg !=0 && EventYield_bg ->f[fakeID.c_str()]!=0) ? EventYield_bg ->f[fakeID.c_str()]->getRegion(thisRegion.getName())->yield->Integral() : 0.;
       //float  bg_btagUp = (EventYield_bg !=0 && EventYield_bg ->f[fakeID.c_str()]!=0) ? EventYield_bg ->f[fakeID.c_str()]->getRegion(thisRegion.getName())->yield_btagUp->Integral() : 0.;
       //float  bg_btagDown = (EventYield_bg !=0 && EventYield_bg ->f[fakeID.c_str()]!=0) ? EventYield_bg ->f[fakeID.c_str()]->getRegion(thisRegion.getName())->yield_btagDown->Integral() : 0.;
@@ -420,7 +424,7 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
   return histos;
 
 }
-*/
+
 
 
 
