@@ -80,7 +80,6 @@ class MT2Analysis {
 
 
 
-
 template<class T> 
 MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& regionsSet, int aid ) {
 
@@ -173,6 +172,7 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
   
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
 
+
     float htMin  = (*it)->region->htRegion()->htMin;
     float htMax  = (*it)->region->htRegion()->htMax;
     float metMin = (*it)->region->htRegion()->metMin;
@@ -192,6 +192,7 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
     if( nbjetsmax>0 && nbjets>nbjetsmax ) continue;
 
     region = (*it)->region;
+    break;
 
   }  // for
 
@@ -203,6 +204,8 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
 
 template<class T>
 T* MT2Analysis<T>::get( MT2Region* r ) const {
+
+  if( r==0 ) return 0;
 
   T* t = 0;
 

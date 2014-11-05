@@ -222,20 +222,15 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
     int nbjets = myTree.nBJet40;
     if( ht>600 ) continue;
 
-    std::cout << "x1" << std::endl;
     Double_t weight = myTree.evt_scale1fb; 
-    std::cout << "x2" << std::endl;
 
     float fullweight_btagUp = weight;
     float fullweight_btagDown = weight;
 
 
 
-    std::cout << "x3" << std::endl;
-    std::cout << "looking for ht: " << ht << " njets: " << njets << " nbjets: " << nbjets << " met: " << met << std::endl;
     MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met );
     if( thisEstimate==0 ) continue;
-    std::cout << "Found region: " << thisEstimate->region->getName() << std::endl;
 
     if( isData ) {
       //// fix HLT selection here
@@ -243,14 +238,10 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
       //ttf_hlt.push_back(this_ttf);
     }   
 
-    std::cout << "thisEstimate->yield         : " << thisEstimate->yield          << std::endl;
-    std::cout << "thisEstimate->yield_btagUp  : " << thisEstimate->yield_btagUp   << std::endl;
-    std::cout << "thisEstimate->yield_btagDown: " << thisEstimate->yield_btagDown << std::endl;
     thisEstimate->yield         ->Fill(600., weight );
     thisEstimate->yield_btagUp  ->Fill(600., fullweight_btagUp );
     thisEstimate->yield_btagDown->Fill(600., fullweight_btagDown );
 
-    std::cout << "x4" << std::endl;
     
   } // for entries
 
