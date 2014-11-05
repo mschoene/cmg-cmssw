@@ -13,7 +13,7 @@
 //#include "interface/MT2RegionAnalysisUtilities.h"
 
 #define mt2_cxx
-#include "mt2.h"
+#include "interface/mt2.h"
 
 
 
