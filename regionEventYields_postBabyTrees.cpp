@@ -6,7 +6,7 @@
 
 #include <TTreeFormula.h>
 
-#include "interface/MT2Common.h"
+#include "interface/MT2Sample.h"
 #include "interface/MT2Region.h"
 #include "interface/MT2Analysis.h"
 #include "interface/MT2EstimateSyst.h"
@@ -47,7 +47,7 @@ int main( int argc, char* argv[] ) {
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading samples from file: " << samplesFileName << std::endl;
 
-  std::vector<MT2Sample> fSamples = MT2Common::loadSamples(samplesFileName);
+  std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName);
   if( fSamples.size()==0 ) {
     std::cout << "There must be an error: samples is empty!" << std::endl;
     exit(1209);
@@ -243,7 +243,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
   } // for entries
 
 
-  analysis->addOverflow();
+  analysis->finalize();
   
 
   delete tree;
@@ -299,8 +299,8 @@ MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector<MT2Analysis<MT2EstimateSy
 std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2EstimateSyst>* EventYield_tot, MT2Analysis<MT2EstimateSyst>* EventYield_bg, std::ofstream& logfile ) {
 
 
-  std::vector<MT2HTRegion> HTRegions = EventYield_tot->getHTRegions();
-  std::vector<MT2SignalRegion> signalRegions = EventYield_tot->getSignalRegions();
+  std::set<MT2HTRegion> HTRegions = EventYield_tot->getHTRegions();
+  std::set<MT2SignalRegion> signalRegions = EventYield_tot->getSignalRegions();
 
 
   int nHistos = HTRegions.size();
@@ -314,25 +314,29 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
   
   logfile << std::endl << std::endl <<  "Event yield for sample " << prefix.c_str() << std::endl;
   
-  for( int i=0; i<nHistos; ++i ) {
+  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
 
-    TH1D* h1 = new TH1D(Form("%s_%s", prefix.c_str(), HTRegions[i].name.c_str()), "", nBins, 0., nBins);
+  //for( int i=0; i<nHistos; ++i ) {
+
+    TH1D* h1 = new TH1D(Form("%s_%s", prefix.c_str(), iHT->getName().c_str()), "", nBins, 0., nBins);
     h1->Sumw2();
 
     //float EventYield_sum = 0;
     //float statErr_sum = 0;
 
     std::cout << std::endl << std::endl;
-    std::cout << "HT region: " << HTRegions[i].name.c_str() << std::endl;
-    logfile << std::endl << "HT region: " << HTRegions[i].name.c_str() << std::endl;
+    std::cout << "HT region: " << iHT->getName() << std::endl;
+    logfile << std::endl << "HT region: " << iHT->getName() << std::endl;
 
-    for( int j=0; j<nBins; ++j ) {
+    int iBin = 0;
+    //for( int j=0; j<nBins; ++j ) {
+    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
   
-      int iBin = j+1;
+      iBin += 1;
 
-      MT2Region thisRegion( &HTRegions[i], &signalRegions[j] );
+      MT2Region thisRegion( &(*iHT), &(*iSR) );
 
-      h1->GetXaxis()->SetBinLabel(iBin, signalRegions[j].getName().c_str());
+      h1->GetXaxis()->SetBinLabel(iBin, iSR->getName().c_str());
 
       MT2EstimateSyst* thisEstimate_tot = EventYield_tot->get( &thisRegion );
 
@@ -384,7 +388,7 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
       //h1->SetBinContent( iBin, EventYield );
 
       std::cout << std::endl;
-      std::cout << "Signal region: " << signalRegions[j].getName().c_str() << std::endl;  
+      std::cout << "Signal region: " << iSR->getName().c_str() << std::endl;  
      
       //std::cout << "tot: " << tot << std::endl;
       //std::cout << "bg: " << bg << std::endl;
