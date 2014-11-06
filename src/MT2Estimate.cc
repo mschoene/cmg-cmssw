@@ -57,6 +57,9 @@ void MT2Estimate::addOverflowSingleHisto( TH1D* yield ) {
            yield->GetBinError(yield->GetNbinsX()+1)*
            yield->GetBinError(yield->GetNbinsX()+1)  ));
 
+  yield->SetBinContent(yield->GetNbinsX()+1, 0.);
+  yield->SetBinError  (yield->GetNbinsX()+1, 0.);
+
 }
 
 
