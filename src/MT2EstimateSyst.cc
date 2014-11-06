@@ -32,7 +32,8 @@ MT2EstimateSyst::~MT2EstimateSyst() {
 
 void MT2EstimateSyst::addOverflow() {
 
-  MT2Estimate::addOverflowSingleHisto( yield );
+  MT2Estimate::addOverflow();
+
   MT2Estimate::addOverflowSingleHisto( yield_btagUp );
   MT2Estimate::addOverflowSingleHisto( yield_btagDown );
 

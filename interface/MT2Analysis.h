@@ -186,10 +186,10 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
     int nbjetsmin = (*it)->region->sigRegion()->nBJetsMin;
     int nbjetsmax = (*it)->region->sigRegion()->nBJetsMax;
 
-    if( njetsmin >0 && njets <njetsmin  ) continue;
-    if( njetsmax >0 && njets >njetsmax  ) continue;
-    if( nbjetsmin>0 && nbjets<nbjetsmin ) continue;
-    if( nbjetsmax>0 && nbjets>nbjetsmax ) continue;
+    if( njetsmin >=0 && njets <njetsmin  ) continue;
+    if( njetsmax >=0 && njets >njetsmax  ) continue;
+    if( nbjetsmin>=0 && nbjets<nbjetsmin ) continue;
+    if( nbjetsmax>=0 && nbjets>nbjetsmax ) continue;
 
     region = (*it)->region;
     break;

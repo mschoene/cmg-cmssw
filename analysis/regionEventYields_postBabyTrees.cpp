@@ -43,7 +43,7 @@ int main( int argc, char* argv[] ) {
 
   std::string sampleName(argv[1]);
 
-  std::string samplesFileName = "samples/samples_" + sampleName + ".dat";
+  std::string samplesFileName = "../samples/samples_" + sampleName + ".dat";
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading samples from file: " << samplesFileName << std::endl;
 
@@ -162,9 +162,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
   TFile* file = TFile::Open(sample.file.c_str());
   TTree* tree = (TTree*)file->Get("mt2");
   
-  MT2Tree myTree;
-  myTree.Init(tree);
-
 
   std::ostringstream preselectionStream;
   preselectionStream << " " 
@@ -189,6 +186,9 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
   std::cout << "-> Skimming tree by applying preselection." << std::endl;
   TTree* tree_reduced = tree->CopyTree(cuts);
 
+  MT2Tree myTree;
+  myTree.Init(tree_reduced);
+
     
 
   bool isData = false;
@@ -204,8 +204,9 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
 
   
 
-  int nentries = tree->GetEntries();
+  int nentries = tree_reduced->GetEntries();
 
+  ofstream ofs("events.log");
 
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
@@ -214,6 +215,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
 
     myTree.GetEntry(iEntry);
 
+    int evt   = myTree.evt;
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
     float mt2  = myTree.mt2;
@@ -236,6 +238,8 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
       //ttf_hlt.push_back(this_ttf);
     }   
 
+          ofs << evt << " " << ht << " " << njets << " " << nbjets << " " << met << " " << weight << " " <<  thisEstimate->region->getName() << std::endl;
+
     thisEstimate->yield         ->Fill(300., weight );
     thisEstimate->yield_btagUp  ->Fill(300., fullweight_btagUp );
     thisEstimate->yield_btagDown->Fill(300., fullweight_btagDown );
@@ -243,17 +247,18 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const std::string& outputdir, const 
     
   } // for entries
 
+  ofs.close();
 
   analysis->finalize();
   
-  //delete tree;
-  //delete tree_reduced;
+  delete tree;
+  delete tree_reduced;
 
-  //tmpFile->Close();
-  //delete tmpFile;
+  tmpFile->Close();
+  delete tmpFile;
 
-  //file->Close();
-  //delete file;
+  file->Close();
+  delete file;
   
   return analysis;
 
@@ -277,7 +282,8 @@ MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector<MT2Analysis<MT2EstimateSy
     if( EventYield[i]->id >= id_min && EventYield[i]->id <= id_max ) {
 
         if( return_EventYield==0 )
-          return_EventYield = new MT2Analysis<MT2EstimateSyst>(*(EventYield[i]));
+          return_EventYield = EventYield[i];
+          //return_EventYield = new MT2Analysis<MT2EstimateSyst>(*(EventYield[i]));
         else 
           return_EventYield->add(*(EventYield[i]));
         
@@ -342,11 +348,10 @@ std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2Est
         exit(93);
       }
 
-      TH1D* h1 = thisEstimate_tot->yield;
-      int nBins = h1->GetNbinsX();
-      std::cout << "bins: " << nBins << " integral: " << h1->Integral() << std::endl;
+      TH1D* histo = thisEstimate_tot->yield;
+      int nBins = histo->GetNbinsX();
       double err_histo = 0;
-      float tot = h1->IntegralAndError(0, nBins+1, err_histo);
+      float tot = histo->IntegralAndError(0, nBins+1, err_histo);
 
       //int tot = 0;
       //
