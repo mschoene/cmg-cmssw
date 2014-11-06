@@ -109,6 +109,23 @@ MT2Estimate MT2Estimate::operator/( const MT2Estimate& rhs ) const {
 
 
 
+MT2Estimate MT2Estimate::operator/=( const MT2Estimate& rhs ) const {
+
+  return (*this) / rhs ;
+
+}
+
+
+
+MT2Estimate MT2Estimate::operator+=( const MT2Estimate& rhs ) const {
+
+  return (*this) + rhs ;
+
+}
+
+
+
+
 MT2Estimate MT2Estimate::operator*( const MT2Estimate& rhs ) const {
 
 

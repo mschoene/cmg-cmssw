@@ -40,6 +40,8 @@ class MT2Analysis {
   MT2Analysis operator/( const MT2Analysis& rhs);
   void divide( const MT2Analysis& rhs );
   MT2Analysis operator*( const MT2Analysis& rhs);
+  MT2Analysis operator+=( const MT2Analysis& rhs);
+  MT2Analysis operator/=( const MT2Analysis& rhs);
 
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
@@ -261,6 +263,22 @@ MT2Analysis<T> MT2Analysis<T>::operator+( const MT2Analysis& rhs ) {
 
 
   return *this;
+
+}
+
+
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator+=( const MT2Analysis& rhs ) {
+
+  return ((*this) + rhs);
+
+}
+
+
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator/=( const MT2Analysis& rhs ) {
+
+  return ((*this) / rhs);
 
 }
 

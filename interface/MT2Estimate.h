@@ -58,6 +58,8 @@ class MT2Estimate {
   MT2Estimate operator+( const MT2Estimate& rhs ) const;
   MT2Estimate operator/( const MT2Estimate& rhs ) const;
   MT2Estimate operator*( const MT2Estimate& rhs ) const;
+  MT2Estimate operator+=( const MT2Estimate& rhs ) const;
+  MT2Estimate operator/=( const MT2Estimate& rhs ) const;
 
   virtual void addOverflow();
   void addOverflowSingleHisto( TH1D* yield );
