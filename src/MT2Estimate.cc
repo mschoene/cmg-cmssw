@@ -73,9 +73,7 @@ MT2Estimate MT2Estimate::operator+( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  std::string newname = this->name + "_" + rhs.name;
-
-  MT2Estimate result(newname, *(this->region) );
+  MT2Estimate result(name, *(this->region) );
 
   result.yield->Add(this->yield);
   result.yield->Add(rhs.yield);
@@ -95,9 +93,7 @@ MT2Estimate MT2Estimate::operator/( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  std::string newname = this->name + "_" + rhs.name;
-
-  MT2Estimate result(newname, *(this->region) );
+  MT2Estimate result(name, *(this->region) );
 
   result.yield = new TH1D(*(this->yield));
   result.yield->Divide(rhs.yield);
@@ -128,15 +124,12 @@ MT2Estimate MT2Estimate::operator+=( const MT2Estimate& rhs ) const {
 
 MT2Estimate MT2Estimate::operator*( const MT2Estimate& rhs ) const {
 
-
   if( *(this->region) != *(rhs.region) ) {
     std::cout << "[MT2Estimate::operator*] ERROR! Can't multiply MT2Estimate with different MT2Regions!" << std::endl;
     exit(113);
   }
 
-  std::string newname = this->name + "_" + rhs.name;
-
-  MT2Estimate result(newname, *(this->region) );
+  MT2Estimate result(name, *(this->region) );
 
   result.yield = new TH1D(*(this->yield));
   result.yield->Multiply(rhs.yield);
