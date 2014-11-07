@@ -17,6 +17,9 @@ EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -L$(CMSSW_BASE)/lib/slc6_amd64
 
 all: computeLostLepton_BabyTrees regionEventYields_BabyTrees regionEventYields_postBabyTrees inclusivePlots_BabyTrees inclusivePlots_QCD regionOptimization_BabyTrees
 
+computeZinvFromZmumu: computeZinvFromZmumu.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o
+	$(CC) -Wall $(INCLUDES) -o computeZinvFromZmumu computeZinvFromZmumu.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS)
+
 computeLostLepton_BabyTrees: computeLostLepton_BabyTrees.cpp MT2Region.o MT2LostLeptonUtilities.o MT2Sample.o
 	$(CC) -Wall $(INCLUDES) -o computeLostLepton_BabyTrees computeLostLepton_BabyTrees.cpp MT2Region.o MT2LostLeptonUtilities.o MT2Sample.o $(ROOTFLAG) $(EXTRALIBS)
 
