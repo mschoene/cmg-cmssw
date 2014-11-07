@@ -74,8 +74,8 @@ std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename) {
       TFile* file = TFile::Open(s.file.c_str());
       TTree* tree = (TTree*)file->Get("mt2");
 
-      int evt_id;
-      float evt_nEvts, evt_filter, evt_kfactor, evt_xsec, evt_scale1fb;
+      int evt_id, evt_nEvts;
+      float evt_filter, evt_kfactor, evt_xsec, evt_scale1fb;
 
       tree->SetBranchAddress("evt_id",&evt_id);
       tree->SetBranchAddress("evt_nEvts",&evt_nEvts);
