@@ -24,7 +24,7 @@ class MT2Sample {
   std::string dir;
   std::string file;
   int id;
-  float nevents;
+  int nevents;
   float xsection;
   float lumi;
   float kfact;
