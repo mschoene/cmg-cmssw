@@ -56,7 +56,7 @@ void MT2EstimateSyst::getShit( TFile* file, const std::string& path ) {
 MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const {
 
 
-  if( this->region != rhs.region ) {
+  if( *(this->region) != *(rhs.region) ) {
     std::cout << "[MT2EstimateSyst::operator+] ERROR! Can't add MT2EstimateSyst with different MT2Regions!" << std::endl;
     exit(113);
   }
