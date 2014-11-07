@@ -255,8 +255,9 @@ MT2Analysis<T> MT2Analysis<T>::operator+( const MT2Analysis& rhs ) {
         std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
         exit(111);
       }
-      *t1 = *t1 + *t2;
 
+      *t1 += *t2;
+      
     }
 
   }
