@@ -248,7 +248,6 @@ MT2Analysis<T> MT2Analysis<T>::operator+( const MT2Analysis& rhs ) {
     for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
 
       MT2Region thisRegion(&(*iHT), &(*iSR));
-
       T* t1 = this->get(&thisRegion); 
       T* t2 = rhs.get(&thisRegion); 
       if( t2==0 ) {
@@ -348,7 +347,7 @@ MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
       T* t1 = this->get(&thisRegion); 
       T* t2 = rhs.get(&thisRegion); 
       if( t2==0 ) {
-        std::cout << "[MT2Analysis::operator*] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+        std::cout << "[MT2Analysis::operator*] ERROR! Can't multiply MT2Analysis with different regional structures!" << std::endl;
         exit(111);
       }
       *t1 = (*t1) * (*t2);
