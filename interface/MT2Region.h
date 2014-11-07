@@ -83,9 +83,9 @@ class MT2Region {
     sigRegion_ = new MT2SignalRegion(*(region.sigRegion()));
   }
 
-  MT2Region( const MT2HTRegion* htRegion, const MT2SignalRegion* sigRegion ) {
-    htRegion_ = new MT2HTRegion(*htRegion);
-    sigRegion_ = new MT2SignalRegion(*sigRegion);
+  MT2Region( const MT2HTRegion& htRegion, const MT2SignalRegion& sigRegion ) {
+    htRegion_ = new MT2HTRegion(htRegion);
+    sigRegion_ = new MT2SignalRegion(sigRegion);
   }
   ~MT2Region() {};
 
