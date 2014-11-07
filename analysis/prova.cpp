@@ -7,6 +7,8 @@
 
 int main() {
 
+  system("rm prova.root prova2.root");
+
   // create a signal region structure with the 8TeV definitions of signal regions:
   // "pippo" is a name that will figure in the histogram names
   // "8TeV" is the name of a given signal region set (for now i've implemented the one used at 8 tev and the recent proposal by mario - called "13TeV")
@@ -42,6 +44,11 @@ int main() {
   // write the histograms to a file:
   analysis->writeToFile("prova.root");
   // ^ the above will call the method write() for all objects, so again make sure it's implemented
+
+  MT2Analysis<MT2EstimateSyst> *analysis2 = new MT2Analysis<MT2EstimateSyst>("pippo2", "8TeV", 702);
+  *analysis2 = *analysis;
+
+  analysis2->writeToFile("prova2.root");
 
   return 0;
 
