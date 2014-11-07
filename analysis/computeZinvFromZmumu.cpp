@@ -48,12 +48,6 @@ int main() {
   MT2Tree  myTree;
   myTree.Init(tree);
 
-  ///////////////
-  //// MAKE SKIM
-  /////
-
-  MT2Tree  myFullTree;
-  myFullTree.Init(tree);
 
   /*
   std::ostringstream preselectionStream;
@@ -109,7 +103,6 @@ int main() {
     // it will return a null pointer if the event doesnt fall in any region (eg if it has too low HT)
     if( est!=0 ) {
       // if you found a valid region, you can use the pointer, for example filling histograms
-      std::cout << "filling region: " << est->region->getName() << std::endl;
       est->yield->Fill( mt2, weight );
       est->yield_btagUp->Fill( mt2, weight_btagUp );
       est->yield_btagDown->Fill( mt2, weight_btagDown );
@@ -125,7 +118,6 @@ int main() {
   analysis->writeToFile("ZinvFromZmumu.root");
   // ^ the above will call the method write() for all objects, so again make sure it's implemented
   
-  system( "rm tmp.root" );
 
   //  delete tree;
   //  delete myTree;
