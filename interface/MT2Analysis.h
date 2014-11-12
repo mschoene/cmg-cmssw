@@ -27,11 +27,9 @@ class MT2Analysis {
   std::set<MT2HTRegion> getHTRegions() const { return htRegions_; };
   std::set<MT2SignalRegion> getSignalRegions() const { return signalRegions_; };
 
-  MT2Region* getRegion( float ht, int njets, int nbjets, float met );
-  T* get( MT2Region* r ) const;
-  T* get( float ht, int njets, int nbjets, float met ) {
-    return this->get( this->getRegion(ht, njets, nbjets, met ) );
-  }
+  MT2Region* getRegion( float ht, int njets, int nbjets, float met ) const;
+  T* get( const MT2Region& r ) const;
+  T* get( float ht, int njets, int nbjets, float met ) const;
 
 
   const MT2Analysis& operator=( const MT2Analysis& rhs);
@@ -64,7 +62,7 @@ class MT2Analysis {
 
     for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
       for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
-        MT2Region thisRegion(&(*iHT), &(*iSR));
+        MT2Region thisRegion(*iHT, *iSR);
         T* t = new T(name + "_" + thisRegion.getName(), thisRegion);
         data.insert(t);
       }
@@ -171,9 +169,9 @@ MT2Analysis<T>::MT2Analysis( const MT2Analysis& rhs ) {
 
 
 template<class T>
-MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met ) {
+MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met ) const {
 
-  MT2Region* region = 0;
+  MT2Region* foundRegion = 0;
   
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
 
@@ -196,30 +194,48 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
     if( nbjetsmin>=0 && nbjets<nbjetsmin ) continue;
     if( nbjetsmax>=0 && nbjets>nbjetsmax ) continue;
 
-    region = (*it)->region;
+    foundRegion = (*it)->region;
     break;
 
   }  // for
 
-  return region;
+  return foundRegion;
 
 }
 
 
 
-template<class T>
-T* MT2Analysis<T>::get( MT2Region* r ) const {
 
-  if( r==0 ) return 0;
+template<class T>
+T* MT2Analysis<T>::get( float ht, int njets, int nbjets, float met ) const {
+
+  MT2Region* foundRegion = this->getRegion(ht, njets, nbjets, met);
+
+  if( foundRegion==0 ) return 0;
+
+  return this->get( *foundRegion );
+
+}
+
+
+template<class T>
+T* MT2Analysis<T>::get( const MT2Region& r ) const {
+
+  //if( r==0 ) return 0;
+
+  bool found = false;
 
   T* t = 0;
 
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
-    if( *((*it)->region) == *r ) {
+    if( *((*it)->region) == r ) {
       t = *it;
+      found = true;
       break;
     }
   }
+
+  if( !found ) return 0;
 
   return t;
 
@@ -231,6 +247,25 @@ const MT2Analysis<T>& MT2Analysis<T>::operator=( const MT2Analysis& rhs ) {
 
   htRegions_ = rhs.getHTRegions();
   signalRegions_ = rhs.getSignalRegions();
+
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
+
+      MT2Region thisRegion(*iHT, *iSR);
+
+      T* t1 = this->get(thisRegion); 
+      T* t2 = rhs.get(thisRegion); 
+      if( t2==0 ) {
+        std::cout << "[MT2Analysis::operator+] ERROR! Can't equate MT2Analysis with different regional structures!" << std::endl;
+        exit(111);
+      }
+
+      *t1 = *t2;
+
+    }
+
+  }
+
 
   return *this;
 
@@ -247,10 +282,10 @@ MT2Analysis<T> MT2Analysis<T>::operator+( const MT2Analysis& rhs ) {
   for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
     for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
 
-      MT2Region thisRegion(&(*iHT), &(*iSR));
+      MT2Region thisRegion(*iHT, *iSR);
 
-      T* t1 = this->get(&thisRegion); 
-      T* t2 = rhs.get(&thisRegion); 
+      T* t1 = this->get(thisRegion); 
+      T* t2 = rhs.get(thisRegion); 
       if( t2==0 ) {
         std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
         exit(111);
@@ -304,10 +339,10 @@ MT2Analysis<T> MT2Analysis<T>::operator/( const MT2Analysis& rhs ) {
   for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
     for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
 
-      MT2Region thisRegion(&(*iHT), &(*iSR));
+      MT2Region thisRegion(*iHT, *iSR);
 
-      T* t1 = this->get(&thisRegion); 
-      T* t2 = rhs.get(&thisRegion); 
+      T* t1 = this->get(thisRegion); 
+      T* t2 = rhs.get(thisRegion); 
       if( t2==0 ) {
         std::cout << "[MT2Analysis::operator/] ERROR! Can't divide MT2Analysis with different regional structures!" << std::endl;
         exit(111);
@@ -344,12 +379,12 @@ MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
   for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
     for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
 
-      MT2Region thisRegion(&(*iHT), &(*iSR));
+      MT2Region thisRegion(*iHT, *iSR);
 
-      T* t1 = this->get(&thisRegion); 
-      T* t2 = rhs.get(&thisRegion); 
+      T* t1 = this->get(thisRegion); 
+      T* t2 = rhs.get(thisRegion); 
       if( t2==0 ) {
-        std::cout << "[MT2Analysis::operator*] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+        std::cout << "[MT2Analysis::operator*] ERROR! Can't multiply MT2Analysis with different regional structures!" << std::endl;
         exit(111);
       }
       *t1 = (*t1) * (*t2);
@@ -486,9 +521,9 @@ std::set<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fi
 
       for( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ) {
 
-        MT2Region thisRegion( &htRegion, &(*iSR) );
+        MT2Region thisRegion( htRegion, *iSR );
 
-        T* thisT = analysis->get(&thisRegion);
+        T* thisT = analysis->get(thisRegion);
         thisT->getShit( file, path );
 
       } // for signal regions        
