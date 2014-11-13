@@ -2,7 +2,7 @@
 How to run:
 root -l
 .L postProcessing.C+
-run("samples_50ns_miniaod.txt", "treeProducerSusyFullHad", "/scratch/mmasciov/ToPostProcess/", "/scratch/mmasciov/PostProcessED/", "_babytree.root")
+run("list_postProcessing.txt")
 */
 
 #include <sstream>
@@ -23,64 +23,51 @@ run("samples_50ns_miniaod.txt", "treeProducerSusyFullHad", "/scratch/mmasciov/To
 using namespace std;
 
 
-int postProcessing(string inputFile="input.root",
+int postProcessing(string inputFile="treeSmall1.root",
 		   string outputFile="output.root",
 		   string treeName="treeProducerSusyFullHad",
 		   float filter=1.0, float kfactor=1.0, float xsec=-1.0, int id=1 );
 
 
-int run(string sampleFileName="samples_50ns_miniaod.txt",
-	string treeName="treeProducerSusyFullHad", 
-	string inputPath = "/scratch/mmasciov/ToPostProcess/", 
-	string outputPath = "/scratch/mmasciov/PostProcessED/",  
-	string fileExtension = "_babytree.root"){
+int run(string mData="list_postProcessing.txt",
+	string treeName="treeProducerSusyFullHad"){
   
   int start_s=clock();
 
-  ifstream IN(sampleFileName.c_str());
+  cout<<"File Name = "<<mData.c_str()<<endl;
 
-  if(!IN)
-    system(Form("wget https://mangano.web.cern.ch/mangano/public/MECCA/%s", sampleFileName.c_str()));
+  ifstream meta(mData.c_str());
+  string line;
 
-  char buffer[300];
+  while(std::getline(meta,line)){
+    istringstream ss(line);
+    if((ss.str()[0])==(string)"#") continue;
+    string inputS,outputS,filterS,kfactorS,xsecS,idS; 
 
-  std::cout << "------------------------------------" << std::endl;
-  std::cout << "Sample File  " << sampleFileName << std::endl;
+    ss >> inputS;
+    ss >> outputS;
+    ss >> filterS;
+    ss >> kfactorS;
+    ss >> xsecS;
+    ss >> idS;
 
-  int counter(0);
-
-  while( IN.getline(buffer, 300, '\n') ) {
-
-    if (buffer[0] == '#' || buffer[0] == "\n" || buffer[0] == " " || buffer[0] == "")
-      continue;
-
-    ++counter;
-    std::cout << "# sample " << counter << std::endl;
-    std::cout << buffer << std::endl;
-
+    float filter,kfactor,xsec;
     int id;
-    char datasetName[300];
-    float xs, filter, kfactor;
-    sscanf(buffer, "%d\t/%s\t%f\t%f\t%f\t%f\n", &id, datasetName, &xs, &filter, &kfactor);
-    std::cout << id << "\t" << xs << "\t" << filter << "\t" << "\t" << kfactor << std::endl;
 
-    std::string dataset(datasetName);
-    std::size_t length = dataset.find("_Tune");
+    filter = (float)atof(filterS.c_str());
+    kfactor = (float)atof(kfactorS.c_str());
+    xsec = (float)atof(xsecS.c_str());
+    id = (int)atof(idS.c_str());
 
-    char fileName[300];
-    std::size_t nameLength = dataset.copy(fileName, length, 0);
-    fileName[nameLength]='\0';
+    cout << "input,output,f,k,x,id: " 
+	 << inputS << " , " 
+	 << outputS << " , " 
+	 << filter << " , " 
+	 << kfactor << " , "
+	 << xsec << " , " 
+	 << id << endl;
 
-    std::string file(fileName);
-    std::string inputFile = inputPath + file + fileExtension;
-    std::string outputFile = outputPath + file + fileExtension;
-    std::cout << inputFile << std::endl;
-    std::cout << outputFile << std::endl;
-
-  }
-
-    postProcessing(inputFile, outputFile, treeName, filter, kfactor, xs, id);
-
+    postProcessing(inputS, outputS, treeName, filter, kfactor, xsec, id);
   }
 
   int stop_s=clock();
@@ -177,3 +164,9 @@ int postProcessing(string inputFile,
   return 0;
   
 }
+
+
+
+
+
+

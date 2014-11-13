@@ -27,6 +27,7 @@ class MT2EstimateSyst : public MT2Estimate {
   TH1D* yield_btagDown;
 
   MT2EstimateSyst operator+( const MT2EstimateSyst& rhs ) const;
+  MT2EstimateSyst operator+=( const MT2EstimateSyst& rhs ) const;
 
   virtual void addOverflow();
 

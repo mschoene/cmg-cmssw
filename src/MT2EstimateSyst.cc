@@ -1,5 +1,4 @@
 #include "../interface/MT2EstimateSyst.h"
-
 #include <iostream>
 #include <cmath>
 
@@ -53,7 +52,7 @@ void MT2EstimateSyst::getShit( TFile* file, const std::string& path ) {
 
 
 
-MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const {
+MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const{
 
 
   if( *(this->region) != *(rhs.region) ) {
@@ -73,10 +72,17 @@ MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const {
 
   result.yield_btagDown->Add(this->yield_btagDown);
   result.yield_btagDown->Add(rhs.yield_btagDown);
+  
+  std::cout << result.yield->Integral();
 
   return result;
 
 }
 
 
+MT2EstimateSyst MT2EstimateSyst::operator+=( const MT2EstimateSyst& rhs ) const {
+
+  return (*this) + rhs ;
+
+}
 

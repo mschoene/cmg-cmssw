@@ -76,19 +76,19 @@ int main( int argc, char* argv[] ) {
 
   std::cout << "-> Done looping on samples. Start merging." << std::endl;
 
-  MT2Analysis<MT2EstimateSyst>* EventYield_data  = mergeYields( EventYield, "data", 1, 99 );
-  MT2Analysis<MT2EstimateSyst>* EventYield_top   = mergeYields( EventYield, "Top", 300, 499 );
+  //MT2Analysis<MT2EstimateSyst>* EventYield_data  = mergeYields( EventYield, "data", 1, 99 );
+  //MT2Analysis<MT2EstimateSyst>* EventYield_top   = mergeYields( EventYield, "Top", 300, 499 );
   MT2Analysis<MT2EstimateSyst>* EventYield_qcd   = mergeYields( EventYield, "QCD", 100, 199 );
-  MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, "WJets", 500, 599 );
-  MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, "DY_VV", 600, 899 );
+  //MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, "WJets", 500, 599 );
+  //MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, "DY_VV", 600, 899 );
 
-  MT2Analysis<MT2EstimateSyst>* EventYield_signal = mergeYields( EventYield, "Signal", 1000, 10000 );
+  //MT2Analysis<MT2EstimateSyst>* EventYield_signal = mergeYields( EventYield, "Signal", 1000, 10000 );
 
-  std::cout << "-> Done merging. Let me add a couple of them together." << std::endl;
-
-  MT2Analysis<MT2EstimateSyst>* EventYield_topW   = (EventYield_top!=0 && EventYield_wjets!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_top  + *EventYield_wjets) : 0;
-  MT2Analysis<MT2EstimateSyst>* EventYield_bg     = (EventYield_qcd!=0 && EventYield_other!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_qcd + *EventYield_other) : 0;
-  MT2Analysis<MT2EstimateSyst>* EventYield_allMC  = (EventYield_topW!=0 && EventYield_other!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_topW + *EventYield_qcd + *EventYield_other) : 0;
+  //std::cout << "-> Done merging. Let me add a couple of them together." << std::endl;
+  //
+  //MT2Analysis<MT2EstimateSyst>* EventYield_topW   = (EventYield_top!=0 && EventYield_wjets!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_top  + *EventYield_wjets) : 0;
+  //MT2Analysis<MT2EstimateSyst>* EventYield_bg     = (EventYield_qcd!=0 && EventYield_other!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_qcd + *EventYield_other) : 0;
+  //MT2Analysis<MT2EstimateSyst>* EventYield_allMC  = (EventYield_topW!=0 && EventYield_other!=0) ? new MT2Analysis<MT2EstimateSyst>(*EventYield_topW + *EventYield_qcd + *EventYield_other) : 0;
 
 
 
@@ -97,12 +97,12 @@ int main( int argc, char* argv[] ) {
 
 
 
-  if( EventYield_allMC!=0  ) EventYield_allMC ->writeToFile( outputdir + "/yield_allMC.root"  ); 
-  if( EventYield_topW!=0   ) EventYield_topW  ->writeToFile( outputdir + "/yield_topW.root"   ); 
-  if( EventYield_bg!=0     ) EventYield_bg    ->writeToFile( outputdir + "/yield_bg.root"     ); 
-  if( EventYield_data!=0   ) EventYield_data  ->writeToFile( outputdir + "/yield_data.root"   ); 
-  if( EventYield_signal!=0 ) EventYield_signal->writeToFile( outputdir + "/yield_signal.root" ); 
-
+  //if( EventYield_allMC!=0  ) EventYield_allMC ->writeToFile( outputdir + "/yield_allMC.root"  ); 
+  //if( EventYield_topW!=0   ) EventYield_topW  ->writeToFile( outputdir + "/yield_topW.root"   ); 
+  //if( EventYield_bg!=0     ) EventYield_bg    ->writeToFile( outputdir + "/yield_bg.root"     ); 
+  //if( EventYield_data!=0   ) EventYield_data  ->writeToFile( outputdir + "/yield_data.root"   ); 
+  //if( EventYield_signal!=0 ) EventYield_signal->writeToFile( outputdir + "/yield_signal.root" ); 
+  if( EventYield_qcd!=0 ) EventYield_qcd->writeToFile( outputdir + "/yield_qcd.root" );
 
   TFile* outfile = TFile::Open(Form("%s/EventYields_%s.root", outputdir.c_str(), sampleName.c_str()), "recreate");
   outfile->cd();
@@ -118,8 +118,11 @@ int main( int argc, char* argv[] ) {
   // For topW yield:
   //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_topW", "", HTRegions, signalRegions, EventYield_topW, EventYield_bg, logfile );
   
+  // For qcd yield
+  std::vector<TH1D*> vh1_qcd = getYieldHistos( "EventYield_qcd", EventYield_qcd, 0, logfile ); 
+
   // For signal yield:
-  std::vector<TH1D*> vh1_signal = getYieldHistos( "EventYield_signal", EventYield_signal, 0, logfile ); 
+  //std::vector<TH1D*> vh1_signal = getYieldHistos( "EventYield_signal", EventYield_signal, 0, logfile ); 
 
   // For all SM yield:
   ////std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_MC", "", HTRegions, signalRegions, EventYield_allMC, EventYield_bg, logfile );
@@ -129,9 +132,10 @@ int main( int argc, char* argv[] ) {
   //std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_signal );
  
 
-  for( unsigned i=0; i<EventYield_signal->getHTRegions().size(); ++i ) {
+  for( unsigned i=0; i<EventYield_qcd->getHTRegions().size(); ++i ) {
 
-    vh1_signal[i]->Write();
+    //vh1_signal[i]->Write();
+    vh1_qcd[i]->Write();
 
     //vh1_data[i]->Write();
     //
@@ -286,7 +290,9 @@ MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector<MT2Analysis<MT2EstimateSy
           //return_EventYield = new MT2Analysis<MT2EstimateSyst>(*(EventYield[i]));
         else 
           return_EventYield->add(*(EventYield[i]));
-        
+	
+	std::cout << "E 1" << std::endl;
+
     }
 
   } // for EventYield
