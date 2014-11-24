@@ -93,7 +93,8 @@ MT2Estimate MT2Estimate::operator/( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  MT2Estimate result(name, *(this->region) );
+  std::string newname = this->name + "_merge";
+  MT2Estimate result(this->name, *(this->region) );
 
   result.yield = new TH1D(*(this->yield));
   result.yield->Divide(rhs.yield);
@@ -116,6 +117,13 @@ MT2Estimate MT2Estimate::operator/=( const MT2Estimate& rhs ) const {
 MT2Estimate MT2Estimate::operator+=( const MT2Estimate& rhs ) const {
 
   return (*this) + rhs ;
+
+}
+
+
+MT2Estimate MT2Estimate::operator*=( const MT2Estimate& rhs ) const {
+
+  return (*this) * rhs ;
 
 }
 

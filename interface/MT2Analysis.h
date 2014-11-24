@@ -40,6 +40,7 @@ class MT2Analysis {
   MT2Analysis operator*( const MT2Analysis& rhs);
   MT2Analysis operator+=( const MT2Analysis& rhs);
   MT2Analysis operator/=( const MT2Analysis& rhs);
+  MT2Analysis operator*=( const MT2Analysis& rhs);
 
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
@@ -229,7 +230,7 @@ T* MT2Analysis<T>::get( const MT2Region& r ) const {
 
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
     if( *((*it)->region) == r ) {
-      t = *it;
+      t = (*it);
       found = true;
       break;
     }
@@ -318,6 +319,13 @@ MT2Analysis<T> MT2Analysis<T>::operator/=( const MT2Analysis& rhs ) {
 
 }
 
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator*=( const MT2Analysis& rhs ) {
+
+  return ((*this) * rhs);
+
+}
+
 
 
 template<class T>
@@ -343,11 +351,11 @@ MT2Analysis<T> MT2Analysis<T>::operator/( const MT2Analysis& rhs ) {
 
       T* t1 = this->get(thisRegion); 
       T* t2 = rhs.get(thisRegion); 
-      if( t2==0 ) {
+      if( t1==0 || t2==0 ) {
         std::cout << "[MT2Analysis::operator/] ERROR! Can't divide MT2Analysis with different regional structures!" << std::endl;
         exit(111);
       }
-      *t1 = *t1 / *t2;
+      *t1 /= *t2;
 
     }
 
@@ -387,7 +395,7 @@ MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
         std::cout << "[MT2Analysis::operator*] ERROR! Can't multiply MT2Analysis with different regional structures!" << std::endl;
         exit(111);
       }
-      *t1 = (*t1) * (*t2);
+      *t1 *= (*t2);
 
     }
 
