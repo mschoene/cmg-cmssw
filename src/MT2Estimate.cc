@@ -8,7 +8,11 @@
 
 MT2Estimate::MT2Estimate( const MT2Estimate& rhs ) {
 
-  MT2Estimate( rhs.name, *(rhs.region) );
+  this->name = rhs.name;
+
+  this->region = new MT2Region(*(rhs.region));
+
+  this->yield = new TH1D(*(rhs.yield));
 
 }
 
@@ -16,15 +20,16 @@ MT2Estimate::MT2Estimate( const MT2Estimate& rhs ) {
 
 MT2Estimate::MT2Estimate( const std::string& aname, const MT2Region& aregion ) {
 
-  name = aname;
-  region = new MT2Region(aregion);
+  this->name = aname;
+
+  this->region = new MT2Region(aregion);
 
   int nBins;
   double* bins;
-  region->getBins(nBins, bins);
+  this->region->getBins(nBins, bins);
 
-  yield = new TH1D(Form("yield_%s", name.c_str()), "", nBins, bins);
-  yield->Sumw2();
+  this->yield = new TH1D(Form("yield_%s", this->name.c_str()), "", nBins, bins);
+  this->yield->Sumw2();
 
 }
 
@@ -64,6 +69,32 @@ void MT2Estimate::addOverflowSingleHisto( TH1D* yield ) {
 
 
 
+const MT2Estimate& MT2Estimate::operator=( const MT2Estimate& rhs ) {
+
+  if( this->yield == 0 ) { // first time
+
+    this->name = rhs.name;
+
+    this->region = new MT2Region(*(rhs.region));
+
+    this->yield = new TH1D(*(rhs.yield));
+
+  } else { // keep name and histo name, just make histogram identical
+
+    if( this->region!=0 ) delete this->region;
+    this->region = new MT2Region(*(rhs.region));
+
+    std::string oldName = this->yield->GetName();
+    delete this->yield;
+    this->yield = new TH1D(*(rhs.yield));
+    this->yield->SetName(oldName.c_str());
+
+  }
+
+  return *this;
+
+}
+
 
 MT2Estimate MT2Estimate::operator+( const MT2Estimate& rhs ) const {
 
@@ -73,12 +104,12 @@ MT2Estimate MT2Estimate::operator+( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  MT2Estimate result(name, *(this->region) );
+  this->yield->Add(rhs.yield);
+  //MT2Estimate result(*this);
+  //result.yield->Add(rhs.yield);
 
-  result.yield->Add(this->yield);
-  result.yield->Add(rhs.yield);
-
-  return result;
+  return *this;
+  //return result;
 
 }
 
@@ -93,13 +124,14 @@ MT2Estimate MT2Estimate::operator/( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  std::string newname = this->name + "_merge";
-  MT2Estimate result(this->name, *(this->region) );
 
-  result.yield = new TH1D(*(this->yield));
-  result.yield->Divide(rhs.yield);
+  this->yield->Divide(rhs.yield);
+  //MT2Estimate result(name, *(this->region) );
+  //result.yield = new TH1D(*(this->yield));
+  //result.yield->Divide(rhs.yield);
 
-  return result;
+  return *this;
+  //return result;
 
 }
 
@@ -137,12 +169,13 @@ MT2Estimate MT2Estimate::operator*( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  MT2Estimate result(name, *(this->region) );
+  this->yield->Multiply(rhs.yield);
+  //MT2Estimate result(name, *(this->region) );
+  //result.yield = new TH1D(*(this->yield));
+  //result.yield->Multiply(rhs.yield);
 
-  result.yield = new TH1D(*(this->yield));
-  result.yield->Multiply(rhs.yield);
-
-  return result;
+  return *this;
+  //return result;
 
 }
 
