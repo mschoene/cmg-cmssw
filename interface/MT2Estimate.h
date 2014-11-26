@@ -23,7 +23,7 @@ class MT2Estimate {
 
   MT2Estimate( const MT2Estimate& rhs );  
   MT2Estimate( const std::string& aname, const MT2Region& aregion );
-  ~MT2Estimate();
+  virtual ~MT2Estimate();
  
   // this is just a name to differentiate different
   // instances of the same class
@@ -55,11 +55,13 @@ class MT2Estimate {
     return region->getName();
   }
 
+  const MT2Estimate& operator=( const MT2Estimate& rhs );
   MT2Estimate operator+( const MT2Estimate& rhs ) const;
   MT2Estimate operator/( const MT2Estimate& rhs ) const;
   MT2Estimate operator*( const MT2Estimate& rhs ) const;
   MT2Estimate operator+=( const MT2Estimate& rhs ) const;
   MT2Estimate operator/=( const MT2Estimate& rhs ) const;
+  MT2Estimate operator*=( const MT2Estimate& rhs ) const;
 
   virtual void addOverflow();
   void addOverflowSingleHisto( TH1D* yield );

@@ -51,6 +51,46 @@ void MT2EstimateSyst::getShit( TFile* file, const std::string& path ) {
 
 
 
+const MT2EstimateSyst& MT2EstimateSyst::operator=( const MT2EstimateSyst& rhs ) {
+
+  if( this->yield == 0 ) { // first time
+
+    this->name = rhs.name;
+
+    this->region = new MT2Region(*(rhs.region));
+
+    this->yield = new TH1D(*(rhs.yield));
+    this->yield_btagUp = new TH1D(*(rhs.yield_btagUp));
+    this->yield_btagDown = new TH1D(*(rhs.yield_btagDown));
+
+  } else { // keep name and histo name, just make histogram identical
+
+    if( this->region!=0 ) delete this->region;
+    this->region = new MT2Region(*(rhs.region));
+
+    std::string oldName = this->yield->GetName();
+    delete this->yield;
+    this->yield = new TH1D(*(rhs.yield));
+    this->yield->SetName(oldName.c_str());
+
+    std::string oldName_btagUp = this->yield_btagUp->GetName();
+    delete this->yield_btagUp;
+    this->yield_btagUp = new TH1D(*(rhs.yield_btagUp));
+    this->yield_btagUp->SetName(oldName_btagUp.c_str());
+
+    std::string oldName_btagDown = this->yield_btagDown->GetName();
+    delete this->yield_btagDown;
+    this->yield_btagDown = new TH1D(*(rhs.yield_btagDown));
+    this->yield_btagDown->SetName(oldName_btagDown.c_str());
+
+  }
+
+  return *this;
+
+}
+
+
+
 
 MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const{
 
@@ -60,22 +100,63 @@ MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const{
     exit(113);
   }
 
-  std::string newname = this->name + "_" + rhs.name;
-
-  MT2EstimateSyst result(newname, *(this->region) );
-
-  result.yield->Add(this->yield);
-  result.yield->Add(rhs.yield);
-
-  result.yield_btagUp->Add(this->yield_btagUp);
-  result.yield_btagUp->Add(rhs.yield_btagUp);
-
-  result.yield_btagDown->Add(this->yield_btagDown);
-  result.yield_btagDown->Add(rhs.yield_btagDown);
+  //MT2EstimateSyst result(*this);
+  //result.yield->Add(rhs.yield);
+  //result.yield_btagUp->Add(rhs.yield_btagUp);
+  //result.yield_btagDown->Add(rhs.yield_btagDown);
   
-  std::cout << result.yield->Integral();
+  this->yield->Add(rhs.yield);
+  this->yield_btagUp->Add(rhs.yield_btagUp);
+  this->yield_btagDown->Add(rhs.yield_btagDown);
+  
+  return *this;
+  //return result;
 
-  return result;
+}
+
+
+MT2EstimateSyst MT2EstimateSyst::operator/( const MT2EstimateSyst& rhs ) const{
+
+
+  if( *(this->region) != *(rhs.region) ) {
+    std::cout << "[MT2EstimateSyst::operator/] ERROR! Can't divide MT2EstimateSyst with different MT2Regions!" << std::endl;
+    exit(113);
+  }
+
+  //MT2EstimateSyst result(*this);
+  //result.yield->Add(rhs.yield);
+  //result.yield_btagUp->Add(rhs.yield_btagUp);
+  //result.yield_btagDown->Add(rhs.yield_btagDown);
+  
+  this->yield->Divide(rhs.yield);
+  this->yield_btagUp->Divide(rhs.yield_btagUp);
+  this->yield_btagDown->Divide(rhs.yield_btagDown);
+  
+  return *this;
+  //return result;
+
+}
+
+
+MT2EstimateSyst MT2EstimateSyst::operator*( const MT2EstimateSyst& rhs ) const{
+
+
+  if( *(this->region) != *(rhs.region) ) {
+    std::cout << "[MT2EstimateSyst::operator*] ERROR! Can't multiply MT2EstimateSyst with different MT2Regions!" << std::endl;
+    exit(113);
+  }
+
+  //MT2EstimateSyst result(*this);
+  //result.yield->Add(rhs.yield);
+  //result.yield_btagUp->Add(rhs.yield_btagUp);
+  //result.yield_btagDown->Add(rhs.yield_btagDown);
+  
+  this->yield->Multiply(rhs.yield);
+  this->yield_btagUp->Multiply(rhs.yield_btagUp);
+  this->yield_btagDown->Multiply(rhs.yield_btagDown);
+  
+  return *this;
+  //return result;
 
 }
 
@@ -83,6 +164,18 @@ MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const{
 MT2EstimateSyst MT2EstimateSyst::operator+=( const MT2EstimateSyst& rhs ) const {
 
   return (*this) + rhs ;
+
+}
+
+MT2EstimateSyst MT2EstimateSyst::operator/=( const MT2EstimateSyst& rhs ) const {
+
+  return (*this) / rhs ;
+
+}
+
+MT2EstimateSyst MT2EstimateSyst::operator*=( const MT2EstimateSyst& rhs ) const {
+
+  return (*this) * rhs ;
 
 }
 
