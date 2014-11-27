@@ -51,7 +51,7 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
 
   while( IN.getline(buffer, 300, '\n') ) {
 
-    if (buffer[0] == '#' || buffer[0] == "\n" || buffer[0] == " " || buffer[0] == "")
+    if (buffer[0] == '#' || buffer[0] == '\n' || buffer[0] == ' ')
       continue;
 
     ++counter;
@@ -61,7 +61,7 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     int id;
     char datasetName[300];
     float xs, filter, kfactor;
-    sscanf(buffer, "%d\t/%s\t%f\t%f\t%f\t%f\n", &id, datasetName, &xs, &filter, &kfactor);
+    sscanf(buffer, "%d\t/%s\t%f\t%f\t%f\n", &id, datasetName, &xs, &filter, &kfactor);
     std::cout << id << "\t" << xs << "\t" << filter << "\t" << "\t" << kfactor << std::endl;
 
     std::string dataset(datasetName);
@@ -77,12 +77,10 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     std::cout << inputFile << std::endl;
     std::cout << outputFile << std::endl;
 
-  }
-
     postProcessing(inputFile, outputFile, treeName, filter, kfactor, xs, id);
 
   }
-
+  
   int stop_s=clock();
   cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << endl;
   
