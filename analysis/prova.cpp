@@ -50,6 +50,10 @@ int main() {
 
   analysis2->writeToFile("prova2.root");
 
+  analysis2->setName("paperino");
+  analysis2->writeToFile("paperino.root");
+
+
   return 0;
 
 }
