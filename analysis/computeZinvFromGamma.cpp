@@ -4,7 +4,6 @@
 #include <iomanip>
 
 
-#include <TTreeFormula.h>
 
 #include "interface/MT2Sample.h"
 #include "interface/MT2Region.h"
@@ -15,6 +14,10 @@
 #include "../interface/mt2.h"
 
 
+#include "TCanvas.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TLegend.h"
 
 
 
@@ -22,8 +25,9 @@
 
 
 
-MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2Sample& sample, const std::string& regionsSet );
-
+MT2Analysis<MT2Estimate> computeYield( const std::string& outputdir, const MT2Sample& sample, const std::string& regionsSet );
+void drawCompare( const std::string& outputdir, MT2Analysis<MT2Estimate>* ZinvEstimate, MT2Analysis<MT2Estimate>* Zinv );
+void drawSinglePlot( const std::string& outputdir, const std::string& name, TH1D* h1_ratio, TH1D* h1_mc );
 
 
 int main( int argc, char* argv[] ) {
@@ -36,7 +40,8 @@ int main( int argc, char* argv[] ) {
   //}
 
 
-  std::string samplesFile_gammaJet = "samples/samples_gammaJet.dat";
+  std::string samplesFile_gammaJet = "../samples/samples_gammaJet.dat";
+  //std::string samplesFile_gammaJet = "../samples/samples_gammaJet_prova.dat";
 
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading gamma+jet samples from file: " << samplesFile_gammaJet << std::endl;
@@ -48,7 +53,8 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string samplesFile_Zinv = "samples/samples_Zinv.dat";
+  std::string samplesFile_Zinv = "../samples/samples_Zinv.dat";
+  //std::string samplesFile_Zinv = "../samples/samples_gammaJet_prova.dat";
 
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading gamma+jet samples from file: " << samplesFile_Zinv << std::endl;
@@ -70,13 +76,15 @@ int main( int argc, char* argv[] ) {
 
   
   MT2Analysis<MT2Estimate>* gammaJet = new MT2Analysis<MT2Estimate>( "gammaJet", regionsSet );
-  for( unsigned i=0; i<samples_gammaJet.size(); ++i )
-    (*gammaJet) += *(computeYield( outputdir, samples_gammaJet[i], regionsSet ));
+  for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
+    (*gammaJet) += (computeYield( outputdir, samples_gammaJet[i], regionsSet ));
+  }
   
 
   MT2Analysis<MT2Estimate>* Zinv = new MT2Analysis<MT2Estimate>( "Zinv", regionsSet );
-  for( unsigned i=0; i<samples_Zinv.size(); ++i )
-    (*Zinv) += *(computeYield( outputdir, samples_Zinv[i], regionsSet ));
+  for( unsigned i=0; i<samples_Zinv.size(); ++i ) {
+    (*Zinv) += (computeYield( outputdir, samples_Zinv[i], regionsSet ));
+  }
   
 
   system( "rm tmp.root" );
@@ -89,7 +97,11 @@ int main( int argc, char* argv[] ) {
   std::string outputdirPlots = outputdir + "/plots";
   system(Form("mkdir -p %s", outputdirPlots.c_str()));
 
-  //drawCompare( outputdirPlots, ZinvEstimate, Zinv );
+  Zinv->writeToFile( "prova_Zinv.root" );
+  ZgammaRatio->writeToFile( "prova_ZgammaRatio.root" );
+  ZinvEstimate->writeToFile( "prova_ZinvEstimate.root" );
+  drawCompare( outputdirPlots, ZinvEstimate, Zinv );
+  
 
 
   return 0;
@@ -99,7 +111,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2Sample& sample, const std::string& regionsSet ) {
+MT2Analysis<MT2Estimate> computeYield( const std::string& outputdir, const MT2Sample& sample, const std::string& regionsSet ) {
 
 
   std::cout << std::endl << std::endl;
@@ -108,8 +120,7 @@ MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2S
   TFile* file = TFile::Open(sample.file.c_str());
   TTree* tree = (TTree*)file->Get("mt2");
   
-  MT2Tree myTree;
-  myTree.Init(tree);
+  std::cout << "-> Loaded tree: it has " << tree->GetEntries() << " entries." << std::endl;
 
 
   std::ostringstream preselectionStream;
@@ -131,7 +142,9 @@ MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2S
 
   TFile* tmpFile = TFile::Open("tmp.root", "recreate");
   tmpFile->cd();
+  std::cout << "-> Skimming..." << std::endl;
   TTree* tree_reduced = tree->CopyTree(cuts);
+  std::cout << "-> Done. Skimmed tree has " << tree_reduced->GetEntries() << " entries." << std::endl;
 
     
 
@@ -141,11 +154,13 @@ MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2S
   //cout << endl << "Weight " << weight <<endl; 
 
 
-  MT2Analysis<MT2Estimate>* analysis = new MT2Analysis<MT2Estimate>( sample.sname, regionsSet, sample.id );
+  MT2Analysis<MT2Estimate> analysis( sample.sname, regionsSet, sample.id );
 
   
+  MT2Tree myTree;
+  myTree.Init(tree_reduced);
 
-  int nentries = tree->GetEntries();
+  int nentries = tree_reduced->GetEntries();
 
 
 
@@ -164,8 +179,8 @@ MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2S
 
     Double_t weight = myTree.evt_scale1fb; 
 
-
-    MT2Estimate* thisEstimate = analysis->get( ht, njets, nbjets, met );
+    
+    MT2Estimate* thisEstimate = analysis.get( ht, njets, nbjets, met );
     if( thisEstimate==0 ) continue;
 
     thisEstimate->yield->Fill(mt2, weight );
@@ -174,7 +189,7 @@ MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2S
   } // for entries
 
 
-  analysis->finalize();
+  analysis.finalize();
   
 
   delete tree;
@@ -192,8 +207,45 @@ MT2Analysis<MT2Estimate>* computeYield( const std::string& outputdir, const MT2S
 
 
 
+void drawCompare( const std::string& outputdir, MT2Analysis<MT2Estimate>* ZinvEstimate, MT2Analysis<MT2Estimate>* Zinv ) {
+
+  std::set<MT2HTRegion> htRegions = Zinv->getHTRegions();
+  std::set<MT2SignalRegion> signalRegions = Zinv->getSignalRegions();
+
+    for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) {
+      for( std::set<MT2SignalRegion>::iterator iSR=signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+  
+        MT2Region thisRegion(*iHT, *iSR);
+
+        MT2Estimate* est_ratio = ZinvEstimate->get(thisRegion); 
+        MT2Estimate* est_mc    = Zinv->get(thisRegion); 
+
+        drawSinglePlot( outputdir, thisRegion.getName(), est_ratio->yield, est_mc->yield );
+
+      }
+    }
+}
 
 
 
+void drawSinglePlot( const std::string& outputdir, const std::string& name, TH1D* h1_ratio, TH1D* h1_mc ) {
 
+  TCanvas* c1 = new TCanvas("c11", "", 600, 600);
+  c1->cd();
 
+  h1_ratio->SetLineColor(kRed);
+  h1_ratio->SetLineWidth(2);
+
+  h1_mc->SetMarkerColor(kBlue);
+  h1_mc->SetMarkerStyle(20);
+  h1_mc->SetMarkerSize(2);
+
+  h1_ratio->Draw();
+  h1_mc->Draw("p same");
+  
+  c1->SaveAs( Form("%s/estVsMc_%s.eps", outputdir.c_str(), name.c_str()) );
+  c1->SaveAs( Form("%s/estVsMc_%s.png", outputdir.c_str(), name.c_str()) );
+
+  delete c1;
+
+}

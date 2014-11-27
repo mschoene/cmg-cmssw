@@ -8,11 +8,11 @@
 
 MT2Estimate::MT2Estimate( const MT2Estimate& rhs ) {
 
-  this->name = rhs.name;
+  name = rhs.getName();
 
-  this->region = new MT2Region(*(rhs.region));
+  region = new MT2Region(*(rhs.region));
 
-  this->yield = new TH1D(*(rhs.yield));
+  yield = new TH1D(*(rhs.yield));
 
 }
 
@@ -20,16 +20,16 @@ MT2Estimate::MT2Estimate( const MT2Estimate& rhs ) {
 
 MT2Estimate::MT2Estimate( const std::string& aname, const MT2Region& aregion ) {
 
-  this->name = aname;
+  name = aname;
 
-  this->region = new MT2Region(aregion);
+  region = new MT2Region(aregion);
 
   int nBins;
   double* bins;
-  this->region->getBins(nBins, bins);
+  region->getBins(nBins, bins);
 
-  this->yield = new TH1D(Form("yield_%s", this->name.c_str()), "", nBins, bins);
-  this->yield->Sumw2();
+  yield = new TH1D(this->getHistoName("yield").c_str(), "", nBins, bins);
+  yield->Sumw2();
 
 }
 
@@ -41,6 +41,26 @@ MT2Estimate::~MT2Estimate() {
   delete yield;
 
 }
+
+
+
+std::string MT2Estimate::getHistoName( const std::string& prefix ) const {
+
+  std::string returnName = prefix + "_" + name + "_" + region->getName();
+  
+  return returnName;
+
+}
+
+
+
+void MT2Estimate::setName( const std::string& newName ) {
+
+  name = newName;
+  yield->SetName( this->getHistoName("yield").c_str() );
+
+}
+
 
 
 

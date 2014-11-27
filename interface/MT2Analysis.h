@@ -31,6 +31,7 @@ class MT2Analysis {
   T* get( const MT2Region& r ) const;
   T* get( float ht, int njets, int nbjets, float met ) const;
 
+  void setName( const std::string& newName );
 
   const MT2Analysis& operator=( const MT2Analysis& rhs);
   MT2Analysis operator+( const MT2Analysis& rhs) const;
@@ -63,7 +64,7 @@ class MT2Analysis {
     for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
       for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
         MT2Region thisRegion(*iHT, *iSR);
-        T* t = new T(name + "_" + thisRegion.getName(), thisRegion);
+        T* t = new T(name, thisRegion);
         data.insert(t);
       }
     }
@@ -255,6 +256,31 @@ T* MT2Analysis<T>::get( const MT2Region& r ) const {
 
 }
 
+
+
+template<class T> 
+void MT2Analysis<T>::setName( const std::string& newName ) {
+
+  this->name = newName;
+
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
+
+      MT2Region thisRegion(*iHT, *iSR);
+
+      T* t = this->get(thisRegion); 
+
+      t->setName( newName );
+
+    }
+  }
+
+}
+
+
+
+
+// operator overloading:
 
 template<class T> 
 const MT2Analysis<T>& MT2Analysis<T>::operator=( const MT2Analysis& rhs ) {
