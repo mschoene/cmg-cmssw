@@ -11,9 +11,9 @@ MT2EstimateSyst::MT2EstimateSyst( const std::string& aname, const MT2Region& are
   double* bins;
   region->getBins(nBins, bins);
 
-  yield_btagUp = new TH1D(Form("yield_btagUp_%s", name.c_str()), "", nBins, bins);
+  yield_btagUp = new TH1D( this->getHistoName("yield_btagUp").c_str(), "", nBins, bins);
   yield_btagUp->Sumw2();
-  yield_btagDown = new TH1D(Form("yield_btagDown_%s", name.c_str()), "", nBins, bins);
+  yield_btagDown = new TH1D( this->getHistoName("yield_btagDown").c_str(), "", nBins, bins);
   yield_btagDown->Sumw2();
 
 }
@@ -24,6 +24,17 @@ MT2EstimateSyst::~MT2EstimateSyst() {
 
   delete yield_btagUp;
   delete yield_btagDown;
+
+}
+
+
+
+void MT2EstimateSyst::setName( const std::string& newName ) {
+
+  MT2Estimate::setName(newName);
+
+  yield_btagUp->SetName( this->getHistoName("yield_btagUp").c_str() );
+  yield_btagDown->SetName( this->getHistoName("yield_btagDown").c_str() );
 
 }
 
@@ -55,7 +66,7 @@ const MT2EstimateSyst& MT2EstimateSyst::operator=( const MT2EstimateSyst& rhs ) 
 
   if( this->yield == 0 ) { // first time
 
-    this->name = rhs.name;
+    this->setName(rhs.getName());
 
     this->region = new MT2Region(*(rhs.region));
 

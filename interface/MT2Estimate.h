@@ -25,10 +25,6 @@ class MT2Estimate {
   MT2Estimate( const std::string& aname, const MT2Region& aregion );
   virtual ~MT2Estimate();
  
-  // this is just a name to differentiate different
-  // instances of the same class
-  std::string name;
-
   // the region it refers to
   MT2Region* region;
 
@@ -36,6 +32,10 @@ class MT2Estimate {
   // classes that inherit from this one will add other data members
   TH1D* yield;
 
+  std::string getName() const { return name; };
+  virtual void setName( const std::string& newName );
+
+  std::string getHistoName( const std::string& prefix ) const;
 
   void getBins( int& nBins, double* bins ) const {
     return region->getBins(nBins, bins);
@@ -74,6 +74,9 @@ class MT2Estimate {
 
 
  private:
+  
+  std::string name;
+
 
 };
 

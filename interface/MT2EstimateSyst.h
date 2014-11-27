@@ -19,6 +19,8 @@ class MT2EstimateSyst : public MT2Estimate {
   }
   MT2EstimateSyst( const std::string& aname, const MT2Region& aregion );
   ~MT2EstimateSyst();
+
+  virtual void setName( const std::string& newName );
  
   TH1D* yield_btagUp;
   TH1D* yield_btagDown;
