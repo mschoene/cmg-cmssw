@@ -40,8 +40,8 @@ int main( int argc, char* argv[] ) {
   //}
 
 
-  std::string samplesFile_gammaJet = "../samples/samples_gammaJet.dat";
-  //std::string samplesFile_gammaJet = "../samples/samples_gammaJet_prova.dat";
+  //std::string samplesFile_gammaJet = "../samples/samples_gammaJet.dat";
+  std::string samplesFile_gammaJet = "../samples/samples_gammaJet_prova.dat";
 
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading gamma+jet samples from file: " << samplesFile_gammaJet << std::endl;
@@ -53,8 +53,8 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string samplesFile_Zinv = "../samples/samples_Zinv.dat";
-  //std::string samplesFile_Zinv = "../samples/samples_gammaJet_prova.dat";
+  //std::string samplesFile_Zinv = "../samples/samples_Zinv.dat";
+  std::string samplesFile_Zinv = "../samples/samples_Zinv_prova.dat";
 
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading gamma+jet samples from file: " << samplesFile_Zinv << std::endl;
@@ -90,13 +90,21 @@ int main( int argc, char* argv[] ) {
   system( "rm tmp.root" );
   
 
-  MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( (*Zinv)/(*gammaJet) );
+  MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( "ZgammaRatio", regionsSet );
+  (*ZgammaRatio) = (*Zinv);
+  (*ZgammaRatio) /= (*gammaJet);
+  //ZgammaRatio->setName("ZgammaRatio");
 
-  MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( (*ZgammaRatio)*(*gammaJet) );
+  MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( "ZinvEstimate" );
+  (*ZinvEstimate) = (*ZgammaRatio);
+  (*ZinvEstimate) *= (*gammaJet);
+  //MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( (*ZgammaRatio)*(*gammaJet) );
+  //ZinvEstimate->setName("ZinvEstimate");
 
   std::string outputdirPlots = outputdir + "/plots";
   system(Form("mkdir -p %s", outputdirPlots.c_str()));
 
+  gammaJet->writeToFile( "prova_gammaJet.root" );
   Zinv->writeToFile( "prova_Zinv.root" );
   ZgammaRatio->writeToFile( "prova_ZgammaRatio.root" );
   ZinvEstimate->writeToFile( "prova_ZinvEstimate.root" );
