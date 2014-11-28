@@ -33,6 +33,11 @@ class MT2EstimateSyst : public MT2Estimate {
   MT2EstimateSyst operator/=( const MT2EstimateSyst& rhs ) const;
   MT2EstimateSyst operator*=( const MT2EstimateSyst& rhs ) const;
 
+  MT2EstimateSyst operator/ ( float k ) const;
+  MT2EstimateSyst operator* ( float k ) const;
+  MT2EstimateSyst operator/=( float k ) const;
+  MT2EstimateSyst operator*=( float k ) const;
+
   virtual void addOverflow();
 
   virtual void getShit( TFile* file, const std::string& path );

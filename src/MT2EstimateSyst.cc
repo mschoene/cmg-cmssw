@@ -172,6 +172,30 @@ MT2EstimateSyst MT2EstimateSyst::operator*( const MT2EstimateSyst& rhs ) const{
 }
 
 
+MT2EstimateSyst MT2EstimateSyst::operator*( float k ) const{
+
+  this->yield->Scale(k);
+  this->yield_btagUp->Scale(k);
+  this->yield_btagDown->Scale(k);
+  
+  return *this;
+
+}
+
+
+
+MT2EstimateSyst MT2EstimateSyst::operator/( float k ) const{
+
+  this->yield->Scale(1./k);
+  this->yield_btagUp->Scale(1./k);
+  this->yield_btagDown->Scale(1./k);
+  
+  return *this;
+
+}
+
+
+
 MT2EstimateSyst MT2EstimateSyst::operator+=( const MT2EstimateSyst& rhs ) const {
 
   return (*this) + rhs ;
@@ -187,6 +211,18 @@ MT2EstimateSyst MT2EstimateSyst::operator/=( const MT2EstimateSyst& rhs ) const 
 MT2EstimateSyst MT2EstimateSyst::operator*=( const MT2EstimateSyst& rhs ) const {
 
   return (*this) * rhs ;
+
+}
+
+MT2EstimateSyst MT2EstimateSyst::operator*=( float k ) const {
+
+  return (*this) * k ;
+
+}
+
+MT2EstimateSyst MT2EstimateSyst::operator/=( float k ) const {
+
+  return (*this) / k ;
 
 }
 
