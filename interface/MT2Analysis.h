@@ -43,6 +43,10 @@ class MT2Analysis {
   MT2Analysis operator/=( const MT2Analysis& rhs);
   MT2Analysis operator*=( const MT2Analysis& rhs);
 
+  MT2Analysis operator* ( float k );
+  MT2Analysis operator/ ( float k );
+  MT2Analysis operator*=( float k );
+  MT2Analysis operator/=( float k );
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
   static std::set<MT2Analysis*> readAllFromFile( TFile* file );
@@ -376,6 +380,21 @@ MT2Analysis<T> MT2Analysis<T>::operator*=( const MT2Analysis& rhs ) {
 }
 
 
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator/=( float k ) {
+
+  return ((*this) / k);
+
+}
+
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator*=( float k ) {
+
+  return ((*this) * k);
+
+}
+
+
 
 template<class T>
 void MT2Analysis<T>::add( const MT2Analysis& rhs ) {
@@ -430,9 +449,6 @@ void MT2Analysis<T>::divide( const MT2Analysis& rhs ) {
 template<class T> 
 MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
 
-  htRegions_ = rhs.getHTRegions();
-  signalRegions_ = rhs.getSignalRegions();
-
   for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
     for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
 
@@ -445,6 +461,53 @@ MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
         exit(111);
       }
       *t1 *= (*t2);
+
+    }
+
+  }
+
+
+  return *this;
+
+}
+
+
+
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator*( float k ) {
+
+
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
+
+      MT2Region thisRegion(*iHT, *iSR);
+
+      T* t1 = this->get(thisRegion); 
+      *t1 *= k;
+
+    }
+
+  }
+
+
+  return *this;
+
+}
+
+
+
+
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator/( float k ) {
+
+
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
+
+      MT2Region thisRegion(*iHT, *iSR);
+
+      T* t1 = this->get(thisRegion); 
+      *t1 /= k;
 
     }
 
