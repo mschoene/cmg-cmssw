@@ -1,0 +1,3 @@
+regionsSet 13TeV
+mcSamples mctest
+dataSamples datatest
