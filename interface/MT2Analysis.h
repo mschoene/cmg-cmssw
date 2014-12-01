@@ -409,11 +409,13 @@ void MT2Analysis<T>::add( const MT2Analysis& rhs ) {
 template<class T> 
 MT2Analysis<T> MT2Analysis<T>::operator/( const MT2Analysis& rhs ) {
 
-  htRegions_ = rhs.getHTRegions();
-  signalRegions_ = rhs.getSignalRegions();
+  std::set<MT2HTRegion> htRegions = rhs.getHTRegions();
+  std::set<MT2SignalRegion> signalRegions = rhs.getSignalRegions();
 
-  for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
-    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
+  //MT2Analysis<T> result(rhs.name, htRegions, signalRegions );
+
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
 
       MT2Region thisRegion(*iHT, *iSR);
 
@@ -423,7 +425,9 @@ MT2Analysis<T> MT2Analysis<T>::operator/( const MT2Analysis& rhs ) {
         std::cout << "[MT2Analysis::operator/] ERROR! Can't divide MT2Analysis with different regional structures!" << std::endl;
         exit(111);
       }
-      *t1 /= *t2;
+      (*t1) /= (*t2);
+      //T* tnew = result.get(thisRegion); 
+      //(*tnew) = (*t1) + (*t2);
 
     }
 
@@ -431,6 +435,7 @@ MT2Analysis<T> MT2Analysis<T>::operator/( const MT2Analysis& rhs ) {
 
 
   return *this;
+  //return result;
 
 }
 
@@ -449,8 +454,11 @@ void MT2Analysis<T>::divide( const MT2Analysis& rhs ) {
 template<class T> 
 MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
 
-  for( std::set<MT2HTRegion>::iterator iHT=htRegions_.begin(); iHT!=htRegions_.end(); ++iHT ) {
-    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions_.begin(); iSR!=signalRegions_.end(); ++iSR ) {
+  std::set<MT2HTRegion> htRegions = rhs.getHTRegions();
+  std::set<MT2SignalRegion> signalRegions = rhs.getSignalRegions();
+
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
 
       MT2Region thisRegion(*iHT, *iSR);
 
