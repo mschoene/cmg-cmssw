@@ -393,8 +393,8 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
 
   } else { // default binning
 
-    const int nBins_tmp                        = 7;
-    bins = new double[nBins_tmp+1]{100., 150., 200., 250., 300., 350., 400., 450.};
+    const int nBins_tmp                        = 9;
+    bins = new double[nBins_tmp+1]{100., 150., 200., 250., 300., 350., 400., 450., 550., 700.};
     nBins = nBins_tmp;
 
   }
