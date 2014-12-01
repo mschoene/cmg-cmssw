@@ -10,7 +10,7 @@ ROOTSYS ?= ERROR_RootSysIsNotDefined
 
 ROOTFLAG = `${ROOTSYS}/bin/root-config --cflags --libs`
 
-EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -L$(CMSSW_BASE)/lib/slc6_amd64_gcc481/ -L/swshare/cms/slc6_amd64_gcc481/cms/cmssw/CMSSW_7_0_6_patch3/lib/slc6_amd64_gcc481/ -L/swshare/cms/slc6_amd64_gcc481/cms/cmssw-patch/CMSSW_7_0_6_patch3/lib/slc6_amd64_gcc481 -lHtml -lMathCore -lGenVector -lMinuit -lEG  -lPhysics -L/swshare/cms/slc6_amd64_gcc481/external/zlib/1.2.3/lib -lz -lTreePlayer
+EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -L$(CMSSW_BASE)/lib/slc6_amd64_gcc481/ -L/swshare/cms/slc6_amd64_gcc481/cms/cmssw/CMSSW_7_0_6_patch3/lib/slc6_amd64_gcc481/ -L/swshare/cms/slc6_amd64_gcc481/cms/cmssw-patch/CMSSW_7_0_6_patch3/lib/slc6_amd64_gcc481 -lHtml -lMathCore -lGenVector -lMinuit -lEG  -lPhysics -L/swshare/cms/slc6_amd64_gcc481/external/zlib/1.2.3/lib -lz -lTreePlayer -lRooFitCore -lRooFit
 
 
 
@@ -26,8 +26,8 @@ computeLostLepton_BabyTrees: computeLostLepton_BabyTrees.cpp MT2Region.o MT2Lost
 computeZinvFromGamma: computeZinvFromGamma.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o
 	$(CC) -Wall $(INCLUDES) -o computeZinvFromGamma computeZinvFromGamma.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS)
 
-regionEventYields: regionEventYields.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o
-	$(CC) -Wall $(INCLUDES) -o regionEventYields regionEventYields.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS) -fpermissive
+regionEventYields: regionEventYields.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o MT2DrawTools.o
+	$(CC) -Wall $(INCLUDES) -o regionEventYields regionEventYields.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o MT2DrawTools.o $(ROOTFLAG) $(EXTRALIBS) -fpermissive
 
 inclusivePlots_BabyTrees: inclusivePlots_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o
 	$(CC) -Wall $(INCLUDES) -o inclusivePlots_BabyTrees inclusivePlots_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o $(ROOTFLAG) $(EXTRALIBS)
@@ -76,12 +76,6 @@ MT2DrawTools.o: ../src/MT2DrawTools.cc
 
 
 
-
-DrawBase.o: $(CMSSW_BASE)/src/CommonTools/DrawBase.C
-	$(CC) -Wall $(INCLUDES) -c $(CMSSW_BASE)/src/CommonTools/DrawBase.C $(ROOTFLAG) $(EXTRALIBS)
-
-fitTools.o: $(CMSSW_BASE)/src/CommonTools/fitTools.C
-	$(CC) -Wall $(INCLUDES) -c $(CMSSW_BASE)/src/CommonTools/fitTools.C $(ROOTFLAG) $(EXTRALIBS)
 
 
 localQGLikelihoodCalculator2.o: $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator2.cc
