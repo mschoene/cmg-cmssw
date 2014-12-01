@@ -70,11 +70,8 @@ MT2Estimate.o: ../src/MT2Estimate.cc MT2Region.o
 MT2EstimateSyst.o: ../src/MT2EstimateSyst.cc MT2Region.o MT2Estimate.o
 	$(CC) -Wall $(INCLUDES) -c ../src/MT2EstimateSyst.cc MT2Region.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS)
 
-MT2LostLeptonUtilities.o: ../src/MT2LostLeptonUtilities.cc MT2Region.o
-	$(CC) -Wall $(INCLUDES) -c ../src/MT2LostLeptonUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
-
-MT2RegionAnalysisUtilities.o: ../src/MT2RegionAnalysisUtilities.cc MT2Region.o
-	$(CC) -Wall $(INCLUDES) -c ../src/MT2RegionAnalysisUtilities.cc MT2Region.o $(ROOTFLAG) $(EXTRALIBS)
+MT2DrawTools.o: ../src/MT2DrawTools.cc 
+	$(CC) -Wall $(INCLUDES) -c ../src/MT2DrawTools.cc $(ROOTFLAG) $(EXTRALIBS)
 
 
 
