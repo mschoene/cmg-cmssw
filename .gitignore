@@ -3,3 +3,5 @@
 *.eps
 *.pdf
 *.png
+*fuse_hidden*
+*~
