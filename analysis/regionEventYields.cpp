@@ -428,6 +428,7 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       TFile* histoFile = TFile::Open( Form("%s/histograms_%s.root", fullPath.c_str(), thisRegion.getName().c_str()), "recreate" );
       histoFile->cd();
       h1_data->Write();
+
       TGraphAsymmErrors* gr_data = MT2DrawTools::getPoissonGraph(h1_data);
       gr_data->SetMarkerStyle(20);
       gr_data->SetMarkerSize(1.6);
@@ -485,6 +486,17 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
     }  // for signal regions
 
   } // for HT regions
+
+
+  // save also MT2Analyses:
+  std::string analysesDir = outputdir + "/analyses";
+  std::string mkdir_command2 = "mkdir -p " + analysesDir;
+  system(mkdir_command2.c_str());
+  data->writeToFile(analysesDir + "/data.root");
+  for( unsigned i=0; i<bgYields.size(); ++i )
+    bgYields[i]->writeToFile(analysesDir + "/" + bgYields[i]->name + ".root");
+
+  std::cout << "-> Saved MT2Analyses to " + analysesDir << std::endl;
 
 }
 
