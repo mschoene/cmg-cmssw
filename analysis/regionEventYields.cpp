@@ -412,15 +412,22 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
   
   for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
 
-    std::string mkdircommand = "mkdir -p " + outputdir + "/" + iHT->getName();
-    system( mkdircommand.c_str() );
 
     for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+
+      std::string fullPath = outputdir + "/" + iHT->getName() + "/" + iSR->getName();
+      std::string mkdircommand = "mkdir -p " + fullPath;
+      system( mkdircommand.c_str() );
+
   
       MT2Region thisRegion( (*iHT), (*iSR) );
 
 
       TH1D* h1_data = data->get(thisRegion)->yield;
+
+      TFile* histoFile = TFile::Open( Form("%s/histograms_%s.root", fullPath.c_str(), thisRegion.getName().c_str()), "recreate" );
+      histoFile->cd();
+      h1_data->Write();
       TGraphAsymmErrors* gr_data = MT2DrawTools::getPoissonGraph(h1_data);
       gr_data->SetMarkerStyle(20);
       gr_data->SetMarkerSize(1.6);
@@ -450,11 +457,15 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       legend->SetTextSize(0.038);
       legend->SetFillColor(0);
       legend->AddEntry( gr_data, "Data", "P" );
+      histoFile->cd();
       for( unsigned i=0; i<bgYields.size(); ++i ) {  // reverse order in legend is prettier
         int index = bgYields.size() - i - 1;
         TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
         legend->AddEntry( h1_bg, bgYields[index]->name.c_str(), "F" );
+        h1_bg->Write();
       }
+
+      histoFile->Close();
 
       legend->Draw("same");
       bgStack.Draw("histo same");
@@ -465,8 +476,8 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
       gPad->RedrawAxis();
 
-      c1->SaveAs( Form("%s/%s/%s.eps", outputdir.c_str(), iHT->getName().c_str(), thisRegion.getName().c_str()) );
-      c1->SaveAs( Form("%s/%s/%s.png", outputdir.c_str(), iHT->getName().c_str(), thisRegion.getName().c_str()) );
+      c1->SaveAs( Form("%s/mt2_%s.eps", fullPath.c_str(), thisRegion.getName().c_str()) );
+      c1->SaveAs( Form("%s/mt2_%s.png", fullPath.c_str(), thisRegion.getName().c_str()) );
 
       delete c1;
       delete h2_axes;
