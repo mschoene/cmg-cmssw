@@ -55,22 +55,22 @@ if __name__ == '__main__':
    parser.usage = ""
    parser.add_option("-f","--filter", dest="filter",
                       default="",
-                      help="skim only selected dataset")
+                      help="prune only selected dataset")
 
    (options,args) = parser.parse_args()
    if len(args)==0:
      print "ERROR! Script needs at least one argument to run:"
-     print "   python skimBabies.py [input_directory] [output_subdirectory=\"noGenPart\"] [configFile=\"pruneBranches.txt\"]"
+     print "   python pruneBabies.py [input_directory] [output_subdirectory=\"noGenPart\"] [configFile=\"pruneBranches.txt\"]"
      exit()
 
    dir = args[0]
    subdir = "noGenPart"
-   if len(args)>1 : subdir = args[1]
+   if len(args)>1 : outdir = args[1]
    configFile = "pruneBranches.txt"
    if len(args)>2 : configFile = args[2]
 
    if options.filter !="" :
-     print "-> Skimming only files containing: " + str(options.filter)
+     print "-> Pruning only files containing: " + str(options.filter)
 
 
    print "-> Opening pruning config file: " + configFile
@@ -99,7 +99,8 @@ if __name__ == '__main__':
        #exit()
 
 
-   prunedir = dir + "/" + subdir
+   #prunedir = dir + "/" + subdir
+   prunedir = outdir
    os.system("mkdir -p " + prunedir)
 
    files = os.listdir(dir)

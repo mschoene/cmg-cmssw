@@ -37,12 +37,12 @@ if __name__ == '__main__':
    (options,args) = parser.parse_args()
    if len(args)==0:
      print "ERROR! Script needs at least one argument to run:"
-     print "   python skimBabies.py [input_directory] [output_subdirectory=\"mt2_200_ht_450\"] [selection=\"mt2>200. && ht>450.\"]"
+     print "   python skimBabies.py [input_directory] [output_directory=\"mt2_200_ht_450\"] [selection=\"mt2>200. && ht>450.\"]"
      exit()
 
    dir = args[0]
    subdir = "mt2_200_ht_450"
-   if len(args)>1 : subdir = args[1]
+   if len(args)>1 : outdir = args[1]
    cuts = "mt2>200. && ht>450."
    if len(args)>2 : cuts = args[2]
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
      print "-> Skimming only files containing: " + str(options.filter)
 
 
-   skimdir = dir + "/" + subdir
+   skimdir = outdir
    os.system("mkdir -p " + skimdir)
 
    files = os.listdir(dir)
