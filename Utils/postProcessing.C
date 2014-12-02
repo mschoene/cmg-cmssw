@@ -31,9 +31,9 @@ int postProcessing(string inputFile="input.root",
 
 int run(string sampleFileName="samples_50ns_miniaod.txt",
 	string treeName="treeProducerSusyFullHad", 
-	string inputPath = "/scratch/mmasciov/ToPostProcess/", 
-	string outputPath = "/scratch/mmasciov/PostProcessED/",  
-	string fileExtension = "_babytree.root"){
+	string inputPath = "/scratch/mmasciov/endNovember/ToPostProcess/", 
+	string outputPath = "/scratch/mmasciov/endNovember/PostProcess/",  
+	string fileExtension = "_PU_S14_POSTLS170_babytree_post.root"){
   
   int start_s=clock();
 
@@ -42,16 +42,16 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
   if(!IN)
     system(Form("wget https://mangano.web.cern.ch/mangano/public/MECCA/%s", sampleFileName.c_str()));
 
-  char buffer[300];
+  char buffer[512];
 
   std::cout << "------------------------------------" << std::endl;
   std::cout << "Sample File  " << sampleFileName << std::endl;
 
   int counter(0);
 
-  while( IN.getline(buffer, 300, '\n') ) {
+  while( IN.getline(buffer, 512, '\n') ) {
 
-    if (buffer[0] == '#' || buffer[0] == '\n' || buffer[0] == ' ')
+    if (buffer[0] == '#' || buffer[0] == '\n' || buffer[0] == ' ' || buffer[0] == '\0' || strlen(buffer)==1)
       continue;
 
     ++counter;
@@ -59,7 +59,7 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     std::cout << buffer << std::endl;
 
     int id;
-    char datasetName[300];
+    char datasetName[512];
     float xs, filter, kfactor;
     sscanf(buffer, "%d\t/%s\t%f\t%f\t%f\n", &id, datasetName, &xs, &filter, &kfactor);
     std::cout << id << "\t" << xs << "\t" << filter << "\t" << "\t" << kfactor << std::endl;
@@ -67,22 +67,67 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     std::string dataset(datasetName);
     std::size_t length = dataset.find("_Tune");
 
-    char fileName[300];
+    char fileName[512];
     std::size_t nameLength = dataset.copy(fileName, length, 0);
     fileName[nameLength]='\0';
 
+    std::string outputFileName(fileName);
+
+    for (int c = 0; c <= nameLength; ++c) {
+      
+      if (fileName[c] == '-' || fileName[c] == '_')
+	fileName[c] = '*';
+      
+      if (fileName[c]=='\0')
+	break;
+      
+    }
+
     std::string file(fileName);
-    std::string inputFile = inputPath + file + fileExtension;
-    std::string outputFile = outputPath + file + fileExtension;
+    system(Form("ls %s%s*.root > inputFILE.txt", inputPath.c_str(), file.c_str()));
+    
+    ifstream inputFILE("inputFILE.txt");
+    if(!inputFILE) {
+
+      std::cout << "ATTENTION: no input file, looking for next" << std::endl;
+      continue;
+    
+    }
+
+    char inputBuffer[512];
+
+    inputFILE.getline(inputBuffer, 512, '\n'); 
+      
+    if (inputBuffer[0] == '\0' || strlen(inputBuffer)==1){
+      
+      std::cout << "ATTENTION: no input file, looking for next" << std::endl;
+      continue;
+    
+    }
+    
+    std::string inputFile(inputBuffer);
+    std::string outputFile = outputPath + outputFileName + fileExtension;
     std::cout << inputFile << std::endl;
     std::cout << outputFile << std::endl;
+
+    FILE* rootfile;
+    rootfile = fopen(outputFile.c_str(), "r");
+    if (rootfile == NULL);
+    else {
+
+      std::cout << "ATTENTION: Target file already exists!!! I will skip this sample..." << std::endl;
+      continue;
+
+    }
 
     postProcessing(inputFile, outputFile, treeName, filter, kfactor, xs, id);
 
   }
   
   int stop_s=clock();
-  cout << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << endl;
+  std::cout << std::endl << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;
+
+  system(Form("rm -f inputFILE.txt"));
   
   return 0;
 }
