@@ -1,5 +1,0 @@
-genPart
-genLep
-genLepFromTau
-genTau
-#jet  pt>40. && abs(eta)< 2.4
