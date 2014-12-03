@@ -681,7 +681,7 @@ template<class T>
 MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const std::string& matchName ) {
 
 
-  std::set<MT2Analysis<T>*> analyses = readAllFromFile(fileName);
+  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName);
 
   if( analyses.size()==0 ) {
     std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
@@ -693,7 +693,7 @@ MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const
   if( matchName=="" ) {
     analysis = *(analyses.begin());
   } else {
-    for( typename std::set<MT2Analysis<T>*>::iterator iAn=analyses.begin(); iAn!=analyses.end(); ++iAn ) {
+    for( typename std::vector<MT2Analysis<T>*>::iterator iAn=analyses.begin(); iAn!=analyses.end(); ++iAn ) {
       if( (*iAn)->name == matchName ) {
         analysis = new MT2Analysis<T>(*(*iAn));
         break;
