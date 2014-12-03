@@ -59,17 +59,9 @@ fi
 outputPruning=dirOutPruning_$rand3
 if [ "$doPruning" = true ]; then
     if [ "$doSkimming" = true ]; then
-	inputDir=$outputSkimming
+      inputDir=$outputSkimming
     fi
-    echo "Running pruning... "
-    #here I create the pruning input file using the format from Francesco
-    branchesToPruneList=(${branchesToPrune//,/ });
-    pruningCfg=pruningInput.$rand4
-    for x in ${branchesToPruneList[*]}; do
-	echo $x >> $pruningCfg; 
-    done
-    python pruneBabies.py $inputDir $outputPruning $pruningCfg  --filter="$inputFilter"
-    rm $pruningCfg;
+    python pruneBabies.py $inputDir $outputPruning "$branchesToPrune"  --filter="$inputFilter"
 fi
 
 if [[ "$doSkimming" = true && ! "$doPruning" = true ]]; then
@@ -84,5 +76,4 @@ elif [[ "$doSkimming" = true &&  "$doPruning" = true ]]; then
     rm -r $outputSkimming;
 fi
 
-
-#cleaning
+echo "Find your files in: " $outputDir
