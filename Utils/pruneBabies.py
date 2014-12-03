@@ -72,7 +72,6 @@ if __name__ == '__main__':
    for f in files:
      print "found : " + str(f)
      if ".root" in f:
-       print "ok got it"
        if options.filter in f:
          pruneBaby(f, dir, prunedir, pruneBranches)
 
