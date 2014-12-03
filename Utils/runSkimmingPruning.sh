@@ -60,6 +60,7 @@ outputPruning=dirOutPruning_$rand3
 if [ "$doPruning" = true ]; then
     if [ "$doSkimming" = true ]; then
       inputDir=$outputSkimming
+      inputFilter=${inputFilter/'.root'}
     fi
     python pruneBabies.py $inputDir $outputPruning "$branchesToPrune"  --filter="$inputFilter"
 fi
