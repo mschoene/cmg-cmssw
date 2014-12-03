@@ -50,7 +50,7 @@ class MT2Analysis {
   MT2Analysis operator/=( float k );
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
-  static std::set<MT2Analysis*> readAllFromFile( TFile* file );
+  static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName );
   void writeToFile( const std::string& fileName, const std::string& option="RECREATE" );
 
   void finalize();
@@ -564,10 +564,18 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string
 
 
 template<class T> 
-std::set<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( TFile* file ) {
+std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName ) {
 
+  TFile* file = TFile::Open(fileName.c_str());
+ 
+  if( file==0 ) {
+    std::cout << "[MT2Analysis::readAllFromFile] ERROR! Can't open file: " << fileName << std::endl;
+    exit(1357);
+  }
 
-  std::set<MT2Analysis<T>*> analyses;
+  std::cout << "[MT2Analysis] Reading analyses from file: " << file->GetName() << std::endl;
+
+  std::vector<MT2Analysis<T>*> analyses;
 
 
   TIter next(file->GetListOfKeys());
@@ -656,7 +664,9 @@ std::set<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( TFile* file ) {
 
     } // while ht regions
 
-    analyses.insert( analysis );
+    analyses.push_back( analysis );
+
+    std::cout << "  -> added: " << analysis->name << std::endl;
 
   } // while analysis names
 
@@ -670,13 +680,8 @@ std::set<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( TFile* file ) {
 template<class T> 
 MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const std::string& matchName ) {
 
-  TFile* file = TFile::Open(fileName.c_str());
-  if( file==0 ) {
-    std::cout << "[MT2Analysis::readFromFile] Can't open file: " << fileName << "! Exiting." << std::endl;
-    exit(777);
-  }
 
-  std::set<MT2Analysis<T>*> analyses = readAllFromFile(file);
+  std::set<MT2Analysis<T>*> analyses = readAllFromFile(fileName);
 
   if( analyses.size()==0 ) {
     std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
