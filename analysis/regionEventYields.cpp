@@ -63,7 +63,7 @@ class MT2Config {
 
 
 MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet );
-MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector< MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max=-1 );
+MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector< MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max=-1, const std::string& legendName="" );
 
 std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2EstimateSyst>* EventYield_tot, MT2Analysis<MT2EstimateSyst>* EventYield_bg, std::ofstream& logfile );
 //std::vector<TH1D*> getSimTruthYieldHistos( const std::string& prefix, const std::string& fakeID, MT2AnalysisManager* manager, MT2YieldAnalysis* EventYield_tot );
@@ -126,8 +126,8 @@ int main( int argc, char* argv[] ) {
 
     MT2Analysis<MT2EstimateSyst>* EventYield_top   = mergeYields( EventYield, cfg.regionsSet(), "Top", 300, 499 );
     MT2Analysis<MT2EstimateSyst>* EventYield_qcd   = mergeYields( EventYield, cfg.regionsSet(), "QCD", 100, 199 );
-    MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, cfg.regionsSet(), "WJets", 500, 599 );
-    MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, cfg.regionsSet(), "DY_VV", 600, 899 );
+    MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, cfg.regionsSet(), "WJets", 500, 599, "W + Jets" );
+    MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, cfg.regionsSet(), "DY_VV", 600, 899, "Other" );
 
     bgYields.push_back( EventYield_top );
     bgYields.push_back( EventYield_qcd );
@@ -304,7 +304,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     myTree.GetEntry(iEntry);
 
-    int evt   = myTree.evt;
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
     float mt2  = myTree.mt2;
@@ -360,11 +359,11 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
 
 
-MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector<MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max ) {
+MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector<MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max, const std::string& legendName ) {
 
   if( id_max<0 ) id_max=id_min;
 
-  MT2Analysis<MT2EstimateSyst>* return_EventYield = new MT2Analysis<MT2EstimateSyst>(name, regionsSet);
+  MT2Analysis<MT2EstimateSyst>* return_EventYield = new MT2Analysis<MT2EstimateSyst>(name, regionsSet, id_min, legendName);
 
   for( unsigned i=0; i<EventYield.size(); ++i ) {
 
@@ -454,15 +453,29 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       }
 
 
-      TLegend* legend = new TLegend( 0.5, 0.9-(bgYields.size()+1)*0.06, 0.9, 0.9, thisRegion.getName().c_str());
+      std::pair<std::string, std::string> legendNames = thisRegion.getNiceNames();
+
+      TPaveText* regionText = new TPaveText( 0.18, 0.8, 0.55, 0.9, "brNDC" );
+      regionText->SetTextSize(0.035);
+      regionText->SetTextFont(42);
+      regionText->SetFillColor(0);
+      regionText->AddText( Form("#splitline{%s}{%s}", legendNames.first.c_str(), legendNames.second.c_str()) );
+      regionText->Draw("same");
+      
+
+      TLegend* legend = new TLegend( 0.6, 0.9-(bgYields.size()+1)*0.06, 0.93, 0.9 );
       legend->SetTextSize(0.038);
+      legend->SetTextFont(42);
       legend->SetFillColor(0);
-      legend->AddEntry( gr_data, "Data", "P" );
+      if( dummyAnalysis )
+        legend->AddEntry( gr_data, "Dummy", "P" );
+      else
+        legend->AddEntry( gr_data, "Data", "P" );
       histoFile->cd();
       for( unsigned i=0; i<bgYields.size(); ++i ) {  // reverse order in legend is prettier
         int index = bgYields.size() - i - 1;
         TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
-        legend->AddEntry( h1_bg, bgYields[index]->name.c_str(), "F" );
+        legend->AddEntry( h1_bg, bgYields[index]->fullName.c_str(), "F" );
         h1_bg->Write();
       }
 
@@ -489,14 +502,17 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
 
   // save also MT2Analyses:
-  std::string analysesDir = outputdir + "/analyses";
-  std::string mkdir_command2 = "mkdir -p " + analysesDir;
-  system(mkdir_command2.c_str());
-  data->writeToFile(analysesDir + "/data.root");
+  data->writeToFile(outputdir + "/analyses.root");
   for( unsigned i=0; i<bgYields.size(); ++i )
-    bgYields[i]->writeToFile(analysesDir + "/" + bgYields[i]->name + ".root");
+    bgYields[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
+  //std::string analysesDir = outputdir + "/analyses";
+  //std::string mkdir_command2 = "mkdir -p " + analysesDir;
+  //system(mkdir_command2.c_str());
+  //data->writeToFile(analysesDir + "/data.root");
+  //for( unsigned i=0; i<bgYields.size(); ++i )
+  //  bgYields[i]->writeToFile(analysesDir + "/" + bgYields[i]->name + ".root");
 
-  std::cout << "-> Saved MT2Analyses to " + analysesDir << std::endl;
+  //std::cout << "-> Saved MT2Analyses to " + analysesDir << std::endl;
 
 }
 

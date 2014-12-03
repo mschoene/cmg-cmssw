@@ -12,7 +12,9 @@ int main() {
   *analysis += *analysis2;
   analysis->writeToFile( "provaRead2.root" );
 
-  MT2Analysis<MT2EstimateSyst>* analysisSum = new MT2Analysis<MT2EstimateSyst>( *analysis + *analysis2 );
+  //MT2Analysis<MT2EstimateSyst>* analysisSum = new MT2Analysis<MT2EstimateSyst>( *analysis + *analysis2 );
+  MT2Analysis<MT2EstimateSyst>* analysisSum = new MT2Analysis<MT2EstimateSyst>( "provaSum", "8TeV" );
+  *analysisSum = *analysis + *analysis2;
   analysisSum->writeToFile( "provaSum.root" );
 
   return 0;

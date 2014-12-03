@@ -19,8 +19,8 @@ class MT2Analysis {
 
  public:
 
-  MT2Analysis( const std::string& aname, const std::string& regionsSet="13TeV", int id=-1 );
-  MT2Analysis( const std::string& aname, std::set<MT2HTRegion> htRegions, std::set<MT2SignalRegion> signalRegions, int id=-1 );
+  MT2Analysis( const std::string& aname, const std::string& regionsSet="13TeV", int id=-1, const std::string& fullName="" );
+  MT2Analysis( const std::string& aname, std::set<MT2HTRegion> htRegions, std::set<MT2SignalRegion> signalRegions, int id=-1, const std::string& fullName="" );
   MT2Analysis( const MT2Analysis& rhs );
   ~MT2Analysis();
 
@@ -32,6 +32,7 @@ class MT2Analysis {
   T* get( float ht, int njets, int nbjets, float met ) const;
 
   void setName( const std::string& newName );
+  void setFullName( const std::string& newName ) { fullName = newName; };
 
   const MT2Analysis& operator=( const MT2Analysis& rhs);
   MT2Analysis operator+( const MT2Analysis& rhs) const;
@@ -50,11 +51,12 @@ class MT2Analysis {
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
   static std::set<MT2Analysis*> readAllFromFile( TFile* file );
-  void writeToFile( const std::string& fileName );
+  void writeToFile( const std::string& fileName, const std::string& option="RECREATE" );
 
   void finalize();
 
   std::string name;
+  std::string fullName;
   int id;
 
 
@@ -89,10 +91,11 @@ class MT2Analysis {
 // constructors
 
 template<class T> 
-MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& regionsSet, int aid ) {
+MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& regionsSet, int aid, const std::string& afullname ) {
 
 
   name = aname;
+  fullName = (afullname!="") ? afullname : name;
   id = aid;
 
 
@@ -140,9 +143,10 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
 
 
 template<class T> 
-MT2Analysis<T>::MT2Analysis( const std::string& aname, std::set<MT2HTRegion> htRegions, std::set<MT2SignalRegion> signalRegions, int aid ) {
+MT2Analysis<T>::MT2Analysis( const std::string& aname, std::set<MT2HTRegion> htRegions, std::set<MT2SignalRegion> signalRegions, int aid, const std::string& afullname ) {
 
   name = aname;
+  fullName = (afullname!="") ? afullname : name;
   id = aid;
 
   for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) 
@@ -164,6 +168,7 @@ MT2Analysis<T>::MT2Analysis( const MT2Analysis& rhs ) {
   signalRegions_ = rhs.getSignalRegions();
 
   name = rhs.name;
+  fullName = rhs.fullName;
   id = rhs.id;
 
   this->createAnalysisStructure();
@@ -529,9 +534,9 @@ MT2Analysis<T> MT2Analysis<T>::operator/( float k ) {
 
 
 template<class T> 
-void MT2Analysis<T>::writeToFile( const std::string& fileName ) {
+void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string& option ) {
 
-  TFile* file = TFile::Open(fileName.c_str(), "recreate");
+  TFile* file = TFile::Open(fileName.c_str(), option.c_str() );
   file->cd();
 
   file->mkdir(this->name.c_str());

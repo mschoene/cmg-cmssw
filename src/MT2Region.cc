@@ -103,6 +103,30 @@ std::string MT2HTRegion::getName() const {
 }
 
 
+std::string MT2HTRegion::getNiceName() const {
+
+  std::string htMax_str(Form("%.0f", htMax));
+  char htPart[500];
+  if( htMax==-1 ) 
+    sprintf( htPart, "H_{T} > %.0f GeV", htMin );
+  else
+    sprintf( htPart, "%.0f < H_{T} < %.0f GeV", htMin, htMax );
+  std::string htPart_str(htPart);
+
+  char metPart[200];
+  if( metMin>0. )
+    sprintf( metPart, "E_{T}^{miss} > %.0f GeV", metMin );
+  std::string metPart_str(metPart);
+
+  std::string niceName = htPart_str;
+  if( metPart_str!="" ) niceName = niceName + ", " + metPart;
+ 
+  return niceName;
+
+}
+
+
+
 
 bool MT2HTRegion::operator==( const MT2HTRegion& rhs ) const {
 
@@ -216,6 +240,41 @@ std::string MT2SignalRegion::getName() const {
   return signal_region;
 
 }
+
+
+
+
+std::string MT2SignalRegion::getNiceName() const {
+
+  std::string niceName_j = getNiceJetName( "j", nJetsMin,  nJetsMax  );
+  std::string niceName_b = getNiceJetName( "b", nBJetsMin,  nBJetsMax  );
+
+  std::string niceName = niceName_j + ",  " + niceName_b;
+
+  return niceName;
+
+}
+
+
+std::string MT2SignalRegion::getNiceJetName( const std::string& pedix, int nmin, int nmax ) const {
+
+  char n[500];
+  if( nmax==nmin )
+    sprintf( n, "N(%s) = %d", pedix.c_str(), nmin );
+  else {
+    if( nmax==-1 )
+      sprintf( n, "N(%s) #geq %d", pedix.c_str(), nmin );
+    else
+      sprintf( n, "%d #leq N(%s) #leq %d", nmin, pedix.c_str(), nmax );
+  }
+
+  std::string nicename(n);
+
+  return nicename;
+
+}
+
+
 
 
 
@@ -399,5 +458,16 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
 
   }
 
+
+}
+
+
+std::pair< std::string, std::string > MT2Region::getNiceNames() const {
+
+  std::pair< std::string, std::string > returnPair;
+  returnPair.first = htRegion_->getNiceName();
+  returnPair.second = sigRegion_->getNiceName();
+
+  return returnPair;
 
 }
