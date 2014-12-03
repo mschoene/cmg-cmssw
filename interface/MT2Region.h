@@ -20,6 +20,8 @@ class MT2HTRegion {
   // univocal identifier:
   std::string getName() const;
 
+  std::string getNiceName() const;
+
 
   float htMin;
   float htMax;
@@ -54,7 +56,7 @@ class MT2SignalRegion {
   // univocal identifier:
   std::string getName() const;
 
-  std::string getSingleSignalRegionString( const std::string& suffix, int n_min , int n_max=-1 ) const;
+  std::string getNiceName() const;
   
   int nJetsMin; 
   int nJetsMax;
@@ -67,6 +69,9 @@ class MT2SignalRegion {
 
 
  private:
+
+  std::string getNiceJetName( const std::string& pedix, int nmin, int nmax ) const;
+  std::string getSingleSignalRegionString( const std::string& suffix, int n_min , int n_max=-1 ) const;
 
 };
 
@@ -94,6 +99,9 @@ class MT2Region {
   std::string getName() const {
     return htRegion_->getName() + "_" + sigRegion_->getName();
   }
+
+
+  std::pair< std::string, std::string > getNiceNames() const;
 
   void getBins( int& nBins, double*& bins ) const;
 
