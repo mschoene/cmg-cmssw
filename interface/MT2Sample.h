@@ -16,7 +16,7 @@ class MT2Sample {
   ~MT2Sample();
 
 
-  static std::vector<MT2Sample> loadSamples(const std::string& filename);
+  static std::vector<MT2Sample> loadSamples(const std::string& filename, int idMin=-1, int idMax=-1);
 
   // publica data members:
   std::string name;

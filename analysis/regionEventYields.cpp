@@ -282,11 +282,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
   bool isData = false;
 
-  // global sample weight:
-  ////Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents*sample.PU_avg_weight);
-  //Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents);
-  //cout << endl << "Weight " << weight <<endl; 
-
 
   std::cout << "-> Setting up MT2Analysis with name: " << sample.sname << std::endl;
   MT2Analysis<MT2EstimateSyst>* analysis = new MT2Analysis<MT2EstimateSyst>( sample.sname, regionsSet, sample.id );
