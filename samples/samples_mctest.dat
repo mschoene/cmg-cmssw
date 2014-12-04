@@ -1,33 +1,5 @@
-############################################################################################
-GENERAL
-Path		 /scratch/pandolf/CSA14_babytrees_QG/skim_mt2_200/
-#Path             /shome/
-#Path             dcap://t3se01.psi.ch/pnfs/psi.ch/cms/trivcat/store/user/leo/SUSY/MT2trees/MT2_V02-01-02/
-#__________________________________________________________________________________________
-# list of samples
-#
-### New baby-trees for Event Yield Calculation
+/scratch/pandolf/CSA14_babytrees_QG/skim_mt2_200/ZJetsToNuNu_HT200to400_PU_S14_POSTLS170_babytree_QG_post_skim.root
+/scratch/pandolf/CSA14_babytrees_QG/skim_mt2_200/ZJetsToNuNu_HT400to600_PU_S14_POSTLS170_babytree_QG_post_skim.root
+/scratch/pandolf/CSA14_babytrees_QG/skim_mt2_200/WJetsToLNu_HT200to400_PU_S14_POSTLS170_babytree_QG_post_skim.root
 
-
-SAMPLE
-Name		ZJetsToNuNu_HT200to400_PU_S14_POSTLS170
-SName		ZJetsToNuNu_HT200to400
-File		ZJetsToNuNu_HT200to400_PU_S14_POSTLS170_babytree_QG_post_skim.root
-
-SAMPLE
-Name		ZJetsToNuNu_HT400to600_PU_S14_POSTLS170
-SName		ZJetsToNuNu_HT400to600
-File		ZJetsToNuNu_HT400to600_PU_S14_POSTLS170_babytree_QG_post_skim.root
-
-
-SAMPLE
-Name		WJetsToLNu_HT200to400_PU_S14_POSTLS170
-SName		WJetsToLNu_HT200to400
-File		WJetsToLNu_HT200to400_PU_S14_POSTLS170_babytree_QG_post_skim.root
-
-SAMPLE
-Name		WJetsToLNu_HT400to600_PU_S14_POSTLS170
-SName		WJetsToLNu_HT400to600
-File		WJetsToLNu_HT400to600_PU_S14_POSTLS170_babytree_QG_post_skim.root
-
-
+/scratch/pandolf/CSA14_babytrees_QG/skim_mt2_200/WJetsToLNu_HT400to600_PU_S14_POSTLS170_babytree_QG_post_skim.root
