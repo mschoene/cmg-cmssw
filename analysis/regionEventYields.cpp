@@ -441,9 +441,10 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       h2_axes->Draw();
      
       THStack bgStack("bgStack", "");
-      for( unsigned i=0; i<bgYields.size(); ++i ) {
-        TH1D* h1_bg = bgYields[i]->get(thisRegion)->yield;
-        h1_bg->SetFillColor( colors[i] );
+      for( unsigned i=0; i<bgYields.size(); ++i ) { // reverse ordered stack is prettier
+        int index = bgYields.size() - i - 1;
+        TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
+        h1_bg->SetFillColor( colors[index] );
         bgStack.Add(h1_bg);
       }
 
@@ -467,10 +468,9 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       else
         legend->AddEntry( gr_data, "Data", "P" );
       histoFile->cd();
-      for( unsigned i=0; i<bgYields.size(); ++i ) {  // reverse order in legend is prettier
-        int index = bgYields.size() - i - 1;
-        TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
-        legend->AddEntry( h1_bg, bgYields[index]->fullName.c_str(), "F" );
+      for( unsigned i=0; i<bgYields.size(); ++i ) {  
+        TH1D* h1_bg = bgYields[i]->get(thisRegion)->yield;
+        legend->AddEntry( h1_bg, bgYields[i]->fullName.c_str(), "F" );
         h1_bg->Write();
       }
 

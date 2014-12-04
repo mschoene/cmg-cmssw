@@ -23,6 +23,15 @@ MT2Sample::~MT2Sample() {};
 
 std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, int idMin, int idMax) {
 
+  return loadSamples(filename, "", idMin, idMax);
+
+}
+
+
+
+std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, const std::string& filter, int idMin, int idMax) {
+
+
   std::vector<MT2Sample> fSamples;
 
   char buffer[200];
@@ -61,6 +70,9 @@ std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, int i
     } while (iss);
 
     TString rootFileName(pathDirs[pathDirs.size()-2]); // last element of vector always empty: take -2
+
+    if( filter!="" && !(rootFileName.Contains(filter.c_str())) ) continue;
+
     rootFileName.ReplaceAll( "_", " " );
  
     std::vector<std::string> fileNameParts;
@@ -76,12 +88,6 @@ std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, int i
       exit(1101);
     }
      
-    s.sname  = (fileNameParts.size()>1) ? fileNameParts[0] + "_" + fileNameParts[1] : fileNameParts[0];
-
-    s.name = fileNameParts[0];
-    for( unsigned i=1; i<fileNameParts.size() && i<5; ++i )
-      s.name += "_" + fileNameParts[i];
-
 
     TFile* file = TFile::Open(s.file.c_str());
     TTree* tree = (TTree*)file->Get("mt2");
@@ -105,8 +111,36 @@ std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, int i
     s.kfact    = evt_kfactor;
     s.scale1fb = evt_scale1fb;
 
-    if( idMin>=0 && evt_id<idMin ) continue;
-    if( idMax>=0 && evt_id>idMax ) continue;
+    if( idMin>=0 && s.id<idMin ) continue;
+    if( idMax>=0 && s.id>idMax ) continue;
+
+
+    bool isData = s.id>0 && s.id<100;
+
+    s.sname = fileNameParts[0];
+    s.name  = fileNameParts[0];
+
+    if( !isData ) {
+
+      bool foundPU=false;
+      int lastOnes = 3;
+      for( unsigned i=1; i<fileNameParts.size() && lastOnes>0; ++i ) {
+        s.name += "_" + fileNameParts[i];
+        if( fileNameParts[i]=="PU" ) foundPU = true;
+        if( !foundPU )
+          s.sname += "_" + fileNameParts[i];
+        else
+          lastOnes--;
+      }
+
+    } else {
+
+      for( unsigned i=1; i<fileNameParts.size(); ++i ) {
+        s.name += "_" + fileNameParts[i];
+        s.sname += "_" + fileNameParts[i];
+      }
+
+    }
 
 
     // Manually set variables
