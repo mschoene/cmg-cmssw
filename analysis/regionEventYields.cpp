@@ -106,7 +106,7 @@ int main( int argc, char* argv[] ) {
     std::cout << std::endl << std::endl;
     std::cout << "-> Loading samples from file: " << samplesFileName << std::endl;
 
-    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName);
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1, 999); // no signal for now
     if( fSamples.size()==0 ) {
       std::cout << "There must be an error: samples is empty!" << std::endl;
       exit(1209);
@@ -126,13 +126,15 @@ int main( int argc, char* argv[] ) {
 
     MT2Analysis<MT2EstimateSyst>* EventYield_top   = mergeYields( EventYield, cfg.regionsSet(), "Top", 300, 499 );
     MT2Analysis<MT2EstimateSyst>* EventYield_qcd   = mergeYields( EventYield, cfg.regionsSet(), "QCD", 100, 199 );
-    MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, cfg.regionsSet(), "WJets", 500, 599, "W + Jets" );
-    MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, cfg.regionsSet(), "DY_VV", 600, 899, "Other" );
+    MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, cfg.regionsSet(), "WJets", 500, 599, "W+jets" );
+    MT2Analysis<MT2EstimateSyst>* EventYield_zjets = mergeYields( EventYield, cfg.regionsSet(), "ZJets", 600, 699, "Z+jets" );
+    //MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, cfg.regionsSet(), "Diboson", 700, 899, "Other" );
 
-    bgYields.push_back( EventYield_top );
     bgYields.push_back( EventYield_qcd );
     bgYields.push_back( EventYield_wjets );
-    bgYields.push_back( EventYield_other );
+    bgYields.push_back( EventYield_zjets );
+    bgYields.push_back( EventYield_top );
+    //bgYields.push_back( EventYield_other );
 
   } else { // use data driven BG estimates
 
@@ -252,45 +254,19 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
   TTree* tree = (TTree*)file->Get("mt2");
   
 
-  std::ostringstream preselectionStream;
-  preselectionStream << " " 
-                     << "(nTaus20==0 && nMuons10==0 && nElectrons10==0)" << " && "
-                     << "(nVert > 0)"                      << " && "
-                     << "(nJet40 > 1)"                     << " && "
-                     << "(jet_pt[1] > 100)"                << " && "
-                     << "(ht > 450)"                       << " && "
-                     << "((ht < 750 && met_pt > 200) || (ht > 750 && met_pt > 30))" << " && "
-                     << "(deltaPhiMin > 0.3)"              << " && " 
-                     << "(diffMetMht < 70)"                << "&&"
-                     << "(mt2 > 50)" ;
-
-  
-
-  TString preselection = preselectionStream.str().c_str();
-  TString cuts = preselection;
-
-  TFile* tmpFile = TFile::Open("tmp.root", "recreate");
-  tmpFile->cd();
-
-  std::cout << "-> Skimming tree by applying preselection." << std::endl;
-  TTree* tree_reduced = tree->CopyTree(cuts);
 
   MT2Tree myTree;
-  myTree.Init(tree_reduced);
+  myTree.Init(tree);
 
-    
-
-  bool isData = false;
 
 
   std::cout << "-> Setting up MT2Analysis with name: " << sample.sname << std::endl;
   MT2Analysis<MT2EstimateSyst>* analysis = new MT2Analysis<MT2EstimateSyst>( sample.sname, regionsSet, sample.id );
 
-  
+  bool isData = sample.id<100 && sample.id>0;
 
-  int nentries = tree_reduced->GetEntries();
 
-  //ofstream ofs("events.log");
+  int nentries = tree->GetEntries();
 
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
@@ -299,11 +275,19 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     myTree.GetEntry(iEntry);
 
+    if( myTree.nTaus20>0 ) continue;
+    if( myTree.nMuons10>0 ) continue;
+    if( myTree.nElectrons10>0 ) continue;
+    if( myTree.nVert==0 ) continue;
+    if( myTree.nJet40<2 ) continue;
+    if( myTree.jet_pt[1]<100. ) continue;
+
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
     float mt2  = myTree.mt2;
     int njets  = myTree.nJet40;
     int nbjets = myTree.nBJet40;
+
 
     Double_t weight = myTree.evt_scale1fb; 
 
@@ -335,10 +319,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
   analysis->finalize();
   
   delete tree;
-  delete tree_reduced;
-
-  tmpFile->Close();
-  delete tmpFile;
 
   file->Close();
   delete file;
@@ -388,15 +368,16 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
   MT2DrawTools::setStyle();
 
   std::vector<int> colors;
-  if( bgYields.size()==3 ) {
+  if( bgYields.size()==3 ) { // estimates
     colors.push_back(402); 
     colors.push_back(430); 
     colors.push_back(418); 
-  } else {
-    colors.push_back(401); 
-    colors.push_back(417); 
-    colors.push_back(419); 
-    colors.push_back(855); 
+  } else { // mc
+    colors.push_back(401); // qcd
+    colors.push_back(417); // w+jets
+    colors.push_back(419); // z+jets
+    colors.push_back(855); // top
+    //colors.push_back(); // other
   }
 
 

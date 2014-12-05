@@ -18,6 +18,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TLegend.h"
+#include "TLorentzVector.h"
 
 
 
@@ -25,7 +26,7 @@
 
 
 
-MT2Analysis<MT2Estimate> computeYield( const std::string& outputdir, const MT2Sample& sample, const std::string& regionsSet );
+MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix="" );
 void drawCompare( const std::string& outputdir, MT2Analysis<MT2Estimate>* ZinvEstimate, MT2Analysis<MT2Estimate>* Zinv );
 void drawSinglePlot( const std::string& outputdir, const std::string& name, TH1D* h1_ratio, TH1D* h1_mc );
 
@@ -33,35 +34,42 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, TH1D
 int main( int argc, char* argv[] ) {
 
 
-  //if( argc!=2 ) {
-  //  std::cout << "USAGE: ./computeZinvFromGamma [samplesFileName]" << std::endl;
-  //  std::cout << "Exiting." << std::endl;
-  //  exit(11);
-  //}
-
-
-  //std::string samplesFile_gammaJet = "../samples/samples_gammaJet.dat";
-  std::string samplesFile_gammaJet = "../samples/samples_gammaJet_prova.dat";
-
-  std::cout << std::endl << std::endl;
-  std::cout << "-> Loading gamma+jet samples from file: " << samplesFile_gammaJet << std::endl;
-
-  std::vector<MT2Sample> samples_gammaJet = MT2Sample::loadSamples(samplesFile_gammaJet);
-  if( samples_gammaJet.size()==0 ) {
-    std::cout << "There must be an error: samples_gammaJet is empty!" << std::endl;
-    exit(1209);
+  if( argc!=2 ) {
+    std::cout << "USAGE: ./computeZinvFromGamma [samplesFileName]" << std::endl;
+    std::cout << "Exiting." << std::endl;
+    exit(11);
   }
 
 
-  //std::string samplesFile_Zinv = "../samples/samples_Zinv.dat";
-  std::string samplesFile_Zinv = "../samples/samples_Zinv_prova.dat";
+  std::string samplesFileName(argv[1]);
+
+  std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
 
   std::cout << std::endl << std::endl;
-  std::cout << "-> Loading gamma+jet samples from file: " << samplesFile_Zinv << std::endl;
+  std::cout << "-> Loading gamma+jet samples" << std::endl;
 
-  std::vector<MT2Sample> samples_Zinv = MT2Sample::loadSamples(samplesFile_Zinv);
+  std::vector<MT2Sample> samples_gammaJet = MT2Sample::loadSamples(samplesFile, "GJets");
+  if( samples_gammaJet.size()==0 ) {
+    std::cout << "There must be an error: didn't find any gamma+jet files in " << samplesFile << "!" << std::endl;
+    exit(1209);
+  }
+
+  std::cout << std::endl << std::endl;
+  std::cout << "-> Loading QCD samples" << std::endl;
+
+  std::vector<MT2Sample> samples_qcd = MT2Sample::loadSamples(samplesFile, "QCD");
+  if( samples_qcd.size()==0 ) {
+    std::cout << "There must be an error: didn't find any QCD files in " << samplesFile << "!" << std::endl;
+    exit(1205);
+  }
+  
+
+  std::cout << std::endl << std::endl;
+  std::cout << "-> Loading Zinv samples" << std::endl;
+
+  std::vector<MT2Sample> samples_Zinv = MT2Sample::loadSamples(samplesFile, "ZJetsToNuNu");
   if( samples_Zinv.size()==0 ) {
-    std::cout << "There must be an error: samples_Zinv is empty!" << std::endl;
+    std::cout << "There must be an error: didn't find any Zinv files in " << samplesFile << "!" << std::endl;
     exit(1207);
   }
 
@@ -71,35 +79,48 @@ int main( int argc, char* argv[] ) {
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
 
-  std::string outputdir = "ZinvEstimateFromGamma_" + regionsSet;
+  std::string outputdir = "ZinvEstimateFromGamma_" + samplesFileName + "_" + regionsSet;
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
   MT2Analysis<MT2Estimate>* gammaJet = new MT2Analysis<MT2Estimate>( "gammaJet", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
-    (*gammaJet) += (computeYield( outputdir, samples_gammaJet[i], regionsSet ));
+    (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet, "gamma_" ));
   }
   
+  MT2Analysis<MT2Estimate>* qcd = new MT2Analysis<MT2Estimate>( "qcd", regionsSet );
+  for( unsigned i=0; i<samples_qcd.size(); ++i ) {
+    (*qcd) += (computeYield( samples_qcd[i], regionsSet, "gamma_" ));
+  }
+
+  MT2Analysis<MT2Estimate>* gamma_plus_qcd = new MT2Analysis<MT2Estimate>( "gamma_plus_qcd", regionsSet );
+  *gamma_plus_qcd = *gammaJet;
+  *gamma_plus_qcd += *qcd;
+  
+  MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purity", regionsSet );
+  *purity = *gammaJet;
+  *purity /= *gamma_plus_qcd;
+  purity->setName( "purity" );
 
   MT2Analysis<MT2Estimate>* Zinv = new MT2Analysis<MT2Estimate>( "Zinv", regionsSet );
   for( unsigned i=0; i<samples_Zinv.size(); ++i ) {
-    (*Zinv) += (computeYield( outputdir, samples_Zinv[i], regionsSet ));
+    (*Zinv) += (computeYield( samples_Zinv[i], regionsSet ));
   }
   
 
-  system( "rm tmp.root" );
-  
+  //TH1::AddDirectory(kTRUE); // stupid ROOT memory allocation needs this
 
+  //MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( (*Zinv)/(*gammaJet) );
+  //ZgammaRatio->setName("ZgammaRatio");
   MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( "ZgammaRatio", regionsSet );
   (*ZgammaRatio) = (*Zinv);
   (*ZgammaRatio) /= (*gammaJet);
-  //ZgammaRatio->setName("ZgammaRatio");
 
-  MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( "ZinvEstimate" );
-  (*ZinvEstimate) = (*ZgammaRatio);
-  (*ZinvEstimate) *= (*gammaJet);
-  //MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( (*ZgammaRatio)*(*gammaJet) );
-  //ZinvEstimate->setName("ZinvEstimate");
+  //MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( "ZinvEstimate" );
+  //(*ZinvEstimate) = (*ZgammaRatio);
+  //(*ZinvEstimate) *= (*gammaJet);
+  MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( (*ZgammaRatio)*(*gammaJet) );
+  ZinvEstimate->setName("ZinvEstimate");
 
   std::string outputdirPlots = outputdir + "/plots";
   system(Form("mkdir -p %s", outputdirPlots.c_str()));
@@ -119,7 +140,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2Estimate> computeYield( const std::string& outputdir, const MT2Sample& sample, const std::string& regionsSet ) {
+MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix ) {
 
 
   std::cout << std::endl << std::endl;
@@ -131,45 +152,25 @@ MT2Analysis<MT2Estimate> computeYield( const std::string& outputdir, const MT2Sa
   std::cout << "-> Loaded tree: it has " << tree->GetEntries() << " entries." << std::endl;
 
 
-  std::ostringstream preselectionStream;
-  preselectionStream << " " 
-                     << "(nTaus20==0 && nMuons10==0 && nElectrons10==0)" << " && "
-                     << "(nVert > 0)"                      << " && "
-                     << "(nJet40 > 1)"                     << " && "
-                     << "(jet_pt[1] > 100)"                << " && "
-                     << "(ht > 450)"                       << " && "
-                     << "((ht < 750 && met_pt > 200) || (ht > 750 && met_pt > 30))" << " && "
-                     << "(deltaPhiMin > 0.3)"              << " && " 
-                     << "(diffMetMht < 70)"                << "&&"
-                     << "(mt2 > 50)" ;
-
-  
-
-  TString preselection = preselectionStream.str().c_str();
-  TString cuts = preselection;
-
-  TFile* tmpFile = TFile::Open("tmp.root", "recreate");
-  tmpFile->cd();
-  std::cout << "-> Skimming..." << std::endl;
-  TTree* tree_reduced = tree->CopyTree(cuts);
-  std::cout << "-> Done. Skimmed tree has " << tree_reduced->GetEntries() << " entries." << std::endl;
-
-    
-
-  // global sample weight:
-  ////Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents*sample.PU_avg_weight);
-  //Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents);
-  //cout << endl << "Weight " << weight <<endl; 
-
 
   MT2Analysis<MT2Estimate> analysis( sample.sname, regionsSet, sample.id );
 
   
   MT2Tree myTree;
-  myTree.Init(tree_reduced);
+  myTree.Init(tree);
 
-  int nentries = tree_reduced->GetEntries();
+  int nentries = tree->GetEntries();
 
+  float mt2;
+  tree->SetBranchAddress( Form("%smt2"   , prefix.c_str()), &mt2 );
+  float ht;
+  tree->SetBranchAddress( Form("%sht"    , prefix.c_str()), &ht );
+  float met;
+  tree->SetBranchAddress( Form("%smet_pt", prefix.c_str()), &met );
+  int njets;
+  tree->SetBranchAddress( Form("%snJet40", prefix.c_str()), &njets );
+  int nbjets;
+  tree->SetBranchAddress( Form("%snBJet40", prefix.c_str()), &nbjets );
 
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
@@ -178,16 +179,37 @@ MT2Analysis<MT2Estimate> computeYield( const std::string& outputdir, const MT2Sa
 
     myTree.GetEntry(iEntry);
 
+    if( myTree.nTaus20>0 ) continue;
+    if( myTree.nMuons10>0 ) continue;
+    if( myTree.nElectrons10>0 ) continue;
+    if( myTree.nVert==0 ) continue;
+    if( njets<2 ) continue;
 
-    float ht   = myTree.ht;
-    float met  = myTree.met_pt;
-    float mt2  = myTree.mt2;
-    int njets  = myTree.nJet40;
-    int nbjets = myTree.nBJet40;
+    if( myTree.ngamma>0 && prefix=="gamma_" ) {
+      TLorentzVector gamma;
+      gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
+      float found_pt = 0.;
+      int foundjet = 0;
+      for( unsigned i=0; i<myTree.njet; ++i ) {
+        TLorentzVector thisjet;
+        thisjet.SetPtEtaPhiM( myTree.jet_pt[i], myTree.jet_eta[i], myTree.jet_phi[i], myTree.jet_mass[i] );
+        if( gamma.DeltaR(thisjet)>0.4 ) foundjet++;
+        if( foundjet==2 ) {
+          found_pt = thisjet.Pt();
+          break;
+        }
+      }
+      if( found_pt<100. ) continue;
+
+    } else {
+
+      if( myTree.jet_pt[1]<100. ) continue;
+
+    }
+
 
     Double_t weight = myTree.evt_scale1fb; 
 
-    
     MT2Estimate* thisEstimate = analysis.get( ht, njets, nbjets, met );
     if( thisEstimate==0 ) continue;
 
@@ -201,10 +223,6 @@ MT2Analysis<MT2Estimate> computeYield( const std::string& outputdir, const MT2Sa
   
 
   delete tree;
-  delete tree_reduced;
-
-  tmpFile->Close();
-  delete tmpFile;
 
   file->Close();
   delete file;
