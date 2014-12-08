@@ -50,7 +50,7 @@ class MT2Analysis {
   MT2Analysis operator/=( float k );
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
-  static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName );
+  static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, bool verbose=true );
   void writeToFile( const std::string& fileName, const std::string& option="RECREATE" );
 
   void finalize();
@@ -564,7 +564,7 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string
 
 
 template<class T> 
-std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName ) {
+std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName, bool verbose ) {
 
   TFile* file = TFile::Open(fileName.c_str());
  
@@ -573,7 +573,7 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
     exit(1357);
   }
 
-  std::cout << "[MT2Analysis] Reading analyses from file: " << file->GetName() << std::endl;
+  if( verbose ) std::cout << "[MT2Analysis] Reading analyses from file: " << file->GetName() << std::endl;
 
   std::vector<MT2Analysis<T>*> analyses;
 
@@ -666,7 +666,7 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
 
     analyses.push_back( analysis );
 
-    std::cout << "  -> added: " << analysis->name << std::endl;
+    if( verbose ) std::cout << "  -> added: " << analysis->name << std::endl;
 
   } // while analysis names
 
@@ -681,7 +681,7 @@ template<class T>
 MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const std::string& matchName ) {
 
 
-  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName);
+  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName, false);
 
   if( analyses.size()==0 ) {
     std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
@@ -706,7 +706,7 @@ MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const
   }
 
 
-  if( analyses.size()>1 ) {
+  if( analyses.size()>1 && matchName=="" ) {
     std::cout << "[MT2Analysis::readFromFile] WARNING!!! Multiple analyses found, but reading only one ('" << analysis->name << "')" << std::endl;
     std::cout << "[MT2Analysis::readFromFile] (if you want to read all of them you should use readAllFromFile)" << std::endl;
   } else {
