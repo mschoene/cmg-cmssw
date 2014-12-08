@@ -21,6 +21,9 @@
 #include "interface/MT2EstimateSyst.h"
 #include "interface/MT2DrawTools.h"
 
+#include "TRandom3.h"
+
+
 #define mt2_cxx
 #include "interface/mt2.h"
 
@@ -62,6 +65,7 @@ class MT2Config {
 
 
 
+void randomizePoisson( MT2Analysis<MT2EstimateSyst>* data );
 MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet );
 MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector< MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max=-1, const std::string& legendName="" );
 
@@ -157,6 +161,7 @@ int main( int argc, char* argv[] ) {
   if( dummyAnalysis ) { // use same as MC
 
     for( unsigned i=0; i<bgYields.size(); ++i ) *data += *(bgYields[i]);
+    randomizePoisson( data );
 
   } else {
 
@@ -738,4 +743,34 @@ MT2Config::MT2Config( const std::string& configFileName ) {
 
   std::cout << std::endl;
      
+}
+
+
+
+void randomizePoisson( MT2Analysis<MT2EstimateSyst>* data ) {
+
+  TRandom3 rand(13);
+
+
+  std::set<MT2HTRegion> HTRegions = data->getHTRegions();
+  std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
+
+  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+
+      MT2Region thisRegion( (*iHT), (*iSR) );
+
+      TH1D* h1_data = data->get(thisRegion)->yield;
+
+      for( unsigned ibin=1; ibin<h1_data->GetXaxis()->GetNbins()+1; ++ibin ) {
+
+        int poisson_data = rand.Poisson(h1_data->GetBinContent(ibin));
+        h1_data->SetBinContent(ibin, poisson_data);
+        h1_data->SetBinError(ibin, 0.);
+
+      }  // for bins
+
+    }// for signal regions
+  }// for HT regions
+
 }
