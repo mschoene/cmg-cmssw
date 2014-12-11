@@ -295,7 +295,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
-    if( abs(met-ht)>0.5*met ) continue;
+    if( abs(myTree.diffMetMht)>0.5*met ) continue;
 
     float mt2  = myTree.mt2;
     int njets  = myTree.nJet40;
