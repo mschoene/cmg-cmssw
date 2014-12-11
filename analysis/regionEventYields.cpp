@@ -30,6 +30,7 @@
 
 
 bool dummyAnalysis = true;
+float lumi = 5.; // in fb-1
 
 
 
@@ -66,7 +67,7 @@ class MT2Config {
 
 
 void randomizePoisson( MT2Analysis<MT2EstimateSyst>* data );
-MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet );
+MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet, float lumi=1. );
 MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector< MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max=-1, const std::string& legendName="" );
 
 std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2EstimateSyst>* EventYield_tot, MT2Analysis<MT2EstimateSyst>* EventYield_bg, std::ofstream& logfile );
@@ -84,6 +85,8 @@ int main( int argc, char* argv[] ) {
     std::cout << "Exiting." << std::endl;
     exit(11);
   }
+
+
 
 
   std::string configFileName(argv[1]);
@@ -120,7 +123,7 @@ int main( int argc, char* argv[] ) {
     
     std::vector< MT2Analysis<MT2EstimateSyst>* > EventYield;
     for( unsigned i=0; i<fSamples.size(); ++i )
-      EventYield.push_back( computeYield( fSamples[i], cfg.regionsSet() ) );
+      EventYield.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
     
 
     system( "rm tmp.root" );
@@ -249,7 +252,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet ) {
+MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet, float lumi ) {
 
 
   std::cout << std::endl << std::endl;
@@ -283,18 +286,23 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
     if( myTree.nTaus20>0 ) continue;
     if( myTree.nMuons10>0 ) continue;
     if( myTree.nElectrons10>0 ) continue;
+    // ^^ the above should be changed
+
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
     if( myTree.jet_pt[1]<100. ) continue;
+    if( abs(myTree.deltaPhiMin)>0.3 ) continue;
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
+    if( abs(met-ht)>0.5*met ) continue;
+
     float mt2  = myTree.mt2;
     int njets  = myTree.nJet40;
     int nbjets = myTree.nBJet40;
 
 
-    Double_t weight = myTree.evt_scale1fb; 
+    Double_t weight = myTree.evt_scale1fb*lumi;
 
     float fullweight_btagUp = weight;
     float fullweight_btagDown = weight;
@@ -418,7 +426,8 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
       float xMin = h1_data->GetXaxis()->GetXmin();
       float xMax = h1_data->GetXaxis()->GetXmax();
-      float yMax = h1_data->GetMaximum()*1.5;
+      float yMax = TMath::Max( h1_data->GetMaximum()*1.5, (h1_data->GetMaximum() + h1_data->GetBinError(h1_data->GetMaximumBin()))*1.2);
+      //float yMax = h1_data->GetMaximum()*1.5;
   
       TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax );
       h2_axes->SetXTitle("M_{T2} [GeV]");
@@ -431,21 +440,29 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
         int index = bgYields.size() - i - 1;
         TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
         h1_bg->SetFillColor( colors[index] );
+        h1_bg->SetLineColor( kBlack );
         bgStack.Add(h1_bg);
       }
 
 
-      std::pair<std::string, std::string> legendNames = thisRegion.getNiceNames();
+      std::vector<std::string> niceNames = thisRegion.getNiceNames();
 
-      TPaveText* regionText = new TPaveText( 0.18, 0.8, 0.55, 0.9, "brNDC" );
-      regionText->SetTextSize(0.035);
-      regionText->SetTextFont(42);
-      regionText->SetFillColor(0);
-      regionText->AddText( Form("#splitline{%s}{%s}", legendNames.first.c_str(), legendNames.second.c_str()) );
-      regionText->Draw("same");
+      for( unsigned i=0; i<niceNames.size(); ++i ) {
+
+        float yMax = 0.9-(float)i*0.05;
+        float yMin = yMax - 0.05;
+        TPaveText* regionText = new TPaveText( 0.18, yMin, 0.55, yMax, "brNDC" );
+        regionText->SetTextSize(0.035);
+        regionText->SetTextFont(42);
+        regionText->SetFillColor(0);
+        regionText->SetTextAlign(11);
+        regionText->AddText( niceNames[i].c_str() );
+        regionText->Draw("same");
+    
+      }
       
 
-      TLegend* legend = new TLegend( 0.6, 0.9-(bgYields.size()+1)*0.06, 0.93, 0.9 );
+      TLegend* legend = new TLegend( 0.7, 0.9-(bgYields.size()+1)*0.06, 0.93, 0.9 );
       legend->SetTextSize(0.038);
       legend->SetTextFont(42);
       legend->SetFillColor(0);
@@ -466,7 +483,7 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       bgStack.Draw("histo same");
       gr_data->Draw("p same");
 
-      TPaveText* labelTop = MT2DrawTools::getLabelTop();
+      TPaveText* labelTop = MT2DrawTools::getLabelTop(lumi);
       labelTop->Draw("same");
 
       gPad->RedrawAxis();
