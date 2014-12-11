@@ -59,7 +59,7 @@ int main( int argc, char* argv[] ) {
   for( unsigned i=0; i < fSamples.size(); ++i )
     (*lostLeptonEstimate) += ( computeYield( fSamples[i], regionsSet, lumi ) );
   
-  lostLeptonEstimate->writeToFile("estimate_lostlepton.root");
+  lostLeptonEstimate->writeToFile("MT2LostLeptonEstimate_v0.root");
   
   return 0;
   
@@ -88,7 +88,7 @@ MT2Analysis<MT2EstimateSyst> computeYield( const MT2Sample& sample, const std::s
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
-    if( iEntry % 5 == 0 ) std::cout << "    Entry: " << iEntry << " / " << nentries << std::endl;
+    if( iEntry % 50000 == 0 ) std::cout << "    Entry: " << iEntry << " / " << nentries << std::endl;
 
     myTree.GetEntry(iEntry);
 
