@@ -81,6 +81,17 @@ TStyle* MT2DrawTools::setStyle() {
 
 
 
+TPaveText* MT2DrawTools::getLabelTop( float lumi ) {
+
+  char text[300];
+  sprintf( text, "CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV", lumi );
+  std::string text_str(text);
+  return getLabelTop(text_str);
+
+}
+
+
+
 TPaveText* MT2DrawTools::getLabelTop( const std::string& text ) {
 
   TPaveText* label_top = new TPaveText(0.4,0.953,0.975,0.975, "brNDC");

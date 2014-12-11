@@ -20,7 +20,7 @@ class MT2HTRegion {
   // univocal identifier:
   std::string getName() const;
 
-  std::string getNiceName() const;
+  std::vector< std::string > getNiceNames() const;
 
 
   float htMin;
@@ -48,7 +48,7 @@ class MT2SignalRegion {
  public:
 
   MT2SignalRegion( const std::string& name );
-  MT2SignalRegion( int njmin, int njmax, int nbmin, int nbmax );
+  MT2SignalRegion( int njmin, int njmax, int nbmin, int nbmax, float mtMaxCut=-1., float mt2MinCut=-1., float mt2MaxCut=-1., bool insideBox=true );
   MT2SignalRegion( const MT2SignalRegion& rhs );
 
   ~MT2SignalRegion() {};
@@ -56,12 +56,19 @@ class MT2SignalRegion {
   // univocal identifier:
   std::string getName() const;
 
+  std::string getNameMt() const;
   std::string getNiceName() const;
   
   int nJetsMin; 
   int nJetsMax;
   int nBJetsMin;
   int nBJetsMax;
+
+  float mtMax;
+  float mt2Min;
+  float mt2Max;
+
+  bool inBox; 
 
   bool operator==( const MT2SignalRegion& rhs ) const;
   bool operator!=( const MT2SignalRegion& rhs ) const;
@@ -71,7 +78,7 @@ class MT2SignalRegion {
  private:
 
   std::string getNiceJetName( const std::string& pedix, int nmin, int nmax ) const;
-  std::string getSingleSignalRegionString( const std::string& suffix, int n_min , int n_max=-1 ) const;
+  std::string getSingleJetString( const std::string& suffix, int n_min , int n_max=-1 ) const;
 
 };
 
@@ -101,7 +108,7 @@ class MT2Region {
   }
 
 
-  std::pair< std::string, std::string > getNiceNames() const;
+  std::vector< std::string > getNiceNames() const;
 
   void getBins( int& nBins, double*& bins ) const;
 
