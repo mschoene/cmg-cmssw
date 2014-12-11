@@ -581,7 +581,8 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string
 
   std::set<MT2HTRegion> htRegions = this->getHTRegions();
   for( std::set<MT2HTRegion>::iterator it=htRegions.begin(); it!=htRegions.end(); ++it ) {
-    file->cd(this->name.c_str());
+    file->cd();
+    //file->cd(this->name.c_str());
     file->mkdir(Form("%s/%s", this->name.c_str(), it->getName().c_str()) );
   }
 

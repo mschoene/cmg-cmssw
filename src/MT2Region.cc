@@ -170,6 +170,7 @@ MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
     parts.push_back(item);
   }
 
+
   if( parts.size()!=2 && parts.size()!=3 && parts.size()!=4 ) {
     std::cout << "[MT2SignalRegion]::MT2SignalRegion ERROR! Unrecognized MT2SignalRegion name: " << name << std::endl;
     exit(457);
@@ -209,10 +210,13 @@ MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
   
   if( parts.size()>2 ) {
     TString mtPart(parts[2]);
-    if( mtPart.BeginsWith("NOT") ) 
+    if( mtPart.BeginsWith("NOT") ) {
       sscanf( parts[2].c_str(), "NOTmt%f", &mtMax );
-    else 
+      inBox = false;
+    } else {
       sscanf( parts[2].c_str(), "mt%f", &mtMax );
+      inBox = true;
+    }
   }
 
   mt2Min = -1.;
@@ -222,7 +226,7 @@ MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
     sscanf( parts[3].c_str(), "mtt%fto%s", &mt2Min, mt2Max_char );
     std::string mt2Max_str(mt2Max_char);
     if( mt2Max_str!="Inf" )
-      sscanf( parts[3].c_str(), "mtt%fto%s", &mt2Min, mt2Max_char );
+      sscanf( parts[3].c_str(), "mtt%fto%f", &mt2Min, &mt2Max );
   }
 
 
@@ -348,9 +352,9 @@ std::string MT2SignalRegion::getNameMt() const {
     if( mt2Min>=0. ) {
       char mt2Part_char[200];
       if( mt2Max<0. ) 
-        sprintf( mt2Part_char, "mtt%.0f_Inf", mt2Min );
+        sprintf( mt2Part_char, "mtt%.0ftoInf", mt2Min );
       else
-        sprintf( mt2Part_char, "mtt%.0f_%.0f", mt2Min, mt2Max );
+        sprintf( mt2Part_char, "mtt%.0fto%.0f", mt2Min, mt2Max );
       std::string mt2Part_tmp(mt2Part_char);
       mt2Part = mt2Part_tmp;
     }

@@ -291,11 +291,12 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
     if( myTree.jet_pt[1]<100. ) continue;
-    if( abs(myTree.deltaPhiMin)>0.3 ) continue;
+    if( abs(myTree.deltaPhiMin)<0.3 ) continue;
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
-    if( abs(met-ht)>0.5*met ) continue;
+    //if( abs(met-ht)>0.5*met ) continue;
+    if( abs(myTree.diffMetMht)>0.5*met ) continue;
 
     float mt2  = myTree.mt2;
     int njets  = myTree.nJet40;
@@ -403,9 +404,10 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
     for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
 
-      std::string fullPath = outputdir + "/" + iHT->getName() + "/" + iSR->getName();
-      std::string mkdircommand = "mkdir -p " + fullPath;
-      system( mkdircommand.c_str() );
+      std::string fullPath = outputdir;
+      //std::string fullPath = outputdir + "/" + iHT->getName() + "/" + iSR->getName();
+      //std::string mkdircommand = "mkdir -p " + fullPath;
+      //system( mkdircommand.c_str() );
 
   
       MT2Region thisRegion( (*iHT), (*iSR) );
@@ -426,7 +428,10 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
       float xMin = h1_data->GetXaxis()->GetXmin();
       float xMax = h1_data->GetXaxis()->GetXmax();
-      float yMax = TMath::Max( h1_data->GetMaximum()*1.5, (h1_data->GetMaximum() + h1_data->GetBinError(h1_data->GetMaximumBin()))*1.2);
+      float yMax1 = h1_data->GetMaximum()*1.5;
+      float yMax2 = 1.2*(h1_data->GetMaximum() + h1_data->GetBinError(h1_data->GetMaximumBin()));
+      float yMax = (yMax1>yMax2) ? yMax1 : yMax2;
+      //float yMax = TMath::Max( h1_data->GetMaximum()*1.5, (h1_data->GetMaximum() + h1_data->GetBinError(h1_data->GetMaximumBin()))*1.2);
       //float yMax = h1_data->GetMaximum()*1.5;
   
       TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax );

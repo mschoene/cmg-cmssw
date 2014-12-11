@@ -62,7 +62,8 @@ int main( int argc, char* argv[] ) {
 
      MT2Region thisRegion(*iHT, *iSR);
 
-     std::string path = dir + "/" + iHT->getName() + "/" + iSR->getName();
+     std::string path = dir;
+     //std::string path = dir + "/" + iHT->getName() + "/" + iSR->getName();
      std::string histoFileName = path + "/histograms_" + thisRegion.getName() + ".root";
      TFile* histoFile = TFile::Open( histoFileName.c_str() );
      if( histoFile==0 ) {

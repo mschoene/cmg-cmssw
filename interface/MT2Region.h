@@ -122,6 +122,7 @@ class MT2Region {
 
   float htMin() { return htRegion_->htMin; };
   float htMax() { return htRegion_->htMax; };
+  float metMin() { return htRegion_->metMin; };
   int nJetsMin() { return sigRegion_->nJetsMin; };
   int nJetsMax() { return sigRegion_->nJetsMax; };
   int nBJetsMin() { return sigRegion_->nBJetsMin; };
