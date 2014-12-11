@@ -27,9 +27,9 @@ class MT2Analysis {
   std::set<MT2HTRegion> getHTRegions() const { return htRegions_; };
   std::set<MT2SignalRegion> getSignalRegions() const { return signalRegions_; };
 
-  MT2Region* getRegion( float ht, int njets, int nbjets, float met ) const;
+  MT2Region* getRegion( float ht, int njets, int nbjets, float met=-1., float mt=-1., float mt2=-1. ) const;
   T* get( const MT2Region& r ) const;
-  T* get( float ht, int njets, int nbjets, float met ) const;
+  T* get( float ht, int njets, int nbjets, float met=-1., float mt=-1., float mt2=-1. ) const;
 
   void setName( const std::string& newName );
   void setFullName( const std::string& newName ) { fullName = newName; };
@@ -110,6 +110,23 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions_.insert(MT2SignalRegion(2,  3, 1,  2)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 1,  2)); 
     signalRegions_.insert(MT2SignalRegion(2, -1, 3, -1)); 
+
+  } else if( regionsSet=="13TeV_CSA14" ) {
+
+    htRegions_.insert(MT2HTRegion( 450.,   575., 200.));
+    htRegions_.insert(MT2HTRegion( 575.,  1000., 200.));
+    htRegions_.insert(MT2HTRegion(1000.,    -1.,  30.));
+
+    signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 1,  1)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 1,  1)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400.)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400.)); 
+    signalRegions_.insert(MT2SignalRegion(2, -1, 3, -1, 200., 200., 400.)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400., false)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400., false)); 
+    signalRegions_.insert(MT2SignalRegion(2, -1, 3, -1, 200., 200., 400., false)); 
 
 
   } else if( regionsSet=="8TeV" ) {
@@ -195,7 +212,7 @@ MT2Analysis<T>::~MT2Analysis() {
 // other methods
 
 template<class T>
-MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met ) const {
+MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met, float mt, float mt2 ) const {
 
   MT2Region* foundRegion = 0;
   
@@ -208,7 +225,7 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
 
     if( ht<htMin ) continue;
     if( htMax>0. && ht>htMax ) continue;
-    if( met<metMin ) continue;
+    if( metMin>0.&& met>0. && met<metMin ) continue;
 
     int njetsmin  = (*it)->region->sigRegion()->nJetsMin;
     int njetsmax  = (*it)->region->sigRegion()->nJetsMax;
@@ -219,6 +236,26 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
     if( njetsmax >=0 && njets >njetsmax  ) continue;
     if( nbjetsmin>=0 && nbjets<nbjetsmin ) continue;
     if( nbjetsmax>=0 && nbjets>nbjetsmax ) continue;
+
+    float mtMax   = (*it)->region->sigRegion()->mtMax;
+    float mt2Min  = (*it)->region->sigRegion()->mt2Min;
+    float mt2Max  = (*it)->region->sigRegion()->mt2Max;
+    bool  inBox   = (*it)->region->sigRegion()->inBox;
+
+    if( mtMax>0. && mt>0. ) {
+    
+      bool isInsideBox_mt = mt<mtMax;
+
+      bool isInsideBox_mt2 = true;
+      if( mt2Min>0. && mt2>=0. )  {
+        if( mt2<mt2Min )              isInsideBox_mt2 = false;
+        if( mt2Max>0. && mt2>mt2Max ) isInsideBox_mt2 = false;
+      }
+
+      if( inBox  && !(isInsideBox_mt&&isInsideBox_mt2) ) continue;
+      if( !inBox &&  (isInsideBox_mt&&isInsideBox_mt2) ) continue;
+
+    }
 
     foundRegion = (*it)->region;
     break;
@@ -233,9 +270,9 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
 
 
 template<class T>
-T* MT2Analysis<T>::get( float ht, int njets, int nbjets, float met ) const {
+T* MT2Analysis<T>::get( float ht, int njets, int nbjets, float met, float mt, float mt2 ) const {
 
-  MT2Region* foundRegion = this->getRegion(ht, njets, nbjets, met);
+  MT2Region* foundRegion = this->getRegion(ht, njets, nbjets, met, mt, mt2);
 
   if( foundRegion==0 ) return 0;
 
