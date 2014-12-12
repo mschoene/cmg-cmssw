@@ -1,12 +1,9 @@
 #ifndef MT2EstimateSyst_h
 #define MT2EstimateSyst_h
 
-
 #include "MT2Estimate.h"
 
-
-
-
+#include <iostream>
 
 
 class MT2EstimateSyst : public MT2Estimate {
@@ -47,6 +44,8 @@ class MT2EstimateSyst : public MT2Estimate {
     yield_btagUp->Write();
     yield_btagDown->Write();
   }
+
+  virtual void print(const std::string& ofs);
 
  private:
 
