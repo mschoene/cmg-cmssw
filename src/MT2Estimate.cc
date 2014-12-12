@@ -1,6 +1,7 @@
 #include "../interface/MT2Estimate.h"
 
 #include <iostream>
+#include <fstream>
 #include <cmath>
 
 
@@ -238,5 +239,19 @@ MT2Estimate MT2Estimate::operator/=( float k ) const {
 void MT2Estimate::getShit( TFile* file, const std::string& path ) {
 
   yield = (TH1D*)file->Get(Form("%s/%s", path.c_str(), yield->GetName()));
+
+}
+
+void MT2Estimate::print(const std::string& ofs){
+
+  Int_t binXmin=1;
+  Int_t binXmax=5;
+
+  Double_t error;
+  Double_t integral = yield->IntegralAndError(binXmin, binXmax, error);
+
+  ofstream ofs_file;
+  ofs_file.open( ofs, std::ofstream::app );
+  ofs_file << " & " << integral << " \\pm " << error;
 
 }

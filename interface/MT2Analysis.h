@@ -5,6 +5,7 @@
 #include <string>
 #include <set>
 #include <iostream>
+#include <fstream>
 #include "MT2Region.h"
 #include "TFile.h"
 
@@ -52,6 +53,10 @@ class MT2Analysis {
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
   static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, bool verbose=true );
   void writeToFile( const std::string& fileName, const std::string& option="RECREATE" );
+
+  static void printFromFile (  const std::string& fileName, const std::string& ofs, const std::string& matchName="" );
+  static void print ( const std::vector<MT2Analysis*> analyses, const std::string& ofs, const std::string& matchName="" );
+  void print ( const std::string& ofs ) const;
 
   void finalize();
 
@@ -597,6 +602,103 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string
 
   std::cout << "-> Written '" << this->name << "' to file: " << fileName << std::endl;
 
+}
+
+
+
+template<class T>
+void MT2Analysis<T>::printFromFile( const std::string& fileName, const std::string& ofs, const std::string& matchName ) {
+
+  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName, false);
+
+  if( analyses.size()==0 ) {
+    std::cout << "[MT2Analysis::printFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
+    return 0;
+  }
+  else
+    print( analyses, ofs, matchName );
+
+}
+
+
+
+template<class T>
+void MT2Analysis<T>::print( std::vector<MT2Analysis<T>*> analyses, const std::string& ofs, const std::string& matchName ) {
+
+  MT2Analysis<T>* analysis = 0;
+  if( matchName=="" ) {
+    analysis = *(analyses.begin());
+  } else {
+    for( typename std::vector<MT2Analysis<T>*>::iterator iAn=analyses.begin(); iAn!=analyses.end(); ++iAn ) {
+      if( (*iAn)->name == matchName ) {
+	analysis = new MT2Analysis<T>(*(*iAn));
+        break;
+      }
+    }
+    if( analysis==0 ) {
+      std::cout << "[MT2Analysis::print] WARNING!!! Didn't find any MT2Analysis named '" << matchName << std::endl;
+      return 0;
+    }
+  }
+
+  if( analyses.size()>1 && matchName=="" ) {
+    std::cout << "[MT2Analysis::print] WARNING!!! Multiple analyses found, but reading only one ('" << analysis->name << "')" << std::endl;
+  } else {
+    std::cout << "[MT2Analysis::print] Grabbed MT2Analysis '" << analysis->name << std::endl;
+  }
+
+  analysis->print( ofs );
+
+}
+
+
+template<class T>
+void MT2Analysis<T>::print( const std::string& ofs ) const {
+
+  ifstream isExist(ofs);
+  if(isExist){
+    
+    std::cout << "File " << ofs.c_str() << " already exist!" << std::endl;
+    exit(1);
+
+  }
+
+  ofstream ofs_file;
+  if (ofs_file)
+  ofs_file.open( ofs, std::ofstream::app );
+  
+  std::set<MT2HTRegion> htRegions = this->getHTRegions();
+  
+  for ( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) { // loop on ht regions
+   
+    std::vector < std::string > htRegionName = iHT->getNiceNames();
+    for ( unsigned i=0; i < htRegionName.size(); ++i )
+      ofs_file << htRegionName[i] << std::endl;
+
+    std::set<MT2SignalRegion> sigRegions = this->getSignalRegions();
+    
+    for ( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ){
+      
+      std::string sigRegionName = iSR->getNiceName();
+      ofs_file << " & "  << sigRegionName;
+
+    }
+    
+    ofs_file << std::endl;
+
+    for( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ) {
+             	
+      MT2Region thisRegion( *iHT, *iSR );
+      T* thisT = this->get(thisRegion);
+      
+      thisT->print( ofs );
+
+    } // for signal regions                                                                                                                                                          
+
+    ofs_file << std::endl << std::endl;
+
+  } // for ht regions
+  
 }
 
 
