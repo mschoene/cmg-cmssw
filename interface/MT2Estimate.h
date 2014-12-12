@@ -76,12 +76,12 @@ class MT2Estimate {
   }
 
   virtual void getShit( TFile* file, const std::string& path );
-
-
+  
+  virtual void print(const std::string& ofs);
+  
  private:
   
   std::string name;
-
 
 };
 

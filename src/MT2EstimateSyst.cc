@@ -1,5 +1,7 @@
 #include "../interface/MT2EstimateSyst.h"
+
 #include <iostream>
+#include <fstream>
 #include <cmath>
 
 
@@ -60,6 +62,12 @@ void MT2EstimateSyst::getShit( TFile* file, const std::string& path ) {
 
 }
 
+
+void MT2EstimateSyst::print(const std::string& ofs){
+
+  MT2Estimate::print( ofs );
+
+}
 
 
 const MT2EstimateSyst& MT2EstimateSyst::operator=( const MT2EstimateSyst& rhs ) {
