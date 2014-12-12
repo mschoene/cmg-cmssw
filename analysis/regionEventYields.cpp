@@ -126,8 +126,6 @@ int main( int argc, char* argv[] ) {
       EventYield.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
     
 
-    system( "rm tmp.root" );
-
 
     std::cout << "-> Done looping on samples. Start merging." << std::endl;
 
