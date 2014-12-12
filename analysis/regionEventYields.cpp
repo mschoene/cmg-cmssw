@@ -3,9 +3,10 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include <cmath>
 
 
-#include "TTreeFormula.h"
+#include "TMath.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "THStack.h"
@@ -281,7 +282,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     myTree.GetEntry(iEntry);
 
-    if( myTree.nTaus20>0 ) continue;
+    //if( myTree.nTaus20>0 ) continue;
     if( myTree.nMuons10>0 ) continue;
     if( myTree.nElectrons10>0 ) continue;
     // ^^ the above should be changed
@@ -293,12 +294,49 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
-    //if( abs(met-ht)>0.5*met ) continue;
     if( abs(myTree.diffMetMht)>0.5*met ) continue;
 
     float mt2  = myTree.mt2;
     int njets  = myTree.nJet40;
     int nbjets = myTree.nBJet40;
+
+
+    //////To remove for next iteration
+    int nPFLep5LowMT = 0, nPFHad10LowMT = 0;
+    
+    for( int l=0; l < myTree.nisoTrack; ++l ){
+      
+      if( sqrt(2*(myTree.isoTrack_pt[l])*met*( 1 + TMath::Cos( myTree.isoTrack_phi[l] - myTree.met_phi ) ) ) > 100. )
+        continue;
+      
+      if ( ( fabs(myTree.isoTrack_pdgId[l]) == 11 || fabs(myTree.isoTrack_pdgId[l]) == 13 ) && myTree.isoTrack_pt[l] > 5 && myTree.isoTrack_absIso[l]/myTree.isoTrack_pt[l] < 0.2)
+	++nPFLep5LowMT;
+      
+      else if ( fabs(myTree.isoTrack_pdgId[l]) == 211 && myTree.isoTrack_pt[l] > 10 && myTree.isoTrack_absIso[l]/myTree.isoTrack_pt[l] < 0.1)
+	++nPFHad10LowMT;
+       
+    }
+    
+    if( nPFLep5LowMT > 0 || nPFHad10LowMT > 0 ) continue;
+    //////
+
+    ////// minMTBmet - also to remove at next iteration
+    float minMTBmet = 999999.;
+    for (int j=0; j< myTree.njet; ++j){
+      
+      if(myTree.jet_btagCSV[j] < 0.679) continue;
+      if(myTree.jet_pt[j] < 40 || fabs(myTree.jet_eta[j]) > 2.5) continue;
+      
+      float thisMTBmet = sqrt(2*(myTree.jet_pt[j])*met*( 1 + TMath::Cos( myTree.jet_phi[j] - myTree.met_phi ) ) );
+      if( thisMTBmet < minMTBmet ) minMTBmet = thisMTBmet;
+     
+    }
+    //////
+
+
+    // QCD SPIKE REMOVER BY HAND:
+    if( (sample.sname=="QCD-Pt120to170" && mt2 > 150) || (sample.name=="QCD-Pt170to300" && mt2 > 150) || (sample.name=="QCD-Pt300to470" && mt2 > 175) || (sample.name=="QCD-Pt470to600" && mt2 > 200))
+      continue;
 
 
     Double_t weight = myTree.evt_scale1fb*lumi;
@@ -308,7 +346,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
 
 
-    MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met );
+    MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met, minMTBmet, mt2 );
     if( thisEstimate==0 ) continue;
 
     if( isData ) {
@@ -420,15 +458,28 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       TGraphAsymmErrors* gr_data = MT2DrawTools::getPoissonGraph(h1_data);
       gr_data->SetMarkerStyle(20);
       gr_data->SetMarkerSize(1.6);
+
+
+      THStack bgStack("bgStack", "");
+      for( unsigned i=0; i<bgYields.size(); ++i ) { // reverse ordered stack is prettier
+        int index = bgYields.size() - i - 1;
+        TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
+        h1_bg->SetFillColor( colors[index] );
+        h1_bg->SetLineColor( kBlack );
+        bgStack.Add(h1_bg);
+      }
   
+
       TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
       c1->cd();
 
       float xMin = h1_data->GetXaxis()->GetXmin();
       float xMax = h1_data->GetXaxis()->GetXmax();
       float yMax1 = h1_data->GetMaximum()*1.5;
-      float yMax2 = 1.2*(h1_data->GetMaximum() + h1_data->GetBinError(h1_data->GetMaximumBin()));
+      float yMax2 = 1.5*(h1_data->GetMaximum() + sqrt(h1_data->GetMaximum()));
+      float yMax3 = 1.5*(bgStack.GetMaximum());
       float yMax = (yMax1>yMax2) ? yMax1 : yMax2;
+      if( yMax3 > yMax ) yMax = yMax3;
       //float yMax = TMath::Max( h1_data->GetMaximum()*1.5, (h1_data->GetMaximum() + h1_data->GetBinError(h1_data->GetMaximumBin()))*1.2);
       //float yMax = h1_data->GetMaximum()*1.5;
   
@@ -438,14 +489,6 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
       h2_axes->Draw();
      
-      THStack bgStack("bgStack", "");
-      for( unsigned i=0; i<bgYields.size(); ++i ) { // reverse ordered stack is prettier
-        int index = bgYields.size() - i - 1;
-        TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
-        h1_bg->SetFillColor( colors[index] );
-        h1_bg->SetLineColor( kBlack );
-        bgStack.Add(h1_bg);
-      }
 
 
       std::vector<std::string> niceNames = thisRegion.getNiceNames();
@@ -493,6 +536,7 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
       c1->SaveAs( Form("%s/mt2_%s.eps", fullPath.c_str(), thisRegion.getName().c_str()) );
       c1->SaveAs( Form("%s/mt2_%s.png", fullPath.c_str(), thisRegion.getName().c_str()) );
+      c1->SaveAs( Form("%s/mt2_%s.pdf", fullPath.c_str(), thisRegion.getName().c_str()) );
 
       delete c1;
       delete h2_axes;
