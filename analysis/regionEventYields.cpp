@@ -82,7 +82,7 @@ int main( int argc, char* argv[] ) {
 
 
   if( argc!=2 ) {
-    std::cout << "USAGE: ./regionEventYields_postBabyTrees [configFileName]" << std::endl;
+    std::cout << "USAGE: ./regionEventYields [configFileName]" << std::endl;
     std::cout << "Exiting." << std::endl;
     exit(11);
   }
@@ -290,7 +290,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
     if( myTree.jet_pt[1]<100. ) continue;
-    if( abs(myTree.deltaPhiMin)<0.3 ) continue;
+    if( myTree.deltaPhiMin<0.3 ) continue;
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
