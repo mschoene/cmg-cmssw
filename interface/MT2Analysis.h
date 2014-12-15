@@ -25,6 +25,7 @@ class MT2Analysis {
   MT2Analysis( const MT2Analysis& rhs );
   ~MT2Analysis();
 
+  std::set<MT2Region> getRegions() const;
   std::set<MT2HTRegion> getHTRegions() const { return htRegions_; };
   std::set<MT2SignalRegion> getSignalRegions() const { return signalRegions_; };
 
@@ -215,6 +216,24 @@ MT2Analysis<T>::~MT2Analysis() {
 
 
 // other methods
+
+template<class T>
+std::set<MT2Region> MT2Analysis<T>::getRegions() const {
+
+  std::set<MT2Region> regions;
+
+  for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
+
+    regions.insert( (*it)->region );
+
+  }
+
+  return regions;
+
+}
+
+
+
 
 template<class T>
 MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met, float mt, float mt2 ) const {
