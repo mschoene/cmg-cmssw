@@ -275,7 +275,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
   int nentries = tree->GetEntries();
 
-
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
     if( iEntry % 50000 == 0 ) std::cout << "    Entry: " << iEntry << " / " << nentries << std::endl;
@@ -335,7 +334,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
 
     // QCD SPIKE REMOVER BY HAND:
-    if( (sample.sname=="QCD-Pt120to170" && mt2 > 150) || (sample.name=="QCD-Pt170to300" && mt2 > 150) || (sample.name=="QCD-Pt300to470" && mt2 > 175) || (sample.name=="QCD-Pt470to600" && mt2 > 200))
+    if( (sample.sname=="QCD_Pt-120to170" && mt2 > 150) || (sample.name=="QCD_Pt-170to300" && mt2 > 150) || (sample.name=="QCD_Pt-300to470" && mt2 > 175) || (sample.name=="QCD_Pt-470to600" && mt2 > 200))
       continue;
 
 
@@ -343,7 +342,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     float fullweight_btagUp = weight;
     float fullweight_btagDown = weight;
-
 
 
     MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met, minMTBmet, mt2 );
