@@ -675,6 +675,8 @@ public :
    TBranch        *b_evt_nEvts;   //!
    TBranch        *b_evt_id;   //!
 
+   bool loadGenStuff;
+
    MT2Tree(TTree *tree=0);
    virtual ~MT2Tree();
    virtual Int_t    Cut(Long64_t entry);
@@ -691,17 +693,9 @@ public :
 #ifdef mt2_cxx
 MT2Tree::MT2Tree(TTree *tree) : fChain(0) 
 {
-//// if parameter tree is not specified (or zero), connect the file
-//// used to generate this class and read the Tree.
-//   if (tree == 0) {
-//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/scratch/mmasciov/12December/POSTPROCESS/TTJets_MSDecaysCKM_central_PU_S14_POSTLS170_babytree_post.root");
-//      if (!f || !f->IsOpen()) {
-//         f = new TFile("/scratch/mmasciov/12December/POSTPROCESS/TTJets_MSDecaysCKM_central_PU_S14_POSTLS170_babytree_post.root");
-//      }
-//      f->GetObject("mt2",tree);
-//
-//   }
-//   Init(tree);
+
+  loadGenStuff = true;
+
 }
 
 MT2Tree::~MT2Tree()
@@ -907,26 +901,66 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("fatJet_tau1", fatJet_tau1, &b_fatJet_tau1);
    fChain->SetBranchAddress("fatJet_tau2", fatJet_tau2, &b_fatJet_tau2);
    fChain->SetBranchAddress("fatJet_tau3", fatJet_tau3, &b_fatJet_tau3);
-   fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
-   fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
-   fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);
-   fChain->SetBranchAddress("genPart_phi", genPart_phi, &b_genPart_phi);
-   fChain->SetBranchAddress("genPart_mass", genPart_mass, &b_genPart_mass);
-   fChain->SetBranchAddress("genPart_pdgId", genPart_pdgId, &b_genPart_pdgId);
-   fChain->SetBranchAddress("genPart_charge", genPart_charge, &b_genPart_charge);
-   fChain->SetBranchAddress("genPart_status", genPart_status, &b_genPart_status);
-   fChain->SetBranchAddress("genPart_motherId", genPart_motherId, &b_genPart_motherId);
-   fChain->SetBranchAddress("genPart_motherIndex", genPart_motherIndex, &b_genPart_motherIndex);
-   fChain->SetBranchAddress("genPart_grandmaId", genPart_grandmaId, &b_genPart_grandmaId);
-   fChain->SetBranchAddress("ngenTau", &ngenTau, &b_ngenTau);
-   fChain->SetBranchAddress("genTau_pt", genTau_pt, &b_genTau_pt);
-   fChain->SetBranchAddress("genTau_eta", genTau_eta, &b_genTau_eta);
-   fChain->SetBranchAddress("genTau_phi", genTau_phi, &b_genTau_phi);
-   fChain->SetBranchAddress("genTau_mass", genTau_mass, &b_genTau_mass);
-   fChain->SetBranchAddress("genTau_pdgId", genTau_pdgId, &b_genTau_pdgId);
-   fChain->SetBranchAddress("genTau_charge", genTau_charge, &b_genTau_charge);
-   fChain->SetBranchAddress("genTau_status", genTau_status, &b_genTau_status);
-   fChain->SetBranchAddress("genTau_sourceId", genTau_sourceId, &b_genTau_sourceId);
+   if( loadGenStuff ) {
+     fChain->SetBranchAddress("ngenPart", &ngenPart, &b_ngenPart);
+     fChain->SetBranchAddress("genPart_pt", genPart_pt, &b_genPart_pt);
+     fChain->SetBranchAddress("genPart_eta", genPart_eta, &b_genPart_eta);
+     fChain->SetBranchAddress("genPart_phi", genPart_phi, &b_genPart_phi);
+     fChain->SetBranchAddress("genPart_mass", genPart_mass, &b_genPart_mass);
+     fChain->SetBranchAddress("genPart_pdgId", genPart_pdgId, &b_genPart_pdgId);
+     fChain->SetBranchAddress("genPart_charge", genPart_charge, &b_genPart_charge);
+     fChain->SetBranchAddress("genPart_status", genPart_status, &b_genPart_status);
+     fChain->SetBranchAddress("genPart_motherId", genPart_motherId, &b_genPart_motherId);
+     fChain->SetBranchAddress("genPart_motherIndex", genPart_motherIndex, &b_genPart_motherIndex);
+     fChain->SetBranchAddress("genPart_grandmaId", genPart_grandmaId, &b_genPart_grandmaId);
+     fChain->SetBranchAddress("ngenTau", &ngenTau, &b_ngenTau);
+     fChain->SetBranchAddress("genTau_pt", genTau_pt, &b_genTau_pt);
+     fChain->SetBranchAddress("genTau_eta", genTau_eta, &b_genTau_eta);
+     fChain->SetBranchAddress("genTau_phi", genTau_phi, &b_genTau_phi);
+     fChain->SetBranchAddress("genTau_mass", genTau_mass, &b_genTau_mass);
+     fChain->SetBranchAddress("genTau_pdgId", genTau_pdgId, &b_genTau_pdgId);
+     fChain->SetBranchAddress("genTau_charge", genTau_charge, &b_genTau_charge);
+     fChain->SetBranchAddress("genTau_status", genTau_status, &b_genTau_status);
+     fChain->SetBranchAddress("genTau_sourceId", genTau_sourceId, &b_genTau_sourceId);
+     fChain->SetBranchAddress("ngenNu", &ngenNu, &b_ngenNu);
+     fChain->SetBranchAddress("genNu_pt", genNu_pt, &b_genNu_pt);
+     fChain->SetBranchAddress("genNu_eta", genNu_eta, &b_genNu_eta);
+     fChain->SetBranchAddress("genNu_phi", genNu_phi, &b_genNu_phi);
+     fChain->SetBranchAddress("genNu_mass", genNu_mass, &b_genNu_mass);
+     fChain->SetBranchAddress("genNu_pdgId", genNu_pdgId, &b_genNu_pdgId);
+     fChain->SetBranchAddress("genNu_charge", genNu_charge, &b_genNu_charge);
+     fChain->SetBranchAddress("genNu_status", genNu_status, &b_genNu_status);
+     fChain->SetBranchAddress("genNu_sourceId", genNu_sourceId, &b_genNu_sourceId);
+     fChain->SetBranchAddress("ngenLepFromTau", &ngenLepFromTau, &b_ngenLepFromTau);
+     fChain->SetBranchAddress("genLepFromTau_pt", genLepFromTau_pt, &b_genLepFromTau_pt);
+     fChain->SetBranchAddress("genLepFromTau_eta", genLepFromTau_eta, &b_genLepFromTau_eta);
+     fChain->SetBranchAddress("genLepFromTau_phi", genLepFromTau_phi, &b_genLepFromTau_phi);
+     fChain->SetBranchAddress("genLepFromTau_mass", genLepFromTau_mass, &b_genLepFromTau_mass);
+     fChain->SetBranchAddress("genLepFromTau_pdgId", genLepFromTau_pdgId, &b_genLepFromTau_pdgId);
+     fChain->SetBranchAddress("genLepFromTau_charge", genLepFromTau_charge, &b_genLepFromTau_charge);
+     fChain->SetBranchAddress("genLepFromTau_status", genLepFromTau_status, &b_genLepFromTau_status);
+     fChain->SetBranchAddress("genLepFromTau_sourceId", genLepFromTau_sourceId, &b_genLepFromTau_sourceId);
+     fChain->SetBranchAddress("ngenLep", &ngenLep, &b_ngenLep);
+     fChain->SetBranchAddress("genLep_pt", genLep_pt, &b_genLep_pt);
+     fChain->SetBranchAddress("genLep_eta", genLep_eta, &b_genLep_eta);
+     fChain->SetBranchAddress("genLep_phi", genLep_phi, &b_genLep_phi);
+     fChain->SetBranchAddress("genLep_mass", genLep_mass, &b_genLep_mass);
+     fChain->SetBranchAddress("genLep_pdgId", genLep_pdgId, &b_genLep_pdgId);
+     fChain->SetBranchAddress("genLep_charge", genLep_charge, &b_genLep_charge);
+     fChain->SetBranchAddress("genLep_status", genLep_status, &b_genLep_status);
+     fChain->SetBranchAddress("genLep_sourceId", genLep_sourceId, &b_genLep_sourceId);
+     fChain->SetBranchAddress("nGenP6StatusThree", &nGenP6StatusThree, &b_nGenP6StatusThree);
+     fChain->SetBranchAddress("GenP6StatusThree_pt", GenP6StatusThree_pt, &b_GenP6StatusThree_pt);
+     fChain->SetBranchAddress("GenP6StatusThree_eta", GenP6StatusThree_eta, &b_GenP6StatusThree_eta);
+     fChain->SetBranchAddress("GenP6StatusThree_phi", GenP6StatusThree_phi, &b_GenP6StatusThree_phi);
+     fChain->SetBranchAddress("GenP6StatusThree_mass", GenP6StatusThree_mass, &b_GenP6StatusThree_mass);
+     fChain->SetBranchAddress("GenP6StatusThree_pdgId", GenP6StatusThree_pdgId, &b_GenP6StatusThree_pdgId);
+     fChain->SetBranchAddress("GenP6StatusThree_charge", GenP6StatusThree_charge, &b_GenP6StatusThree_charge);
+     fChain->SetBranchAddress("GenP6StatusThree_status", GenP6StatusThree_status, &b_GenP6StatusThree_status);
+     fChain->SetBranchAddress("GenP6StatusThree_motherId", GenP6StatusThree_motherId, &b_GenP6StatusThree_motherId);
+     fChain->SetBranchAddress("GenP6StatusThree_motherIndex", GenP6StatusThree_motherIndex, &b_GenP6StatusThree_motherIndex);
+     fChain->SetBranchAddress("GenP6StatusThree_grandmaId", GenP6StatusThree_grandmaId, &b_GenP6StatusThree_grandmaId);
+   }
    fChain->SetBranchAddress("nisoTrack", &nisoTrack, &b_nisoTrack);
    fChain->SetBranchAddress("isoTrack_pt", isoTrack_pt, &b_isoTrack_pt);
    fChain->SetBranchAddress("isoTrack_eta", isoTrack_eta, &b_isoTrack_eta);
@@ -957,15 +991,6 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("jet_qgl", jet_qgl, &b_jet_qgl);
    fChain->SetBranchAddress("jet_partonId", jet_partonId, &b_jet_partonId);
    fChain->SetBranchAddress("jet_partonMotherId", jet_partonMotherId, &b_jet_partonMotherId);
-   fChain->SetBranchAddress("ngenNu", &ngenNu, &b_ngenNu);
-   fChain->SetBranchAddress("genNu_pt", genNu_pt, &b_genNu_pt);
-   fChain->SetBranchAddress("genNu_eta", genNu_eta, &b_genNu_eta);
-   fChain->SetBranchAddress("genNu_phi", genNu_phi, &b_genNu_phi);
-   fChain->SetBranchAddress("genNu_mass", genNu_mass, &b_genNu_mass);
-   fChain->SetBranchAddress("genNu_pdgId", genNu_pdgId, &b_genNu_pdgId);
-   fChain->SetBranchAddress("genNu_charge", genNu_charge, &b_genNu_charge);
-   fChain->SetBranchAddress("genNu_status", genNu_status, &b_genNu_status);
-   fChain->SetBranchAddress("genNu_sourceId", genNu_sourceId, &b_genNu_sourceId);
    fChain->SetBranchAddress("nlep", &nlep, &b_nlep);
    fChain->SetBranchAddress("lep_pt", lep_pt, &b_lep_pt);
    fChain->SetBranchAddress("lep_eta", lep_eta, &b_lep_eta);
@@ -1008,15 +1033,6 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("lep_mcMatchId", lep_mcMatchId, &b_lep_mcMatchId);
    fChain->SetBranchAddress("lep_mcMatchAny", lep_mcMatchAny, &b_lep_mcMatchAny);
    fChain->SetBranchAddress("lep_mcMatchTau", lep_mcMatchTau, &b_lep_mcMatchTau);
-   fChain->SetBranchAddress("ngenLepFromTau", &ngenLepFromTau, &b_ngenLepFromTau);
-   fChain->SetBranchAddress("genLepFromTau_pt", genLepFromTau_pt, &b_genLepFromTau_pt);
-   fChain->SetBranchAddress("genLepFromTau_eta", genLepFromTau_eta, &b_genLepFromTau_eta);
-   fChain->SetBranchAddress("genLepFromTau_phi", genLepFromTau_phi, &b_genLepFromTau_phi);
-   fChain->SetBranchAddress("genLepFromTau_mass", genLepFromTau_mass, &b_genLepFromTau_mass);
-   fChain->SetBranchAddress("genLepFromTau_pdgId", genLepFromTau_pdgId, &b_genLepFromTau_pdgId);
-   fChain->SetBranchAddress("genLepFromTau_charge", genLepFromTau_charge, &b_genLepFromTau_charge);
-   fChain->SetBranchAddress("genLepFromTau_status", genLepFromTau_status, &b_genLepFromTau_status);
-   fChain->SetBranchAddress("genLepFromTau_sourceId", genLepFromTau_sourceId, &b_genLepFromTau_sourceId);
    fChain->SetBranchAddress("ngamma", &ngamma, &b_ngamma);
    fChain->SetBranchAddress("gamma_pt", gamma_pt, &b_gamma_pt);
    fChain->SetBranchAddress("gamma_eta", gamma_eta, &b_gamma_eta);
@@ -1032,26 +1048,6 @@ void MT2Tree::Init(TTree *tree)
    fChain->SetBranchAddress("gamma_phIso", gamma_phIso, &b_gamma_phIso);
    fChain->SetBranchAddress("gamma_mcMatchId", gamma_mcMatchId, &b_gamma_mcMatchId);
    fChain->SetBranchAddress("gamma_genIso", gamma_genIso, &b_gamma_genIso);
-   fChain->SetBranchAddress("nGenP6StatusThree", &nGenP6StatusThree, &b_nGenP6StatusThree);
-   fChain->SetBranchAddress("GenP6StatusThree_pt", GenP6StatusThree_pt, &b_GenP6StatusThree_pt);
-   fChain->SetBranchAddress("GenP6StatusThree_eta", GenP6StatusThree_eta, &b_GenP6StatusThree_eta);
-   fChain->SetBranchAddress("GenP6StatusThree_phi", GenP6StatusThree_phi, &b_GenP6StatusThree_phi);
-   fChain->SetBranchAddress("GenP6StatusThree_mass", GenP6StatusThree_mass, &b_GenP6StatusThree_mass);
-   fChain->SetBranchAddress("GenP6StatusThree_pdgId", GenP6StatusThree_pdgId, &b_GenP6StatusThree_pdgId);
-   fChain->SetBranchAddress("GenP6StatusThree_charge", GenP6StatusThree_charge, &b_GenP6StatusThree_charge);
-   fChain->SetBranchAddress("GenP6StatusThree_status", GenP6StatusThree_status, &b_GenP6StatusThree_status);
-   fChain->SetBranchAddress("GenP6StatusThree_motherId", GenP6StatusThree_motherId, &b_GenP6StatusThree_motherId);
-   fChain->SetBranchAddress("GenP6StatusThree_motherIndex", GenP6StatusThree_motherIndex, &b_GenP6StatusThree_motherIndex);
-   fChain->SetBranchAddress("GenP6StatusThree_grandmaId", GenP6StatusThree_grandmaId, &b_GenP6StatusThree_grandmaId);
-   fChain->SetBranchAddress("ngenLep", &ngenLep, &b_ngenLep);
-   fChain->SetBranchAddress("genLep_pt", genLep_pt, &b_genLep_pt);
-   fChain->SetBranchAddress("genLep_eta", genLep_eta, &b_genLep_eta);
-   fChain->SetBranchAddress("genLep_phi", genLep_phi, &b_genLep_phi);
-   fChain->SetBranchAddress("genLep_mass", genLep_mass, &b_genLep_mass);
-   fChain->SetBranchAddress("genLep_pdgId", genLep_pdgId, &b_genLep_pdgId);
-   fChain->SetBranchAddress("genLep_charge", genLep_charge, &b_genLep_charge);
-   fChain->SetBranchAddress("genLep_status", genLep_status, &b_genLep_status);
-   fChain->SetBranchAddress("genLep_sourceId", genLep_sourceId, &b_genLep_sourceId);
    fChain->SetBranchAddress("ntau", &ntau, &b_ntau);
    fChain->SetBranchAddress("tau_pt", tau_pt, &b_tau_pt);
    fChain->SetBranchAddress("tau_eta", tau_eta, &b_tau_eta);

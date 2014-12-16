@@ -49,7 +49,8 @@ class MT2Config {
   std::string zinvTag()       const { return zinvTag_; };
 
   bool useMC() {
-    return mcSamples_!="";
+    bool useEstimates = lostLeptonTag_!="" && qcdTag_!="" && zinvTag_!="";
+    return !useEstimates;
   }
 
  private:
@@ -114,7 +115,7 @@ int main( int argc, char* argv[] ) {
     std::cout << std::endl << std::endl;
     std::cout << "-> Loading samples from file: " << samplesFileName << std::endl;
 
-    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1, 999); // no signal for now
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1, 999); // not interested in signal here (see later)
     if( fSamples.size()==0 ) {
       std::cout << "There must be an error: samples is empty!" << std::endl;
       exit(1209);
@@ -123,7 +124,7 @@ int main( int argc, char* argv[] ) {
 
     
     std::vector< MT2Analysis<MT2EstimateSyst>* > EventYield;
-    for( unsigned i=0; i<fSamples.size(); ++i )
+    for( unsigned i=0; i<fSamples.size(); ++i ) 
       EventYield.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
     
 
@@ -157,6 +158,33 @@ int main( int argc, char* argv[] ) {
   }
 
 
+  // load signal samples, if any
+  std::vector< MT2Analysis<MT2EstimateSyst>* > signals;
+  if( cfg.mcSamples()!="" ) {
+
+    std::string samplesFileName = "../samples/samples_" + cfg.mcSamples() + ".dat";
+    std::cout << std::endl << std::endl;
+    std::cout << "-> Loading signal samples from file: " << samplesFileName << std::endl;
+
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1000); // only signal (id>=1000)
+
+
+    if( fSamples.size()==0 ) {
+
+      std::cout << "No signal samples found, skipping." << std::endl;
+
+    } else {
+    
+      for( unsigned i=0; i<fSamples.size(); ++i ) 
+        signals.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
+    
+    } // if samples != 0
+
+  } // if mc samples
+
+
+
+
 
   MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( "data", cfg.regionsSet() );
 
@@ -185,69 +213,19 @@ int main( int argc, char* argv[] ) {
 
   drawYields( outputdir, data, bgYields );
 
-  return 0;
 
-}
-
-
-/*
-  //if( EventYield_allMC!=0  ) EventYield_allMC ->writeToFile( outputdir + "/yield_allMC.root"  ); 
-  //if( EventYield_topW!=0   ) EventYield_topW  ->writeToFile( outputdir + "/yield_topW.root"   ); 
-  //if( EventYield_bg!=0     ) EventYield_bg    ->writeToFile( outputdir + "/yield_bg.root"     ); 
-  //if( EventYield_data!=0   ) EventYield_data  ->writeToFile( outputdir + "/yield_data.root"   ); 
-  //if( EventYield_signal!=0 ) EventYield_signal->writeToFile( outputdir + "/yield_signal.root" ); 
-  if( EventYield_qcd!=0 ) EventYield_qcd->writeToFile( outputdir + "/yield_qcd.root" );
-
-  TFile* outfile = TFile::Open(Form("%s/EventYields_%s.root", outputdir.c_str(), sampleName.c_str()), "recreate");
-  outfile->cd();
-  
-  std::ofstream logfile;
-  logfile.open(Form("%s/EventYields_%s.txt", outputdir.c_str(), sampleName.c_str()));
-  
-
-
-  // For data yield:
-  //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_data", "", HTRegions, signalRegions, EventYield_data, EventYield_allMC, logfile );
-  
-  // For topW yield:
-  //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_topW", "", HTRegions, signalRegions, EventYield_topW, EventYield_bg, logfile );
-  
-  // For qcd yield
-  std::vector<TH1D*> vh1_qcd = getYieldHistos( "EventYield_qcd", EventYield_qcd, 0, logfile ); 
-
-  // For signal yield:
-  //std::vector<TH1D*> vh1_signal = getYieldHistos( "EventYield_signal", EventYield_signal, 0, logfile ); 
-
-  // For all SM yield:
-  ////std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_MC", "", HTRegions, signalRegions, EventYield_allMC, EventYield_bg, logfile );
-  //std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_WJets", "", HTRegions, signalRegions, EventYield_wjets, EventYield_bg, logfile );
-
-  ////std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_allMC );
-  //std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_signal );
- 
-
-  for( unsigned i=0; i<EventYield_qcd->getHTRegions().size(); ++i ) {
-
-    //vh1_signal[i]->Write();
-    vh1_qcd[i]->Write();
-
-    //vh1_data[i]->Write();
-    //
-    //vh1_mc  [i]->Write();
-    //
-    //vh1_sim [i]->Write();
- 
-  }
-
-
-  outfile->Close();
-
-
+  // save MT2Analyses:
+  data->writeToFile(outputdir + "/analyses.root");
+  for( unsigned i=0; i<bgYields.size(); ++i )
+    bgYields[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
+  for( unsigned i=0; i<signals.size(); ++i )
+    signals[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
 
   return 0;
 
 }
-*/
+
+
 
 
 
@@ -263,6 +241,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
 
   MT2Tree myTree;
+  myTree.loadGenStuff = false;
   myTree.Init(tree);
 
 
@@ -275,17 +254,11 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
   int nentries = tree->GetEntries();
 
-
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
     if( iEntry % 50000 == 0 ) std::cout << "    Entry: " << iEntry << " / " << nentries << std::endl;
 
     myTree.GetEntry(iEntry);
-
-    ////if( myTree.nTaus20>0 ) continue;
-    //if( myTree.nMuons10>0 ) continue;
-    //if( myTree.nElectrons10>0 ) continue;
-    //// ^^ the above should be changed
 
     if( myTree.nMuons10 > 0) continue;
     if( myTree.nElectrons10 > 0 ) continue;
@@ -306,49 +279,10 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
     int nbjets = myTree.nBJet40;
 
 
-    ////////To remove for next iteration
-    //int nPFLep5LowMT = 0, nPFHad10LowMT = 0;
-    //
-    //for( int l=0; l < myTree.nisoTrack; ++l ){
-    //  
-    //  if( sqrt(2*(myTree.isoTrack_pt[l])*met*( 1 + TMath::Cos( myTree.isoTrack_phi[l] - myTree.met_phi ) ) ) > 100. )
-    //    continue;
-    //  
-    //  if ( ( fabs(myTree.isoTrack_pdgId[l]) == 11 || fabs(myTree.isoTrack_pdgId[l]) == 13 ) && myTree.isoTrack_pt[l] > 5 && myTree.isoTrack_absIso[l]/myTree.isoTrack_pt[l] < 0.2)
-    //	++nPFLep5LowMT;
-    //  
-    //  else if ( fabs(myTree.isoTrack_pdgId[l]) == 211 && myTree.isoTrack_pt[l] > 10 && myTree.isoTrack_absIso[l]/myTree.isoTrack_pt[l] < 0.1)
-    //	++nPFHad10LowMT;
-    //   
-    //}
-    //
-    //if( nPFLep5LowMT > 0 || nPFHad10LowMT > 0 ) continue;
-    ////////
-    //
-    //////// minMTBmet - also to remove at next iteration
-    //float minMTBmet = 999999.;
-    //for (int j=0; j< myTree.njet; ++j){
-    //  
-    //  if(myTree.jet_btagCSV[j] < 0.679) continue;
-    //  if(myTree.jet_pt[j] < 40 || fabs(myTree.jet_eta[j]) > 2.5) continue;
-    //  
-    //  float thisMTBmet = sqrt(2*(myTree.jet_pt[j])*met*( 1 + TMath::Cos( myTree.jet_phi[j] - myTree.met_phi ) ) );
-    //  if( thisMTBmet < minMTBmet ) minMTBmet = thisMTBmet;
-    // 
-    //}
-    ////////
-
-
-    //// QCD SPIKE REMOVER BY HAND:
-    //if( (sample.sname=="QCD-Pt120to170" && mt2 > 150) || (sample.name=="QCD-Pt170to300" && mt2 > 150) || (sample.name=="QCD-Pt300to470" && mt2 > 175) || (sample.name=="QCD-Pt470to600" && mt2 > 200))
-    //  continue;
-
-
     Double_t weight = myTree.evt_scale1fb*lumi;
 
     float fullweight_btagUp = weight;
     float fullweight_btagDown = weight;
-
 
 
     MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met, minMTBmet, mt2 );
@@ -551,10 +485,6 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
   } // for HT regions
 
 
-  // save also MT2Analyses:
-  data->writeToFile(outputdir + "/analyses.root");
-  for( unsigned i=0; i<bgYields.size(); ++i )
-    bgYields[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
   //std::string analysesDir = outputdir + "/analyses";
   //std::string mkdir_command2 = "mkdir -p " + analysesDir;
   //system(mkdir_command2.c_str());
