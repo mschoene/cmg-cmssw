@@ -29,12 +29,6 @@ int main( int argc, char* argv[] ) {
   std::string dir( argv[1] );
   std::string fileName = dir + "/analyses.root";
 
-  //std::vector< MT2Analysis<MT2Estimate>* > analyses = MT2Analysis<MT2Estimate>::readAllFromFile( dir + "/analyses.root" );
-
-  //if( analyses.size()==0 ) {
-  //  std::cout << "ERROR! No analyses found!" << std::endl;
-  //  exit(87);
-  //}
 
 
   float err_qcd_corr    = 0.0;
@@ -43,6 +37,8 @@ int main( int argc, char* argv[] ) {
   float err_llep_uncorr = 0.075;
   float err_zinv_corr   = 0.;
   float err_zinv_uncorr = 0.;
+  float err_sig_corr    = 0.1;
+  float err_sig_uncorr  = 0.;
 
 
   MT2Analysis<MT2Estimate>* data  = MT2Analysis<MT2Estimate>::readFromFile( fileName, "data" );
@@ -56,6 +52,8 @@ int main( int argc, char* argv[] ) {
   llep->setName( "llep" );
   //*llep += *wjets;
   
+
+  std::cout << std::endl << std::endl;
   std::cout << "-> Creating BG templates file..." << std::endl;
   TFile* file_templateBG = TFile::Open(Form("%s/bkg_templates.root", dir.c_str()), "recreate");
   writeToTemplateFile( file_templateBG, qcd, err_qcd_corr, err_qcd_uncorr );
@@ -64,110 +62,125 @@ int main( int argc, char* argv[] ) {
   file_templateBG->Close();
   std::cout << "-> Created BG templates file: " << file_templateBG->GetName() << std::endl;
 
-  //MT2Analysis<MT2Estimate>* llep = new MT2Analysis<MT2Estimate>( *wjets );
-  //*llep += *top;
 
 
-  //MT2Analysis<MT2Estimate>* data       = get( "data"    , analyses, "data" );
-  //MT2Analysis<MT2Estimate>* llep = get( "llep", analyses, "WJets", "Top" );
-  //MT2Analysis<MT2Estimate>* qcd        = get( "QCD"     , analyses, "QCD" );
-  //MT2Analysis<MT2Estimate>* zinv       = get( "Zinv"    , analyses, "ZJets" );
+  std::cout << std::endl << std::endl;
+  std::cout << "-> Creating signal templates file..." << std::endl;
+  std::vector<MT2Analysis<MT2Estimate>*> signals = MT2Analysis<MT2Estimate>::readAllFromFile( fileName, "SMS" );
+  TFile* file_templateSignal = TFile::Open(Form("%s/sig_templates.root", dir.c_str()), "recreate");
+  for( unsigned i=0; i<signals.size(); ++i ) 
+    writeToTemplateFile( file_templateSignal, signals[i], err_sig_corr, err_sig_uncorr );
+  file_templateSignal->Close();
+  std::cout << "-> Created signal templates file: " << file_templateSignal->GetName() << std::endl;
+
+
+
 
 
 
   std::set<MT2HTRegion> htRegions = data->getHTRegions();
   std::set<MT2SignalRegion> sigRegions = data->getSignalRegions();
-  
-  for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) {
-    for( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ) {
 
-     MT2Region thisRegion(*iHT, *iSR);
+  for( int isig=-1; isig<(int)signals.size(); ++isig ) { // loop on signals (first iteration with isig=-1 will create the templates)
 
-     std::string path = dir;
-     //std::string path = dir + "/" + iHT->getName() + "/" + iSR->getName();
-     std::string histoFileName = path + "/histograms_" + thisRegion.getName() + ".root";
-     TFile* histoFile = TFile::Open( histoFileName.c_str() );
-     if( histoFile==0 ) {
-       std::cout << "ERROR! Didn't find the histogram file for region: " << thisRegion.getName() << std::endl;
-       exit(11);
-     }
-     //TH1D* data = 0;
-     //std::vector<TH1D*> processes;
-     //TIter next(histoFile->GetListOfKeys());
-     //while( TObject *obj = next() ) {
-     //  std::string thisName(obj->GetName());
-     //  if( thisName == ("yield_data_"+thisRegion.getName()) )
-     //    data = (TH1D*)histoFile->Get(thisName.c_str());
-     //  else {
-     //    TH1D* thisHisto = (TH1D*)histoFile->Get(thisName.c_str());
-     //    processes.push_back(thisHisto);
-     //  }
-     //}
-
-     TH1D* this_data = data->get(thisRegion)->yield;
-     TH1D* this_qcd  = qcd ->get(thisRegion)->yield;
-     TH1D* this_zinv = zinv->get(thisRegion)->yield;
-     TH1D* this_llep = llep->get(thisRegion)->yield;
-
-     std::string datacardName(Form("%s/datacard_%s.txt", path.c_str(), thisRegion.getName().c_str()) );
-     ofstream datacard( datacardName.c_str() );
-
-
-     datacard << "imax 1" << std::endl;
-     datacard << "jmax 3" << std::endl;
-     datacard << "kmax *" << std::endl;
-     datacard << "-------------" << std::endl;
-     datacard << std::endl << std::endl;
-     
-     datacard << "shapes sig "  << thisRegion.getName() << " sig_templates-T2tt-filter/sig_m0-1000_m12-800.root $PROCESS_$CHANNEL_sub $PROCESS_$CHANNEL_sub_$SYSTEMATIC" << std::endl;
-     datacard << "shapes qcd "  << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
-     datacard << "shapes zinv " << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
-     datacard << "shapes llep " << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
-     datacard << "-------------" << std::endl;
-
-
-     datacard << std::endl << std::endl;
-     datacard << "bin  " << thisRegion.getName() << std::endl;
-     datacard << "observation  " << this_data->Integral(1,this_data->GetXaxis()->GetNbins()) << std::endl;
-     datacard << "-------------" << std::endl;
-     datacard << std::endl << std::endl;
-
-     // sig qcd zinv llep
-     datacard << "bin \t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << std::endl;
-     datacard << "process \t sig \t qcd \t zinv \t llep" << std::endl;
-     datacard << "process \t 0 \t 1 \t 2 \t 3" << std::endl;
-     datacard << "rate \t XXX \t " << this_qcd->Integral() << " \t " << this_zinv->Integral() << " \t " << this_llep->Integral() << std::endl;
-     datacard << "-------------" << std::endl;
-
-     datacard << "syst_sig    lnN \t 1.1 - - -" << std::endl;
-
-     int N_llep = (int)this_llep->Integral();
-     float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 1.;
-     float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
-     llep_tot_err+=1.;
-     datacard << "syst_ll_corr_" << thisRegion.getName() << "  lnN \t - - - " << llep_tot_err << std::endl;
-
-
-     if( thisRegion.nBJetsMin()>=2 )
-       datacard << "syst_zinv_corr_" << thisRegion.getName() << " lnN \t - - 2.0" << std::endl;
-     else {
-       datacard << "syst_zinv_corr lnN \t - - 1.2 -" << std::endl;
-       if( thisRegion.nBJetsMin()>0 ) {
-         datacard << "syst_zinv_Z1b_" << thisRegion.getName() << " lnN \t - - 1.3 -" << std::endl;
-       }
-     }
-
-     if( this_qcd->Integral()>0. ) {
-       //write the bins
-     }
-
-      //write bins for zinv
-
-     datacard.close();
-
-     std::cout << "-> Created datacard: " << datacardName << std::endl;
-
+    std::string path;
+    if( isig==-1 )
+      path = dir; // these are the templates
+    else {
+      path = dir + "/" + signals[isig]->name;
+      system(Form("mkdir -p %s", path.c_str()));
+      std::cout << "-> Creating datacards in: " << path << std::endl;
     }
+  
+    for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) {
+      for( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ) {
+
+       MT2Region thisRegion(*iHT, *iSR);
+
+
+       TH1D* this_data = data->get(thisRegion)->yield;
+       TH1D* this_qcd  = qcd ->get(thisRegion)->yield;
+       TH1D* this_zinv = zinv->get(thisRegion)->yield;
+       TH1D* this_llep = llep->get(thisRegion)->yield;
+
+       TH1D* this_signal = 0;
+       if( isig>-1 ) this_signal = signals[isig]->get(thisRegion)->yield;
+
+
+       std::string datacardName( path + "/datacard_" + thisRegion.getName() + ".txt");
+       ofstream datacard( datacardName.c_str() );
+
+
+       datacard << "imax 1" << std::endl;
+       datacard << "jmax 3" << std::endl;
+       datacard << "kmax *" << std::endl;
+       datacard << "-------------" << std::endl;
+       datacard << std::endl << std::endl;
+       
+       datacard << "shapes sig "  << thisRegion.getName() << " " << dir << "/sig_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
+       datacard << "shapes qcd "  << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
+       datacard << "shapes zinv " << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
+       datacard << "shapes llep " << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
+       datacard << "-------------" << std::endl;
+
+
+       datacard << std::endl << std::endl;
+       datacard << "bin  " << thisRegion.getName() << std::endl;
+       datacard << "observation  " << this_data->Integral(1,this_data->GetXaxis()->GetNbins()) << std::endl;
+       datacard << "-------------" << std::endl;
+       datacard << std::endl << std::endl;
+
+       // sig qcd zinv llep
+       datacard << "bin \t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << std::endl;
+       datacard << "process \t sig \t qcd \t zinv \t llep" << std::endl;
+       datacard << "process \t 0 \t 1 \t 2 \t 3" << std::endl;
+       datacard << "rate \t ";
+       if( this_signal!=0 )
+         datacard << this_signal->Integral();
+       else
+         datacard << "XXX";
+       datacard << " \t " << this_qcd->Integral() << " \t " << this_zinv->Integral() << " \t " << this_llep->Integral() << std::endl;
+       datacard << "-------------" << std::endl;
+
+       datacard << "syst_sig    lnN \t 1.1 - - -" << std::endl;
+
+       int N_llep = (int)this_llep->Integral();
+       float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 1.;
+       float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
+       llep_tot_err+=1.;
+       datacard << "syst_ll_corr_" << thisRegion.getName() << "  lnN \t - - - " << llep_tot_err << std::endl;
+
+
+       if( thisRegion.nBJetsMin()>=2 )
+         datacard << "syst_zinv_corr_" << thisRegion.getName() << " lnN \t - - 2.0 -" << std::endl;
+       else {
+         datacard << "syst_zinv_corr lnN \t - - 1.2 -" << std::endl;
+         if( thisRegion.nBJetsMin()>0 ) {
+           datacard << "syst_zinv_Z1b_" << thisRegion.getName() << " lnN \t - - 1.3 -" << std::endl;
+         }
+       }
+
+       if( this_qcd->Integral()>0. ) {
+         for( unsigned i=1; i<this_qcd->GetNbinsX()+1; ++i ) 
+           datacard << this_qcd->GetName() << "_bin_" << i << " shapeN2 - 1 - -" << std::endl;
+       }
+
+
+       if( this_zinv->Integral()>0. ) {
+         for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
+           datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl;
+       }
+
+
+       datacard.close();
+
+       if( isig==-1 )
+         std::cout << "-> Created template datacard: " << datacardName << std::endl;
+       
+
+      }
+    }
+
   }
 
   return 0;
