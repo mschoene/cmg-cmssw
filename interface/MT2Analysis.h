@@ -52,7 +52,7 @@ class MT2Analysis {
   MT2Analysis operator/=( float k );
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
-  static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, bool verbose=true );
+  static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, const std::string& matchExpression="", bool verbose=true );
   void writeToFile( const std::string& fileName, const std::string& option="RECREATE" );
 
   static void printFromFile (  const std::string& fileName, const std::string& ofs, const std::string& matchName="" );
@@ -723,7 +723,7 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
 
 
 template<class T> 
-std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName, bool verbose ) {
+std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName, const std::string& matchExpression, bool verbose ) {
 
   TFile* file = TFile::Open(fileName.c_str());
  
@@ -794,6 +794,9 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
 
     } // while ht regions
 
+    TString analysisName_tstr(analysisName);
+    if( matchExpression!="" && !(analysisName_tstr.Contains(matchExpression)) ) continue;
+
     // now that we know name and region structure we can istantiate an MT2Analysis:
     MT2Analysis<T>* analysis = new MT2Analysis<T>( analysisName, htRegions, sigRegions );    
 
@@ -840,7 +843,7 @@ template<class T>
 MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const std::string& matchName ) {
 
 
-  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName, false);
+  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName, "", false);
 
   if( analyses.size()==0 ) {
     std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
