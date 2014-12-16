@@ -131,8 +131,8 @@ int main( int argc, char* argv[] ) {
        if( this_signal!=0 )
          datacard << signals[isig]->name;
        else
-         datacard << "sig ";
-       datacard  << thisRegion.getName() << " " << dir << "/sig_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
+         datacard << "sig";
+       datacard  << " " << thisRegion.getName() << " " << dir << "/sig_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
        datacard << "shapes qcd "      << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
        datacard << "shapes zinv "     << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
        datacard << "shapes llep "     << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
