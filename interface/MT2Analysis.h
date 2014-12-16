@@ -129,10 +129,10 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions_.insert(MT2SignalRegion(4, -1, 1,  1)); 
     signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400.)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400.)); 
-    signalRegions_.insert(MT2SignalRegion(2, -1, 3, -1, 200., 200., 400.)); 
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400.)); 
     signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400., false)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400., false)); 
-    signalRegions_.insert(MT2SignalRegion(2, -1, 3, -1, 200., 200., 400., false)); 
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400., false)); 
 
 
   } else if( regionsSet=="8TeV" ) {
