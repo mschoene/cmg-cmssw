@@ -49,7 +49,8 @@ class MT2Config {
   std::string zinvTag()       const { return zinvTag_; };
 
   bool useMC() {
-    return mcSamples_!="";
+    bool useEstimates = lostLeptonTag_!="" && qcdTag_!="" && zinvTag_!="";
+    return !useEstimates;
   }
 
  private:
@@ -114,7 +115,7 @@ int main( int argc, char* argv[] ) {
     std::cout << std::endl << std::endl;
     std::cout << "-> Loading samples from file: " << samplesFileName << std::endl;
 
-    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1, 999); // no signal for now
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1, 999); // not interested in signal here (see later)
     if( fSamples.size()==0 ) {
       std::cout << "There must be an error: samples is empty!" << std::endl;
       exit(1209);
@@ -123,7 +124,7 @@ int main( int argc, char* argv[] ) {
 
     
     std::vector< MT2Analysis<MT2EstimateSyst>* > EventYield;
-    for( unsigned i=0; i<fSamples.size(); ++i )
+    for( unsigned i=0; i<fSamples.size(); ++i ) 
       EventYield.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
     
 
@@ -157,6 +158,33 @@ int main( int argc, char* argv[] ) {
   }
 
 
+  // load signal samples, if any
+  std::vector< MT2Analysis<MT2EstimateSyst>* > signals;
+  if( cfg.mcSamples()!="" ) {
+
+    std::string samplesFileName = "../samples/samples_" + cfg.mcSamples() + ".dat";
+    std::cout << std::endl << std::endl;
+    std::cout << "-> Loading signal samples from file: " << samplesFileName << std::endl;
+
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1000); // no signal for now
+
+
+    if( fSamples.size()==0 ) {
+
+      std::cout << "No signal samples found, skipping." << std::endl;
+
+    } else {
+    
+      for( unsigned i=0; i<fSamples.size(); ++i ) 
+        signals.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
+    
+    } // if samples != 0
+
+  } // if mc samples
+
+
+
+
 
   MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( "data", cfg.regionsSet() );
 
@@ -184,6 +212,14 @@ int main( int argc, char* argv[] ) {
 
 
   drawYields( outputdir, data, bgYields );
+
+
+  // save MT2Analyses:
+  data->writeToFile(outputdir + "/analyses.root");
+  for( unsigned i=0; i<bgYields.size(); ++i )
+    bgYields[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
+  for( unsigned i=0; i<signals.size(); ++i )
+    signals[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
 
   return 0;
 
@@ -544,10 +580,6 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
   } // for HT regions
 
 
-  // save also MT2Analyses:
-  data->writeToFile(outputdir + "/analyses.root");
-  for( unsigned i=0; i<bgYields.size(); ++i )
-    bgYields[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
   //std::string analysesDir = outputdir + "/analyses";
   //std::string mkdir_command2 = "mkdir -p " + analysesDir;
   //system(mkdir_command2.c_str());
