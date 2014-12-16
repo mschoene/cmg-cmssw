@@ -78,6 +78,7 @@ int main( int argc, char* argv[] ) {
   std::cout << std::endl << std::endl;
   std::cout << "-> Creating data_obs file..." << std::endl;
   TFile* file_data_obs = TFile::Open(Form("%s/data_obs.root", dir.c_str()), "recreate");
+  data->setName("data_obs");
   writeToTemplateFile( file_data_obs, data, 0., 0. );
   file_data_obs->Close();
   std::cout << "-> Created data_obs file: " << file_data_obs->GetName() << std::endl;
