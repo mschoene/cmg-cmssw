@@ -170,7 +170,7 @@ int main( int argc, char* argv[] ) {
        float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 1.;
        float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
        llep_tot_err+=1.;
-       datacard << "syst_ll_corr_" << thisRegion.getName() << "  lnN \t - - - " << llep_tot_err << std::endl;
+       datacard << "syst_llep_corr_" << thisRegion.getName() << "  lnN \t - - - " << llep_tot_err << std::endl;
 
 
        if( thisRegion.nBJetsMin()>=2 )
@@ -191,6 +191,11 @@ int main( int argc, char* argv[] ) {
        if( this_zinv->Integral()>0. ) {
          for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
            datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl;
+       }
+
+       if( this_llep->Integral()>0. ) {
+         for( unsigned i=1; i<this_llep->GetNbinsX()+1; ++i ) 
+           datacard << this_llep->GetName() << "_bin_" << i << " shapeN2 - - - 1" << std::endl;
        }
 
 
@@ -235,8 +240,6 @@ MT2Analysis<MT2Estimate>* get( const std::string& name, std::vector< MT2Analysis
 void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float err_corr, float err_uncorr ) {
 
   file->cd();
-  file->mkdir(analysis->name.c_str());
-  file->cd(analysis->name.c_str());
 
   std::set<MT2HTRegion> htRegions = analysis->getHTRegions();
   std::set<MT2SignalRegion> sigRegions = analysis->getSignalRegions();
@@ -277,10 +280,6 @@ void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float
 void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysis, const std::string& name ) {
 
   file->cd();
-  if( !(file->cd(analysis->name.c_str()) ) ) {
-    file->mkdir(analysis->name.c_str());
-    file->cd(analysis->name.c_str());
-  }
 
   std::set<MT2HTRegion> htRegions = analysis->getHTRegions();
   std::set<MT2SignalRegion> sigRegions = analysis->getSignalRegions();
