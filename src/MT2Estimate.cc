@@ -1,6 +1,7 @@
 #include "../interface/MT2Estimate.h"
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cmath>
 
@@ -252,6 +253,9 @@ void MT2Estimate::print(const std::string& ofs){
 
   ofstream ofs_file;
   ofs_file.open( ofs, std::ofstream::app );
-  ofs_file << " & " << integral << " \\pm " << error;
+  if(integral >= 10)
+    ofs_file << std::fixed << std::setprecision(1) << " & " << integral << " $\\pm$ " << error;
+  else if(integral < 10)
+    ofs_file << std::fixed << std::setprecision(2) << " & " << integral << " $\\pm$ " << error;
 
 }
