@@ -31,10 +31,16 @@ int postProcessing(string inputFile="input.root",
 
 int run(string sampleFileName="samples_50ns_miniaod.txt",
 	string treeName="treeProducerSusyFullHad", 
-	string inputPath = "/scratch/mmasciov/endNovember/ToPostProcess/", 
-	string outputPath = "/scratch/mmasciov/endNovember/PostProcess/",  
-	string fileExtension = "_PU_S14_POSTLS170_babytree_post.root"){
+	string inputPath = "/scratch/mmasciov/12December/TOPOSTPROCESS/", 
+	string outputPath = "/scratch/mmasciov/12December/POSTPROCESS/",  
+	string fileExtension = "_post.root"){
   
+//int run(string sampleFileName="samples_50ns_miniaod.txt",
+//	string treeName="treeProducerSusyFullHad",
+//	string inputPath = "dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/",
+//	string outputPath = "/scratch/mmasciov/12Dec/PostProcess/",
+//	string fileExtension = "_PU_S14_POSTLS170_babytree_post.root"){
+//  
   int start_s=clock();
 
   ifstream IN(sampleFileName.c_str());
@@ -71,8 +77,6 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     std::size_t nameLength = dataset.copy(fileName, length, 0);
     fileName[nameLength]='\0';
 
-    std::string outputFileName(fileName);
-
     for (int c = 0; c <= nameLength; ++c) {
       
       if (fileName[c] == '-' || fileName[c] == '_')
@@ -106,6 +110,14 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     }
     
     std::string inputFile(inputBuffer);
+
+    std::string outputFileName(inputBuffer);    
+    std::size_t outlength = outputFileName.find(inputPath);
+    outputFileName.erase(outlength, inputPath.length());
+    std::string extension = ".root";
+    std::size_t extensionlength = outputFileName.find(".root");
+    outputFileName.erase(extensionlength, extension.length());
+
     std::string outputFile = outputPath + outputFileName + fileExtension;
     std::cout << inputFile << std::endl;
     std::cout << outputFile << std::endl;
