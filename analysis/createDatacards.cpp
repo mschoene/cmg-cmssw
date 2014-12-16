@@ -190,7 +190,7 @@ int main( int argc, char* argv[] ) {
 
        if( this_zinv->Integral()>0. ) {
 
-         if( thisRegion.nBJetsMin()<2 ) {
+         if( thisRegion.nBJetsMin()<2 ) { // 0 and 1 btag
 
            // correlated:
            datacard << "syst_zinv_corr lnN \t - - 1.2 -" << std::endl;
@@ -200,9 +200,9 @@ int main( int argc, char* argv[] ) {
 
            // uncorrelated:
            for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
-             datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 100% of MC
+             datacard << this_zinv->GetName() << "_stat_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 100% of MC
 
-         } else { // 0 and 1 btags
+         } else { // 2 btags
 
            for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
              datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 1/sqrt(k*N)
