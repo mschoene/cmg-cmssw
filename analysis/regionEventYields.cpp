@@ -166,7 +166,7 @@ int main( int argc, char* argv[] ) {
     std::cout << std::endl << std::endl;
     std::cout << "-> Loading signal samples from file: " << samplesFileName << std::endl;
 
-    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1000); // no signal for now
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1000); // only signal (id>=1000)
 
 
     if( fSamples.size()==0 ) {
@@ -241,6 +241,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
 
   MT2Tree myTree;
+  myTree.loadGenStuff = false;
   myTree.Init(tree);
 
 
@@ -259,61 +260,23 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     myTree.GetEntry(iEntry);
 
-    //if( myTree.nTaus20>0 ) continue;
-    if( myTree.nMuons10>0 ) continue;
-    if( myTree.nElectrons10>0 ) continue;
-    // ^^ the above should be changed
-
+    if( myTree.nMuons10 > 0) continue;
+    if( myTree.nElectrons10 > 0 ) continue;
+    if( myTree.nPFLep5LowMT > 0) continue;
+    if( myTree.nPFHad10LowMT > 0) continue;
+  
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
     if( myTree.jet_pt[1]<100. ) continue;
     if( myTree.deltaPhiMin<0.3 ) continue;
+    if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
-    if( abs(myTree.diffMetMht)>0.5*met ) continue;
-
     float mt2  = myTree.mt2;
+    float minMTBmet = myTree.minMTBMet;
     int njets  = myTree.nJet40;
     int nbjets = myTree.nBJet40;
-
-
-    //////To remove for next iteration
-    int nPFLep5LowMT = 0, nPFHad10LowMT = 0;
-    
-    for( int l=0; l < myTree.nisoTrack; ++l ){
-      
-      if( sqrt(2*(myTree.isoTrack_pt[l])*met*( 1 + TMath::Cos( myTree.isoTrack_phi[l] - myTree.met_phi ) ) ) > 100. )
-        continue;
-      
-      if ( ( fabs(myTree.isoTrack_pdgId[l]) == 11 || fabs(myTree.isoTrack_pdgId[l]) == 13 ) && myTree.isoTrack_pt[l] > 5 && myTree.isoTrack_absIso[l]/myTree.isoTrack_pt[l] < 0.2)
-	++nPFLep5LowMT;
-      
-      else if ( fabs(myTree.isoTrack_pdgId[l]) == 211 && myTree.isoTrack_pt[l] > 10 && myTree.isoTrack_absIso[l]/myTree.isoTrack_pt[l] < 0.1)
-	++nPFHad10LowMT;
-       
-    }
-    
-    if( nPFLep5LowMT > 0 || nPFHad10LowMT > 0 ) continue;
-    //////
-
-    ////// minMTBmet - also to remove at next iteration
-    float minMTBmet = 999999.;
-    for (int j=0; j< myTree.njet; ++j){
-      
-      if(myTree.jet_btagCSV[j] < 0.679) continue;
-      if(myTree.jet_pt[j] < 40 || fabs(myTree.jet_eta[j]) > 2.5) continue;
-      
-      float thisMTBmet = sqrt(2*(myTree.jet_pt[j])*met*( 1 + TMath::Cos( myTree.jet_phi[j] - myTree.met_phi ) ) );
-      if( thisMTBmet < minMTBmet ) minMTBmet = thisMTBmet;
-     
-    }
-    //////
-
-
-    // QCD SPIKE REMOVER BY HAND:
-    if( (sample.sname=="QCD_Pt-120to170" && mt2 > 150) || (sample.name=="QCD_Pt-170to300" && mt2 > 150) || (sample.name=="QCD_Pt-300to470" && mt2 > 175) || (sample.name=="QCD_Pt-470to600" && mt2 > 200))
-      continue;
 
 
     Double_t weight = myTree.evt_scale1fb*lumi;

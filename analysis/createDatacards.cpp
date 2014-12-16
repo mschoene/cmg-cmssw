@@ -75,6 +75,13 @@ int main( int argc, char* argv[] ) {
   file_templateSignal->Close();
   std::cout << "-> Created signal templates file: " << file_templateSignal->GetName() << std::endl;
 
+  std::cout << std::endl << std::endl;
+  std::cout << "-> Creating data_obs file..." << std::endl;
+  TFile* file_data_obs = TFile::Open(Form("%s/data_obs.root", dir.c_str()), "recreate");
+  writeToTemplateFile( file_data_obs, data, 0., 0. );
+  file_data_obs->Close();
+  std::cout << "-> Created data_obs file: " << file_data_obs->GetName() << std::endl;
+
 
 
 
@@ -119,10 +126,17 @@ int main( int argc, char* argv[] ) {
        datacard << "-------------" << std::endl;
        datacard << std::endl << std::endl;
        
-       datacard << "shapes sig "  << thisRegion.getName() << " " << dir << "/sig_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
-       datacard << "shapes qcd "  << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
-       datacard << "shapes zinv " << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
-       datacard << "shapes llep " << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL yield_$PROCESS_$CHANNEL" << std::endl;
+       datacard << "shapes ";
+       if( this_signal!=0 )
+         datacard << signals[isig]->name;
+       else
+         datacard << "sig ";
+       datacard  << thisRegion.getName() << " " << dir << "/sig_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
+       datacard << "shapes qcd "      << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
+       datacard << "shapes zinv "     << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
+       datacard << "shapes llep "     << thisRegion.getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
+       datacard << "shapes data_obs " << thisRegion.getName() << " " << dir << "/data_obs.root yield_$PROCESS_$CHANNEL" << std::endl;
+
        datacard << "-------------" << std::endl;
 
 
@@ -134,7 +148,12 @@ int main( int argc, char* argv[] ) {
 
        // sig qcd zinv llep
        datacard << "bin \t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << std::endl;
-       datacard << "process \t sig \t qcd \t zinv \t llep" << std::endl;
+       datacard << "process \t ";
+       if( this_signal!=0 )
+         datacard << signals[isig]->name;
+       else
+         datacard << "sig ";
+       datacard << " \t qcd \t zinv \t llep" << std::endl;
        datacard << "process \t 0 \t 1 \t 2 \t 3" << std::endl;
        datacard << "rate \t ";
        if( this_signal!=0 )
@@ -227,8 +246,9 @@ void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float
       MT2Region thisRegion(*iHT, *iSR);
 
       TH1D* h1 = analysis->get( thisRegion )->yield;
-
       h1->Write();
+
+      if( err_uncorr==0. ) continue;
 
       for( unsigned iBin=1; iBin<h1->GetNbinsX()+1; ++iBin ) {
 
@@ -241,7 +261,7 @@ void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float
 
         TH1D* h1_binDown = new TH1D(*h1);
         h1_binDown->SetName(Form("%s_bin_%dDown", h1->GetName(), iBin));
-        h1_binDown->SetBinContent( iBin, binContent*( 1. - err_uncorr ) );
+        h1_binDown->SetBinContent( iBin, binContent/( 1. + err_uncorr ) );
         h1_binDown->Write();
 
       } // for bins
@@ -288,11 +308,13 @@ void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysi
         TH1D* h1_binUp = new TH1D(*h1);
         h1_binUp->SetName(Form("%s_bin_%dUp", h1->GetName(), iBin));
         h1_binUp->SetBinContent( iBin, binContent*( 1. + error ) );
+        h1_binUp->SetLineColor(kGreen);
         h1_binUp->Write();
 
         TH1D* h1_binDown = new TH1D(*h1);
         h1_binDown->SetName(Form("%s_bin_%dDown", h1->GetName(), iBin));
-        h1_binDown->SetBinContent( iBin, binContent*( 1. - error ) );
+        h1_binDown->SetBinContent( iBin, binContent/( 1. + error ) );
+        h1_binDown->SetLineColor(kRed);
         h1_binDown->Write();
 
       } // for bins
