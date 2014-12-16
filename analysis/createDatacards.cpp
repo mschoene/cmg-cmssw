@@ -13,6 +13,7 @@
 
 
 void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float err_corr, float err_uncorr );
+void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysis, const std::string& name="stat" );
 MT2Analysis<MT2Estimate>* get( const std::string& name, std::vector< MT2Analysis<MT2Estimate>* > analyses, const std::string& name1, const std::string& name2="", const std::string& name3="", const std::string& name4="" );
 
 
@@ -59,6 +60,7 @@ int main( int argc, char* argv[] ) {
   writeToTemplateFile( file_templateBG, qcd, err_qcd_corr, err_qcd_uncorr );
   writeToTemplateFile( file_templateBG, llep, err_llep_corr, err_llep_uncorr );
   writeToTemplateFile( file_templateBG, zinv, err_zinv_corr, err_zinv_uncorr );
+  writeToTemplateFile_poisson( file_templateBG, zinv );
   file_templateBG->Close();
   std::cout << "-> Created BG templates file: " << file_templateBG->GetName() << std::endl;
 
@@ -87,7 +89,7 @@ int main( int argc, char* argv[] ) {
     if( isig==-1 )
       path = dir; // these are the templates
     else {
-      path = dir + "/" + signals[isig]->name;
+      path = dir + "/datacards_" + signals[isig]->name;
       system(Form("mkdir -p %s", path.c_str()));
       std::cout << "-> Creating datacards in: " << path << std::endl;
     }
@@ -212,7 +214,6 @@ MT2Analysis<MT2Estimate>* get( const std::string& name, std::vector< MT2Analysis
 
 void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float err_corr, float err_uncorr ) {
 
-
   file->cd();
   file->mkdir(analysis->name.c_str());
   file->cd(analysis->name.c_str());
@@ -249,4 +250,56 @@ void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float
   } // for HT
 
 }
+
+
+
+void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysis, const std::string& name ) {
+
+  file->cd();
+  if( !(file->cd(analysis->name.c_str()) ) ) {
+    file->mkdir(analysis->name.c_str());
+    file->cd(analysis->name.c_str());
+  }
+
+  std::set<MT2HTRegion> htRegions = analysis->getHTRegions();
+  std::set<MT2SignalRegion> sigRegions = analysis->getSignalRegions();
+  
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ) {
+  
+      MT2Region thisRegion(*iHT, *iSR);
+
+      TH1D* h1 = analysis->get( thisRegion )->yield;
+      h1->SetName(Form("%s_%s", h1->GetName(), name.c_str()));
+
+      h1->Write();
+
+      int nBJetsMin = thisRegion.nBJetsMin();
+      if( nBJetsMin>=2 ) continue;
+
+      float k = (nBJetsMin==0) ? 2. : 20.;
+
+      for( unsigned iBin=1; iBin<h1->GetNbinsX()+1; ++iBin ) {
+
+        float binContent = h1->GetBinContent(iBin);
+        int N_zinv = (int)binContent;
+        float error = (N_zinv>0) ? 1./sqrt(k*N_zinv) : 1.;
+
+        TH1D* h1_binUp = new TH1D(*h1);
+        h1_binUp->SetName(Form("%s_bin_%dUp", h1->GetName(), iBin));
+        h1_binUp->SetBinContent( iBin, binContent*( 1. + error ) );
+        h1_binUp->Write();
+
+        TH1D* h1_binDown = new TH1D(*h1);
+        h1_binDown->SetName(Form("%s_bin_%dDown", h1->GetName(), iBin));
+        h1_binDown->SetBinContent( iBin, binContent*( 1. - error ) );
+        h1_binDown->Write();
+
+      } // for bins
+
+    } // for SR
+  } // for HT
+
+}
+
 
