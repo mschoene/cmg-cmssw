@@ -36,14 +36,18 @@ void addPoissonError( MT2Analysis<MT2Estimate>* analysis );
 int main( int argc, char* argv[] ) {
 
 
-  if( argc!=2 ) {
-    std::cout << "USAGE: ./computeZinvFromGamma [samplesFileName]" << std::endl;
-    std::cout << "Exiting." << std::endl;
-    exit(11);
+  //if( argc!=2 ) {
+  //  std::cout << "USAGE: ./computeZinvFromGamma [samplesFileName]" << std::endl;
+  //  std::cout << "Exiting." << std::endl;
+  //  exit(11);
+  //}
+
+
+  std::string samplesFileName = "CSA14_Zinv";
+  if( argc>1 ) {
+    std::string samplesFileName_tmp(argv[1]); 
+    samplesFileName = samplesFileName_tmp;
   }
-
-
-  std::string samplesFileName(argv[1]);
 
   std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
 
