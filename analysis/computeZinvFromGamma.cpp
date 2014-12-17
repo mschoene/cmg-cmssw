@@ -94,9 +94,6 @@ int main( int argc, char* argv[] ) {
     (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet, "gamma_" ));
   }
 
-  addPoissonError(gammaJet);
-
-
 
   
   MT2Analysis<MT2Estimate>* qcd = new MT2Analysis<MT2Estimate>( "qcd", regionsSet );
@@ -126,6 +123,12 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( "ZgammaRatio", regionsSet );
   (*ZgammaRatio) = (*Zinv);
   (*ZgammaRatio) /= (*gammaJet);
+
+
+  // now that the MC ratio is done, add poisson error to gammajet sample:
+  addPoissonError(gammaJet);
+
+
 
   //MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( "ZinvEstimate" );
   //(*ZinvEstimate) = (*ZgammaRatio);
