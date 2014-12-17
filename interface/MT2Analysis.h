@@ -224,7 +224,7 @@ std::set<MT2Region> MT2Analysis<T>::getRegions() const {
 
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
 
-    regions.insert( (*it)->region );
+    regions.insert( *((*it)->region) );
 
   }
 
