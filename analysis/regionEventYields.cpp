@@ -43,6 +43,7 @@ class MT2Config {
 
   std::string regionsSet()    const { return regionsSet_; };
   std::string mcSamples()     const { return mcSamples_; };
+  std::string sigSamples()     const { return sigSamples_; };
   std::string dataSamples()   const { return dataSamples_; };
   std::string lostLeptonTag() const { return lostLeptonTag_; };
   std::string qcdTag()        const { return qcdTag_; };
@@ -57,6 +58,7 @@ class MT2Config {
 
   std::string regionsSet_;
   std::string mcSamples_;
+  std::string sigSamples_;
   std::string dataSamples_;
   std::string lostLeptonTag_;
   std::string qcdTag_;
@@ -157,7 +159,6 @@ int main( int argc, char* argv[] ) {
 
   }
 
-
   // load signal samples, if any
   std::vector< MT2Analysis<MT2EstimateSyst>* > signals;
   if( cfg.mcSamples()!="" ) {
@@ -182,15 +183,35 @@ int main( int argc, char* argv[] ) {
 
   } // if mc samples
 
+  else if ( cfg.sigSamples()!="" ){
 
+    std::string samplesFileName = "../samples/samples_" + cfg.sigSamples() + ".dat";
+    std::cout << std::endl << std::endl;
+    std::cout << "-> Loading signal samples from file: " << samplesFileName << std::endl;
 
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1000); // only signal (id>=1000)
 
+    if( fSamples.size()==0 ) {
 
-  MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( "data", cfg.regionsSet() );
+      std::cout << "No signal samples found, skipping." << std::endl;
 
+    } else {
+
+      for( unsigned i=0; i<fSamples.size(); ++i )
+        signals.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
+
+    } // if samples != 0
+    
+  } // if sig samples
+  
+
+  //MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( "data", cfg.regionsSet() );
+  MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( *(bgYields[0]) );
+  data->setName("data");
+ 
   if( dummyAnalysis ) { // use same as MC
 
-    for( unsigned i=0; i<bgYields.size(); ++i ) *data += *(bgYields[i]);
+    for( unsigned i=1; i < bgYields.size(); ++i ) (*data) += *(bgYields[i]);
     randomizePoisson( data );
 
   } else {
@@ -688,6 +709,7 @@ MT2Config::MT2Config( const std::string& configFileName ) {
 
   regionsSet_ = "";
   mcSamples_ = "";
+  sigSamples_ = "";
   dataSamples_ = "";
   lostLeptonTag_ = "";
   qcdTag_ = "";
@@ -714,6 +736,8 @@ MT2Config::MT2Config( const std::string& configFileName ) {
       regionsSet_ = std::string(StringValue);
     else if( name=="mcSamples" )
       mcSamples_ = std::string(StringValue);
+    else if( name=="sigSamples" )
+      sigSamples_ = std::string(StringValue);
     else if( name=="dataSamples" )
       dataSamples_ = std::string(StringValue);
     else if( name=="lostLeptonTag" )
@@ -738,6 +762,11 @@ MT2Config::MT2Config( const std::string& configFileName ) {
   if( mcSamples_=="" && !( lostLeptonTag_!="" || qcdTag_!="" || zinvTag_!="" ) ) {
     std::cout << "[MT2Config] ERROR! All three data-driven BG estimate tags need to be specified in the config (lostLeptonTag/qcdTag/zinvTag)!" << std::endl;
     exit(337);
+  }
+
+  if( mcSamples_!="" && sigSamples_!="" ) {
+    std::cout << "[MT2Config] ERROR! Config file must have either a mcSamples line OR (exclusive OR) a sigSamples line together with BG estimate tags." << std::endl;
+    exit(339);
   }
 
   std::cout << std::endl;

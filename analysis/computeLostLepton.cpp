@@ -59,9 +59,9 @@ int main( int argc, char* argv[] ) {
   for( unsigned i=0; i < fSamples.size(); ++i )
     (*lostLeptonEstimate) += ( computeYield( fSamples[i], regionsSet, lumi ) );
   
-  //lostLeptonEstimate->writeToFile("MT2LostLeptonEstimate_v0.root");
-  //lostLeptonEstimate->writeToFile("TTJets_Synch.root");
-  lostLeptonEstimate->writeToFile("ZJets_Synch.root");
+  //lostLeptonEstimate->writeToFile("MT2LostLeptonEstimate_v1.root");
+  lostLeptonEstimate->writeToFile("TTJets_CR.root");
+  //lostLeptonEstimate->writeToFile("MT2QCDEstimate_v1.root.root");
 
   return 0;
   

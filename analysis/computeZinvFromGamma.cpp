@@ -8,7 +8,7 @@
 #include "interface/MT2Sample.h"
 #include "interface/MT2Region.h"
 #include "interface/MT2Analysis.h"
-#include "interface/MT2Estimate.h"
+#include "interface/MT2EstimateSyst.h"
 
 #define mt2_cxx
 #include "../interface/mt2.h"
@@ -27,10 +27,10 @@ float lumi = 5.; // fb-1
 
 
 
-MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix="" );
-void drawCompare( const std::string& outputdir, MT2Analysis<MT2Estimate>* ZinvEstimate, MT2Analysis<MT2Estimate>* Zinv );
+MT2Analysis<MT2EstimateSyst> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix="" );
+void drawCompare( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* ZinvEstimate, MT2Analysis<MT2EstimateSyst>* Zinv );
 void drawSinglePlot( const std::string& outputdir, const std::string& name, TH1D* h1_ratio, TH1D* h1_mc );
-void addPoissonError( MT2Analysis<MT2Estimate>* analysis );
+void addPoissonError( MT2Analysis<MT2EstimateSyst>* analysis );
 
 
 int main( int argc, char* argv[] ) {
@@ -89,28 +89,28 @@ int main( int argc, char* argv[] ) {
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
-  MT2Analysis<MT2Estimate>* gammaJet = new MT2Analysis<MT2Estimate>( "gammaJet", regionsSet );
+  MT2Analysis<MT2EstimateSyst>* gammaJet = new MT2Analysis<MT2EstimateSyst>( "gammaJet", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
     (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet, "gamma_" ));
   }
 
 
   
-  MT2Analysis<MT2Estimate>* qcd = new MT2Analysis<MT2Estimate>( "qcd", regionsSet );
+  MT2Analysis<MT2EstimateSyst>* qcd = new MT2Analysis<MT2EstimateSyst>( "qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
     (*qcd) += (computeYield( samples_qcd[i], regionsSet, "gamma_" ));
   }
 
-  MT2Analysis<MT2Estimate>* gamma_plus_qcd = new MT2Analysis<MT2Estimate>( "gamma_plus_qcd", regionsSet );
+  MT2Analysis<MT2EstimateSyst>* gamma_plus_qcd = new MT2Analysis<MT2EstimateSyst>( "gamma_plus_qcd", regionsSet );
   *gamma_plus_qcd = *gammaJet;
   *gamma_plus_qcd += *qcd;
   
-  MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purity", regionsSet );
+  MT2Analysis<MT2EstimateSyst>* purity = new MT2Analysis<MT2EstimateSyst>( "purity", regionsSet );
   *purity = *gammaJet;
   *purity /= *gamma_plus_qcd;
   purity->setName( "purity" );
 
-  MT2Analysis<MT2Estimate>* Zinv = new MT2Analysis<MT2Estimate>( "Zinv", regionsSet );
+  MT2Analysis<MT2EstimateSyst>* Zinv = new MT2Analysis<MT2EstimateSyst>( "Zinv", regionsSet );
   for( unsigned i=0; i<samples_Zinv.size(); ++i ) {
     (*Zinv) += (computeYield( samples_Zinv[i], regionsSet ));
   }
@@ -118,9 +118,9 @@ int main( int argc, char* argv[] ) {
 
   //TH1::AddDirectory(kTRUE); // stupid ROOT memory allocation needs this
 
-  //MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( (*Zinv)/(*gammaJet) );
+  //MT2Analysis<MT2EstimateSyst>* ZgammaRatio = new MT2Analysis<MT2EstimateSyst>( (*Zinv)/(*gammaJet) );
   //ZgammaRatio->setName("ZgammaRatio");
-  MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( "ZgammaRatio", regionsSet );
+  MT2Analysis<MT2EstimateSyst>* ZgammaRatio = new MT2Analysis<MT2EstimateSyst>( "ZgammaRatio", regionsSet );
   (*ZgammaRatio) = (*Zinv);
   (*ZgammaRatio) /= (*gammaJet);
 
@@ -130,10 +130,10 @@ int main( int argc, char* argv[] ) {
 
 
 
-  //MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( "ZinvEstimate" );
+  //MT2Analysis<MT2EstimateSyst>* ZinvEstimate = new MT2Analysis<MT2EstimateSyst>( "ZinvEstimate" );
   //(*ZinvEstimate) = (*ZgammaRatio);
   //(*ZinvEstimate) *= (*gammaJet);
-  MT2Analysis<MT2Estimate>* ZinvEstimate = new MT2Analysis<MT2Estimate>( (*ZgammaRatio)*(*gammaJet) );
+  MT2Analysis<MT2EstimateSyst>* ZinvEstimate = new MT2Analysis<MT2EstimateSyst>( (*ZgammaRatio)*(*gammaJet) );
   ZinvEstimate->setName("ZinvEstimate");
 
   std::string outputdirPlots = outputdir + "/plots";
@@ -158,7 +158,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix ) {
+MT2Analysis<MT2EstimateSyst> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix ) {
 
 
   std::cout << std::endl << std::endl;
@@ -171,7 +171,7 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
 
 
 
-  MT2Analysis<MT2Estimate> analysis( sample.sname, regionsSet, sample.id );
+  MT2Analysis<MT2EstimateSyst> analysis( sample.sname, regionsSet, sample.id );
 
   
   MT2Tree myTree;
@@ -236,7 +236,7 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
 
-    MT2Estimate* thisEstimate = analysis.get( ht, njets, nbjets, met );
+    MT2EstimateSyst* thisEstimate = analysis.get( ht, njets, nbjets, met );
     if( thisEstimate==0 ) continue;
 
     thisEstimate->yield->Fill(mt2, weight );
@@ -259,7 +259,7 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
 
 
 
-void drawCompare( const std::string& outputdir, MT2Analysis<MT2Estimate>* ZinvEstimate, MT2Analysis<MT2Estimate>* Zinv ) {
+void drawCompare( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* ZinvEstimate, MT2Analysis<MT2EstimateSyst>* Zinv ) {
 
   std::set<MT2HTRegion> htRegions = Zinv->getHTRegions();
   std::set<MT2SignalRegion> signalRegions = Zinv->getSignalRegions();
@@ -269,8 +269,8 @@ void drawCompare( const std::string& outputdir, MT2Analysis<MT2Estimate>* ZinvEs
   
         MT2Region thisRegion(*iHT, *iSR);
 
-        MT2Estimate* est_ratio = ZinvEstimate->get(thisRegion); 
-        MT2Estimate* est_mc    = Zinv->get(thisRegion); 
+        MT2EstimateSyst* est_ratio = ZinvEstimate->get(thisRegion); 
+        MT2EstimateSyst* est_mc    = Zinv->get(thisRegion); 
 
         drawSinglePlot( outputdir, thisRegion.getName(), est_ratio->yield, est_mc->yield );
 
@@ -305,7 +305,7 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, TH1D
 
 
 
-void addPoissonError( MT2Analysis<MT2Estimate>* analysis ) {
+void addPoissonError( MT2Analysis<MT2EstimateSyst>* analysis ) {
 
 
   std::set<MT2Region> regions = analysis->getRegions();
@@ -319,7 +319,7 @@ void addPoissonError( MT2Analysis<MT2Estimate>* analysis ) {
         int nData = (int) h1->GetBinContent(ibin);
         h1->SetBinContent(ibin, nData);
         if( nData==0 )
-          h1->SetBinError(ibin, 1.);
+          h1->SetBinError(ibin, 0.);
         else
           h1->SetBinError(ibin, sqrt((float)nData));
 
