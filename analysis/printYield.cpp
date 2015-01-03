@@ -25,24 +25,30 @@ int main() {
   (*analysisSum) += (*analysisQCD);
   analysisSum->setName("FullBkg");
 
+  std::vector < MT2Analysis<MT2EstimateSyst>* > analysesSignal = MT2Analysis<MT2EstimateSyst>::readAllFromFile(firstInputFile.c_str(), "SMS");
+  
   //std::string firstInputFile  = "/scratch/mmasciov/CMSSW_7_0_6_patch3_MT2Analysis2015/src/MT2Analysis2015/analysis/ZJets_Synch.root";
   //MT2Analysis<MT2EstimateSyst>* analysisTop = MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "LostLepton");
 
-  std::string ofsTop = "Top_Synch.log";
-  analysisTop->print(ofsTop);
-
-  std::string ofsWJets = "WJets_Synch.log";
-  analysisWJets->print(ofsWJets);
-
-  std::string ofsZJets = "ZJets_Synch.log";
-  analysisZJets->print(ofsZJets);
-
-  std::string ofsQCD = "QCD_Synch.log";
-  analysisQCD->print(ofsQCD);
-
-  std::string ofsFullBkg = "FullBkg_Synch.log";
-  analysisSum->print(ofsFullBkg);
-
+  //std::string ofsTop = "Top_Synch.log";
+  //analysisTop->print(ofsTop);
+  //
+  //std::string ofsWJets = "WJets_Synch.log";
+  //analysisWJets->print(ofsWJets);
+  //
+  //std::string ofsZJets = "ZJets_Synch.log";
+  //analysisZJets->print(ofsZJets);
+  //
+  //std::string ofsQCD = "QCD_Synch.log";
+  //analysisQCD->print(ofsQCD);
+  //
+  //std::string ofsFullBkg = "FullBkg_Synch.log";
+  //analysisSum->print(ofsFullBkg);
+  
+  for(unsigned a =0;  a < analysesSignal.size(); ++a){
+    std::string ofsSig = analysesSignal[a]->name + ".log";
+    analysesSignal[a]->print(ofsSig);
+  }
   return 0;
 
 }

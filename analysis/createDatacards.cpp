@@ -45,14 +45,20 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2Estimate>* data  = MT2Analysis<MT2Estimate>::readFromFile( fileName, "data" );
   MT2Analysis<MT2Estimate>* qcd   = MT2Analysis<MT2Estimate>::readFromFile( fileName, "QCD"  );
   qcd->setName("qcd");
-  MT2Analysis<MT2Estimate>* zinv  = MT2Analysis<MT2Estimate>::readFromFile( fileName, "ZJets");
-  zinv->setName("zinv");
-  MT2Analysis<MT2Estimate>* wjets = MT2Analysis<MT2Estimate>::readFromFile( fileName, "WJets");
-  MT2Analysis<MT2Estimate>* top   = MT2Analysis<MT2Estimate>::readFromFile( fileName, "Top"  );
-  MT2Analysis<MT2Estimate>* llep = new MT2Analysis<MT2Estimate>( *top + *wjets );
-  llep->setName( "llep" );
-  //*llep += *wjets;
+
+  //////CHANGE HERE for ITERATION 1
+  //MT2Analysis<MT2Estimate>* zinv  = MT2Analysis<MT2Estimate>::readFromFile( fileName, "ZJets");
+  //zinv->setName("zinv");
+  //MT2Analysis<MT2Estimate>* wjets = MT2Analysis<MT2Estimate>::readFromFile( fileName, "WJets");
+  //MT2Analysis<MT2Estimate>* top   = MT2Analysis<MT2Estimate>::readFromFile( fileName, "Top"  );
+  //MT2Analysis<MT2Estimate>* llep = new MT2Analysis<MT2Estimate>( *top + *wjets );
+  //llep->setName( "llep" );
+  ////*llep += *wjets;
   
+  MT2Analysis<MT2Estimate>* zinv  = MT2Analysis<MT2Estimate>::readFromFile( fileName, "ZinvEstimate");
+  zinv->setName("zinv");
+  MT2Analysis<MT2Estimate>* llep = MT2Analysis<MT2Estimate>::readFromFile( fileName, "LostLepton");
+  llep->setName( "llep" );
 
   std::cout << std::endl << std::endl;
   std::cout << "-> Creating BG templates file..." << std::endl;
@@ -158,7 +164,7 @@ int main( int argc, char* argv[] ) {
        datacard << "process \t 0 \t 1 \t 2 \t 3" << std::endl;
        datacard << "rate \t ";
        if( this_signal!=0 )
-         datacard << this_signal->Integral();
+	 datacard << this_signal->Integral();
        else
          datacard << "XXX";
        datacard << " \t " << this_qcd->Integral() << " \t " << this_zinv->Integral() << " \t " << this_llep->Integral() << std::endl;
@@ -167,7 +173,7 @@ int main( int argc, char* argv[] ) {
        datacard << "syst_sig    lnN    1.1 - - -" << std::endl;
 
        int N_llep = (int)this_llep->Integral();
-       float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 1.;
+       float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 0.;
        float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
        llep_tot_err+=1.;
        datacard << "syst_llep_corr_" << thisRegion.getName() << "  lnN   - - - " << llep_tot_err << std::endl;
@@ -200,12 +206,12 @@ int main( int argc, char* argv[] ) {
 
            // uncorrelated:
            for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
-             datacard << this_zinv->GetName() << "_stat_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 100% of MC
+             datacard << this_zinv->GetName() << "_stat_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 1/sqrt(k*N)
 
          } else { // 2 btags
 
            for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
-             datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 1/sqrt(k*N)
+             datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 100% of MC
 
          }
 
@@ -273,6 +279,13 @@ void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float
       MT2Region thisRegion(*iHT, *iSR);
 
       TH1D* h1 = analysis->get( thisRegion )->yield;
+
+      TString analysisName(analysis->name);
+      if(h1->Integral() == 0.){
+	for( int b=1; b < h1->GetNbinsX()+1; ++b)
+	  h1->SetBinContent(b, analysisName.Contains("SMS") ? 1e-4 : 1e-2);
+      }
+      
       h1->Write();
 
       if( err_uncorr==0. ) continue;
@@ -321,13 +334,18 @@ void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysi
       int nBJetsMin = thisRegion.nBJetsMin();
       if( nBJetsMin>=2 ) continue;
 
-      float k = (nBJetsMin==0) ? 2. : 20.;
+      //////CHANGE HERE for ITERATION 1
+      //Fake uncertainty
+      //float k = (nBJetsMin==0) ? 2. : 20.;
+
+      //Real uncertainty
+      float k = 1.;
 
       for( unsigned iBin=1; iBin<h1->GetNbinsX()+1; ++iBin ) {
 
         float binContent = h1->GetBinContent(iBin);
         int N_zinv = (int)binContent;
-        float error = (N_zinv>0) ? 1./sqrt(k*N_zinv) : 1.;
+        float error = (N_zinv>0) ? 1./sqrt(k*N_zinv) : 0.;
 
         TH1D* h1_binUp = new TH1D(*h1);
         h1_binUp->SetName(Form("%s_bin_%dUp", h1->GetName(), iBin));
