@@ -68,6 +68,11 @@ class MT2Estimate {
   MT2Estimate operator/=( float k ) const;
   MT2Estimate operator*=( float k ) const;
 
+
+  virtual void finalize() {
+    return this->addOverflow();
+  }
+
   virtual void addOverflow();
   void addOverflowSingleHisto( TH1D* yield );
 
