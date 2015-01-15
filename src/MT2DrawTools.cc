@@ -74,6 +74,9 @@ TStyle* MT2DrawTools::setStyle() {
   style->SetNdivisions(510, "XYZ");
   style->SetPadTickX(1); // To get tick marks on the opposite side of the frame
   style->SetPadTickY(1);
+  // for histograms:
+  style->SetHistLineColor(0);
+
   style->cd();
   return style;
 
