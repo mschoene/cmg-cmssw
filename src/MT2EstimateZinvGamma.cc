@@ -46,13 +46,21 @@ void MT2EstimateZinvGamma::setName( const std::string& newName ) {
 
 
 
-void MT2EstimateZinvGamma::addOverflow() {
+void MT2EstimateZinvGamma::finalize() {
 
   MT2Estimate::addOverflow();
 
-  MT2Estimate::addOverflowSingleHisto( template_prompt );
-  MT2Estimate::addOverflowSingleHisto( template_fake );
-  MT2Estimate::addOverflowSingleHisto( template_unmatched );
+  //MT2Estimate::addOverflowSingleHisto( template_prompt );
+  //MT2Estimate::addOverflowSingleHisto( template_fake );
+  //MT2Estimate::addOverflowSingleHisto( template_unmatched );
+
+  float int_prompt = template_prompt->Integral("width");
+  float int_fake = template_fake->Integral("width");
+  float int_unmatched = template_unmatched->Integral("width");
+
+  if( int_prompt>0. ) template_prompt->Scale( 1./int_prompt );
+  if( int_fake>0. ) template_fake->Scale( 1./int_fake );
+  if( int_unmatched>0. ) template_unmatched->Scale( 1./int_unmatched );
 
 }
 
@@ -74,6 +82,19 @@ void MT2EstimateZinvGamma::print(const std::string& ofs){
   MT2Estimate::print( ofs );
 
 }
+
+
+
+void MT2EstimateZinvGamma::write() const {
+
+    MT2Estimate::write();
+
+    template_prompt->Write();
+    template_fake->Write();
+    template_unmatched->Write();
+
+}
+
 
 
 const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator=( const MT2EstimateZinvGamma& rhs ) {
