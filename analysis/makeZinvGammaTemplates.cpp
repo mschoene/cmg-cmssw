@@ -48,15 +48,6 @@ int main( int argc, char* argv[] ) {
   }
   
 
-  std::cout << std::endl << std::endl;
-  std::cout << "-> Loading Zinv samples" << std::endl;
-
-  std::vector<MT2Sample> samples_Zinv = MT2Sample::loadSamples(samplesFile, "ZJetsToNuNu");
-  if( samples_Zinv.size()==0 ) {
-    std::cout << "There must be an error: didn't find any Zinv files in " << samplesFile << "!" << std::endl;
-    exit(1207);
-  }
-
 
   std::string regionsSet = "13TeV_CSA14";
   //std::string regionsSet = "13TeV_ZinvGammaPurity";
@@ -68,22 +59,20 @@ int main( int argc, char* argv[] ) {
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
-  MT2Analysis<MT2EstimateZinvGamma>* gammaJet = new MT2Analysis<MT2EstimateZinvGamma>( "gammaJet", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* templates = new MT2Analysis<MT2EstimateZinvGamma>( "templates", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
-    (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet ));
+    (*templates) += (computeYield( samples_gammaJet[i], regionsSet ));
   }
 
 
   
-  MT2Analysis<MT2EstimateZinvGamma>* qcd = new MT2Analysis<MT2EstimateZinvGamma>( "qcd", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = new MT2Analysis<MT2EstimateZinvGamma>( "templates_qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-    (*qcd) += (computeYield( samples_qcd[i], regionsSet ));
+    (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet ));
   }
 
-  MT2Analysis<MT2EstimateZinvGamma>* gamma_plus_qcd = new MT2Analysis<MT2EstimateZinvGamma>( "gamma_plus_qcd", regionsSet );
-  *gamma_plus_qcd = *gammaJet;
-  *gamma_plus_qcd += *qcd;
-
+  templates->writeToFile("provaTemplates.root");
+  templates_qcd->addToFile("provaTemplates.root");
 
 
   return 0;
@@ -132,11 +121,14 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
   tree->SetBranchAddress( "gamma_nBJet40", &nbjets );
 
 
+
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
     if( iEntry % 50000 == 0 ) std::cout << "    Entry: " << iEntry << " / " << nentries << std::endl;
 
     myTree.GetEntry(iEntry);
+
+    if( mt2 < 200.) continue;
 
     if( myTree.nMuons10 > 0) continue;
     if( myTree.nElectrons10 > 0 ) continue;
@@ -180,7 +172,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
       thisEstimate->template_prompt->Fill(myTree.gamma_chHadIso[0], weight );
     else if( myTree.gamma_mcMatchId[0]==7 )
       thisEstimate->template_fake->Fill(myTree.gamma_chHadIso[0], weight );
-    else if( myTree.gamma_mcMatchId[0]==0 )
+    else 
       thisEstimate->template_unmatched->Fill(myTree.gamma_chHadIso[0], weight );
 
     
