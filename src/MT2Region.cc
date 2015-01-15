@@ -70,18 +70,16 @@ MT2HTRegion::MT2HTRegion( const MT2HTRegion& rhs ) {
   htMin = rhs.htMin;
   htMax = rhs.htMax;
   metMin = rhs.metMin;
-  HLT_selection = rhs.HLT_selection;
   
 }
 
 
 
-MT2HTRegion::MT2HTRegion( float ahtMin, float ahtMax, float ametMin, const std::string& aHLT_selection ) {
+MT2HTRegion::MT2HTRegion( float ahtMin, float ahtMax, float ametMin ) {
 
   htMin = ahtMin;
   htMax = ahtMax;
   metMin = ametMin;
-  HLT_selection = aHLT_selection;
 
 }
 
@@ -131,14 +129,14 @@ std::vector< std::string > MT2HTRegion::getNiceNames() const {
 
 bool MT2HTRegion::operator==( const MT2HTRegion& rhs ) const {
 
-  return ( htMin==rhs.htMin && htMax==rhs.htMax && metMin==rhs.metMin && HLT_selection==rhs.HLT_selection ); 
+  return ( htMin==rhs.htMin && htMax==rhs.htMax && metMin==rhs.metMin ); 
 
 }
 
 
 bool MT2HTRegion::operator!=( const MT2HTRegion& rhs ) const {
 
-  return ( htMin!=rhs.htMin || htMax!=rhs.htMax || metMin!=rhs.metMin || HLT_selection!=rhs.HLT_selection ); 
+  return ( htMin!=rhs.htMin || htMax!=rhs.htMax || metMin!=rhs.metMin ); 
 
 }
 
@@ -206,7 +204,7 @@ MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
   
 
   mtMax  = -1.;
-  inBox = false;
+  inBox = true;
   
   if( parts.size()>2 ) {
     TString mtPart(parts[2]);
