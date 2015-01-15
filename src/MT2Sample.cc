@@ -74,6 +74,7 @@ std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, const
     if( filter!="" && !(rootFileName.Contains(filter.c_str())) ) continue;
 
     rootFileName.ReplaceAll( "_", " " );
+    rootFileName.ReplaceAll( ".", " " );
  
     std::vector<std::string> fileNameParts;
     std::istringstream iss2(rootFileName.Data());
@@ -125,6 +126,10 @@ std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, const
       bool foundPU=false;
       int lastOnes = 3;
       for( unsigned i=1; i<fileNameParts.size() && lastOnes>0; ++i ) {
+        if( fileNameParts[i] == "root" ) break;
+        if( fileNameParts[i] == "babytree" ) continue;
+        if( fileNameParts[i] == "prune" ) continue;
+        if( fileNameParts[i] == "skim" ) continue;
         s.name += "_" + fileNameParts[i];
         if( fileNameParts[i]=="PU" ) foundPU = true;
         if( !foundPU )
@@ -155,11 +160,11 @@ std::vector<MT2Sample> MT2Sample::loadSamples(const std::string& filename, const
     std::cout << "   ID:             " << s.id << std::endl;
     std::cout << "   Events:         " << s.nevents  << std::endl;
     std::cout << "   Xsection:       " << s.xsection << std::endl;
-    std::cout << "   Lumi:           " << s.lumi << std::endl;
+    //std::cout << "   Lumi:           " << s.lumi << std::endl;
     std::cout << "   Kfactor:        " << s.kfact << std::endl;
     std::cout << "   Filter:         " << s.filter << std::endl;
     std::cout << "   Scale to 1/fb:  " << s.scale1fb << std::endl;
-    std::cout << "   Avg PU weight:  " << s.PU_avg_weight << std::endl;
+    //std::cout << "   Avg PU weight:  " << s.PU_avg_weight << std::endl;
     //std::cout << "   type:           " << s.type << std::endl;
     //std::cout << "   Color:          " << s.color << std::endl;
     fSamples.push_back(s);
