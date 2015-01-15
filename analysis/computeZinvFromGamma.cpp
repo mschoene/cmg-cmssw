@@ -190,6 +190,10 @@ MT2Analysis<MT2EstimateSyst> computeYield( const MT2Sample& sample, const std::s
   tree->SetBranchAddress( Form("%snJet40", prefix.c_str()), &njets );
   int nbjets;
   tree->SetBranchAddress( Form("%snBJet40", prefix.c_str()), &nbjets );
+  float deltaPhiMin;
+  tree->SetBranchAddress( Form("%sdeltaPhiMin", prefix.c_str()), &deltaPhiMin );
+  float diffMetMht;
+  tree->SetBranchAddress( Form("%sdiffMetMht", prefix.c_str()), &diffMetMht );
 
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
@@ -203,9 +207,8 @@ MT2Analysis<MT2EstimateSyst> computeYield( const MT2Sample& sample, const std::s
     if( myTree.nPFLep5LowMT > 0) continue;
     if( myTree.nPFHad10LowMT > 0) continue;
 
-    if( myTree.jet_pt[1]<100. ) continue;
-    if( myTree.deltaPhiMin<0.3 ) continue;
-    if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
+    if( deltaPhiMin<0.3 ) continue;
+    if( diffMetMht>0.5*met ) continue;
   
     if( myTree.nVert==0 ) continue;
 
