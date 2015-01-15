@@ -35,16 +35,12 @@ class MT2EstimateZinvGamma : public MT2Estimate {
   //MT2EstimateZinvGamma operator/=( float k ) const;
   //MT2EstimateZinvGamma operator*=( float k ) const;
 
-  virtual void addOverflow();
+
+  virtual void finalize();
 
   virtual void getShit( TFile* file, const std::string& path );
 
-  virtual void write() const {
-    MT2Estimate::write();
-    template_prompt->Write();
-    template_fake->Write();
-    template_unmatched->Write();
-  }
+  virtual void write() const;
 
   virtual void print(const std::string& ofs);
 
