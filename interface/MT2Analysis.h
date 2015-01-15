@@ -62,6 +62,8 @@ class MT2Analysis {
   static void print ( const std::vector<MT2Analysis*> analyses, const std::string& ofs, const std::string& matchName="" );
   void print ( const std::string& ofs ) const;
 
+  void printRegions() const;
+
   void finalize();
 
   std::string name;
@@ -235,6 +237,17 @@ std::set<MT2Region> MT2Analysis<T>::getRegions() const {
 
 }
 
+
+template<class T>
+void MT2Analysis<T>::printRegions() const {
+
+  std::cout << std::endl;
+  std::cout << "-> MT2Analysis '" << name << "' has the following regions: " << std::endl;
+
+  for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) 
+    std::cout << "  " << ((*it)->region)->getName() << std::endl;
+
+}
 
 
 
