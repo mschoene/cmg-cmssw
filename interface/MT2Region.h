@@ -13,7 +13,7 @@ class MT2HTRegion {
 
   MT2HTRegion( const std::string& name );
   MT2HTRegion( const MT2HTRegion& rhs );
-  MT2HTRegion( float ahtMin, float ahtMax, float ametMin, const std::string& aHLT_selection="" );
+  MT2HTRegion( float ahtMin, float ahtMax, float ametMin );
   ~MT2HTRegion() {};
 
 
@@ -26,8 +26,6 @@ class MT2HTRegion {
   float htMin;
   float htMax;
   float metMin;
-
-  std::string HLT_selection;
 
 
   bool operator==( const MT2HTRegion& rhs ) const;
@@ -99,6 +97,12 @@ class MT2Region {
     htRegion_ = new MT2HTRegion(htRegion);
     sigRegion_ = new MT2SignalRegion(sigRegion);
   }
+
+  MT2Region( float htMin, float htMax, float metMin, int njmin, int njmax, int nbmin, int nbmax, float mtMaxCut=-1., float mt2MinCut=-1., float mt2MaxCut=-1., bool insideBox=true ) {
+    htRegion_ = new MT2HTRegion( htMin, htMax, metMin );
+    sigRegion_ = new MT2SignalRegion( njmin, njmax, nbmin, nbmax, mtMaxCut, mt2MinCut, mt2MaxCut, insideBox );
+  }
+
   ~MT2Region() {};
 
 
