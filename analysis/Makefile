@@ -76,7 +76,7 @@ printYield_CR: printYield_CR.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2Estima
 fakeQCDestimate: fakeQCDestimate.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateSyst.o
 	$(CC) -Wall $(INCLUDES) -o fakeQCDestimate fakeQCDestimate.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateSyst.o $(ROOTFLAG) $(EXTRALIBS)
 
-makeZinvGammaTemplates: fakeQCDestimate.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateZinvGamma.o
+makeZinvGammaTemplates: makeZinvGammaTemplates.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateZinvGamma.o
 	$(CC) -Wall $(INCLUDES) -o makeZinvGammaTemplates makeZinvGammaTemplates.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateZinvGamma.o $(ROOTFLAG) $(EXTRALIBS)
 
 
