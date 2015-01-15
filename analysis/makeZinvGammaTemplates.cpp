@@ -67,9 +67,9 @@ int main( int argc, char* argv[] ) {
 
   
   MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = new MT2Analysis<MT2EstimateZinvGamma>( "templates_qcd", regionsSet );
-  for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-    (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet ));
-  }
+  //for( unsigned i=0; i<samples_qcd.size(); ++i ) {
+  //  (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet ));
+  //}
 
   templates->writeToFile("provaTemplates.root");
   templates_qcd->addToFile("provaTemplates.root");
@@ -109,16 +109,6 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
   int nentries = tree->GetEntries();
 
-  float mt2;
-  tree->SetBranchAddress( "gamma_mt2"    , &mt2 );
-  float ht;
-  tree->SetBranchAddress( "gamma_ht"     , &ht );
-  float met;
-  tree->SetBranchAddress( "gamma_met_pt" , &met );
-  int njets;
-  tree->SetBranchAddress( "gamma_nJet40" , &njets );
-  int nbjets;
-  tree->SetBranchAddress( "gamma_nBJet40", &nbjets );
 
 
 
@@ -128,20 +118,19 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     myTree.GetEntry(iEntry);
 
-    if( mt2 < 200.) continue;
+    if( myTree.gamma_mt2 < 200.) continue;
 
     if( myTree.nMuons10 > 0) continue;
     if( myTree.nElectrons10 > 0 ) continue;
     if( myTree.nPFLep5LowMT > 0) continue;
     if( myTree.nPFHad10LowMT > 0) continue;
 
-    if( myTree.jet_pt[1]<100. ) continue;
-    if( myTree.deltaPhiMin<0.3 ) continue;
-    if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
+    if( myTree.gamma_deltaPhiMin<0.3 ) continue;
+    if( myTree.gamma_diffMetMht>0.5*myTree.gamma_met_pt ) continue;
   
     if( myTree.nVert==0 ) continue;
 
-    if( njets<2 ) continue;
+    if( myTree.gamma_nJet40<2 ) continue;
 
     if( myTree.ngamma==0 ) continue;
 
@@ -163,10 +152,10 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
 
-    MT2EstimateZinvGamma* thisEstimate = analysis.get( ht, njets, nbjets, met );
+    MT2EstimateZinvGamma* thisEstimate = analysis.get( myTree.gamma_ht, myTree.gamma_nJet40, myTree.gamma_nBJet40, myTree.gamma_met_pt );
     if( thisEstimate==0 ) continue;
 
-    thisEstimate->yield->Fill(mt2, weight );
+    thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
     
     if( myTree.gamma_mcMatchId[0]==22 )
       thisEstimate->template_prompt->Fill(myTree.gamma_chHadIso[0], weight );

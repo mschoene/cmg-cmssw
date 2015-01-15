@@ -31,7 +31,7 @@
 
 
 bool dummyAnalysis = true;
-float lumi = 5.; // in fb-1
+double lumi = 5.; // in fb-1
 
 
 
@@ -257,9 +257,10 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
   std::cout << "-> Starting computation for sample: " << sample.name << std::endl;
 
   TFile* file = TFile::Open(sample.file.c_str());
+  std::cout << "-> Getting mt2 tree from file: " << sample.file << std::endl;
+
   TTree* tree = (TTree*)file->Get("mt2");
   
-
 
   MT2Tree myTree;
   myTree.loadGenStuff = false;
@@ -271,6 +272,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
   MT2Analysis<MT2EstimateSyst>* analysis = new MT2Analysis<MT2EstimateSyst>( sample.sname, regionsSet, sample.id );
 
   bool isData = sample.id<100 && sample.id>0;
+
 
 
   int nentries = tree->GetEntries();
@@ -288,6 +290,7 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
   
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
+    if( myTree.njet<2 ) continue;
     if( myTree.jet_pt[1]<100. ) continue;
     if( myTree.deltaPhiMin<0.3 ) continue;
     if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
