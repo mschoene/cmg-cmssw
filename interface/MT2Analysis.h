@@ -54,6 +54,9 @@ class MT2Analysis {
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
   static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, const std::string& matchExpression="", bool verbose=true );
   void writeToFile( const std::string& fileName, const std::string& option="RECREATE" );
+  void addToFile( const std::string& fileName ) {
+    return this->writeToFile(fileName,"UPDATE");
+  }
 
   static void printFromFile (  const std::string& fileName, const std::string& ofs, const std::string& matchName="" );
   static void print ( const std::vector<MT2Analysis*> analyses, const std::string& ofs, const std::string& matchName="" );
@@ -619,7 +622,7 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string
 
   file->Close();
 
-  std::cout << "-> Written '" << this->name << "' to file: " << fileName << std::endl;
+  std::cout << "-> Wrote '" << this->name << "' to file: " << fileName << std::endl;
 
 }
 
@@ -886,7 +889,7 @@ template<class T>
 void MT2Analysis<T>::finalize() {
 
   for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) 
-    (*it)->addOverflow();
+    (*it)->finalize();
 
 }
 
