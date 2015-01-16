@@ -734,7 +734,7 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
 
   } // for ht regions
 
-  std::cout << "[MT2Analysis::print] Printed analysis '" << name << "' to: " << ofs << std::endl;
+  std::cout << "-> Printed analysis '" << name << "' to: " << ofs << std::endl;
   
 }
 
