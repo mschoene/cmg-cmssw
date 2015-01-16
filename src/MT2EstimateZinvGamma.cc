@@ -10,8 +10,8 @@
 
 MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2Region& aregion ) : MT2Estimate( aname, aregion ) {
 
-  int nbins = 200;
-  float xmax = 50.;
+  int nbins = 500;
+  float xmax = 100.;
 
   template_prompt = new TH1D( this->getHistoName("template_prompt").c_str(), "", nbins, 0., xmax);
   template_prompt->Sumw2();
