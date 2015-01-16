@@ -5,7 +5,7 @@
 
 
 #define mt2_cxx
-#include "../interface/mt2.h"
+#include "../interface/mt2_float.h"
 
 
 #include "TLorentzVector.h"
@@ -42,10 +42,6 @@ int main( int argc, char* argv[] ) {
   std::cout << "-> Loading QCD samples" << std::endl;
 
   std::vector<MT2Sample> samples_qcd = MT2Sample::loadSamples(samplesFile, "QCD");
-  if( samples_qcd.size()==0 ) {
-    std::cout << "There must be an error: didn't find any QCD files in " << samplesFile << "!" << std::endl;
-    exit(1205);
-  }
   
 
 
@@ -67,12 +63,14 @@ int main( int argc, char* argv[] ) {
 
   
   MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = new MT2Analysis<MT2EstimateZinvGamma>( "templates_qcd", regionsSet );
-  //for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-  //  (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet ));
-  //}
+  for( unsigned i=0; i<samples_qcd.size(); ++i ) {
+    (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet ));
+  }
 
-  templates->writeToFile("provaTemplates.root");
-  templates_qcd->addToFile("provaTemplates.root");
+
+  std::string templateFileName = "gammaTemplates_" + samplesFileName + ".root";
+  templates->writeToFile(templateFileName);
+  templates_qcd->addToFile(templateFileName);
 
 
   return 0;
@@ -118,6 +116,8 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     myTree.GetEntry(iEntry);
 
+    if( myTree.gamma_ht>1000. && sample.id==204 ) continue; // remove high-weight spikes (remove GJet_400to600 leaking into HT>1000)
+
     if( myTree.gamma_mt2 < 200.) continue;
 
     if( myTree.nMuons10 > 0) continue;
@@ -159,10 +159,8 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     
     if( myTree.gamma_mcMatchId[0]==22 )
       thisEstimate->template_prompt->Fill(myTree.gamma_chHadIso[0], weight );
-    else if( myTree.gamma_mcMatchId[0]==7 )
+    else if( myTree.gamma_mcMatchId[0]==0 )
       thisEstimate->template_fake->Fill(myTree.gamma_chHadIso[0], weight );
-    else 
-      thisEstimate->template_unmatched->Fill(myTree.gamma_chHadIso[0], weight );
 
     
   } // for entries
