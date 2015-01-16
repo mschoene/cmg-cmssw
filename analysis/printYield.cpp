@@ -7,48 +7,58 @@
 #include <iomanip>
 #include <string>
 
-int main() {
 
-  std::string firstInputFile  = "/scratch/mmasciov/CMSSW_7_0_6_patch3_MT2Analysis2015/src/MT2Analysis2015/analysis/EventYields_mc_CSA14_dummy/analyses.root";
- 
-  MT2Analysis<MT2EstimateSyst>* analysisTop = MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "Top");
 
-  MT2Analysis<MT2EstimateSyst>* analysisWJets = MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "WJets");
 
-  MT2Analysis<MT2EstimateSyst>* analysisZJets = MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "ZJets");
+int main( int argc, char* argv[] ) {
 
-  MT2Analysis<MT2EstimateSyst>* analysisQCD = MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "QCD");
 
-  MT2Analysis<MT2EstimateSyst>* analysisSum = new MT2Analysis<MT2EstimateSyst>( (*analysisTop) );
-  (*analysisSum) += (*analysisWJets);
-  (*analysisSum) += (*analysisZJets);
-  (*analysisSum) += (*analysisQCD);
+
+  if( argc!=2 ) {
+
+    std::cout << "USAGE: ./printYield [EventYieldsDirectory]" << std::endl;
+    exit(11);
+
+  }
+
+
+  std::string dir(argv[1]);
+
+  std::string firstInputFile  = dir + "/analyses.root";
+
+
+  std::vector< MT2Analysis<MT2EstimateSyst>* > analyses_bg;
+  analyses_bg.push_back( MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "Top") );
+  analyses_bg.push_back( MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "WJets") );
+  analyses_bg.push_back( MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "ZJets") );
+  analyses_bg.push_back( MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "QCD") );
+
+  for(unsigned a =0;  a < analyses_bg.size(); ++a){
+    std::string ofs = dir + "/yieldtable_" + analyses_bg[a]->name + ".log";
+    analyses_bg[a]->print(ofs);
+  }
+
+
+  MT2Analysis<MT2EstimateSyst>* analysisSum = new MT2Analysis<MT2EstimateSyst>( *(analyses_bg[0]) );
+  for(unsigned a =1;  a < analyses_bg.size(); ++a)
+    (*analysisSum) += (*(analyses_bg[1]));
+
   analysisSum->setName("FullBkg");
+
+  analysisSum->print(dir + "/yieldtable_FullBkg.log");
+
+  
+  //MT2Analysis<MT2EstimateSyst>* analysisTop = MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "LostLepton");
+
 
   std::vector < MT2Analysis<MT2EstimateSyst>* > analysesSignal = MT2Analysis<MT2EstimateSyst>::readAllFromFile(firstInputFile.c_str(), "SMS");
   
-  //std::string firstInputFile  = "/scratch/mmasciov/CMSSW_7_0_6_patch3_MT2Analysis2015/src/MT2Analysis2015/analysis/ZJets_Synch.root";
-  //MT2Analysis<MT2EstimateSyst>* analysisTop = MT2Analysis<MT2EstimateSyst>::readFromFile(firstInputFile.c_str(), "LostLepton");
-
-  //std::string ofsTop = "Top_Synch.log";
-  //analysisTop->print(ofsTop);
-  //
-  //std::string ofsWJets = "WJets_Synch.log";
-  //analysisWJets->print(ofsWJets);
-  //
-  //std::string ofsZJets = "ZJets_Synch.log";
-  //analysisZJets->print(ofsZJets);
-  //
-  //std::string ofsQCD = "QCD_Synch.log";
-  //analysisQCD->print(ofsQCD);
-  //
-  //std::string ofsFullBkg = "FullBkg_Synch.log";
-  //analysisSum->print(ofsFullBkg);
-  
-  for(unsigned a =0;  a < analysesSignal.size(); ++a){
-    std::string ofsSig = analysesSignal[a]->name + ".log";
-    analysesSignal[a]->print(ofsSig);
+  for(unsigned a =0;  a < analysesSignal.size(); ++a) {
+    std::string ofs = dir + "/yieldtable_" + analysesSignal[a]->name + ".log";
+    analysesSignal[a]->print(ofs);
   }
+
+
   return 0;
 
 }
