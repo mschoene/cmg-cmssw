@@ -541,9 +541,14 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
 //  nBins = nBins_tmp;
 
 
-  if( regionName == "pippo" ) {
+  if( regionName == "HT450toInf_met200_j2toInf_b0toInf" ) {  // this is the inclusive region
 
-    // put your bins here
+    const int nBins_tmp                        = 150;
+    bins = new double[nBins_tmp+1];
+    for( unsigned i=0; i<nBins_tmp+1; ++i ) 
+      bins[i] = (double)i*10.;
+    nBins = nBins_tmp;
+
 
   } else { // default binning
 
