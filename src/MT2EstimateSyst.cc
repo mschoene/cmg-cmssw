@@ -124,14 +124,15 @@ MT2EstimateSyst MT2EstimateSyst::operator+( const MT2EstimateSyst& rhs ) const{
   //result.yield->Add(rhs.yield);
   //result.yield_btagUp->Add(rhs.yield_btagUp);
   //result.yield_btagDown->Add(rhs.yield_btagDown);
-  
-  this->yield->Add(rhs.yield);
-  this->yield_btagUp->Add(rhs.yield_btagUp);
-  this->yield_btagDown->Add(rhs.yield_btagDown);
-  
-  return *this;
-  //return result;
 
+  MT2EstimateSyst result(*this);
+  result.yield->Add(rhs.yield);
+  result.yield_btagUp->Add(rhs.yield_btagUp);
+  result.yield_btagDown->Add(rhs.yield_btagDown);
+
+  //return *this;
+  return result;
+  
 }
 
 
@@ -143,17 +144,13 @@ MT2EstimateSyst MT2EstimateSyst::operator/( const MT2EstimateSyst& rhs ) const{
     exit(113);
   }
 
-  //MT2EstimateSyst result(*this);
-  //result.yield->Add(rhs.yield);
-  //result.yield_btagUp->Add(rhs.yield_btagUp);
-  //result.yield_btagDown->Add(rhs.yield_btagDown);
-  
-  this->yield->Divide(rhs.yield);
-  this->yield_btagUp->Divide(rhs.yield_btagUp);
-  this->yield_btagDown->Divide(rhs.yield_btagDown);
-  
-  return *this;
-  //return result;
+  MT2EstimateSyst result(*this);
+  result.yield->Divide(rhs.yield);
+  result.yield_btagUp->Divide(rhs.yield_btagUp);
+  result.yield_btagDown->Divide(rhs.yield_btagDown);
+
+  //return *this;
+  return result;
 
 }
 
@@ -166,28 +163,30 @@ MT2EstimateSyst MT2EstimateSyst::operator*( const MT2EstimateSyst& rhs ) const{
     exit(113);
   }
 
-  //MT2EstimateSyst result(*this);
-  //result.yield->Add(rhs.yield);
-  //result.yield_btagUp->Add(rhs.yield_btagUp);
-  //result.yield_btagDown->Add(rhs.yield_btagDown);
-  
-  this->yield->Multiply(rhs.yield);
-  this->yield_btagUp->Multiply(rhs.yield_btagUp);
-  this->yield_btagDown->Multiply(rhs.yield_btagDown);
-  
-  return *this;
-  //return result;
+  MT2EstimateSyst result(*this);
+  result.yield->Multiply(rhs.yield);
+  result.yield_btagUp->Multiply(rhs.yield_btagUp);
+  result.yield_btagDown->Multiply(rhs.yield_btagDown);
+
+  //return *this;
+  return result;
 
 }
 
 
 MT2EstimateSyst MT2EstimateSyst::operator*( float k ) const{
 
-  this->yield->Scale(k);
-  this->yield_btagUp->Scale(k);
-  this->yield_btagDown->Scale(k);
-  
-  return *this;
+  MT2EstimateSyst result(this->getName(), *(this->region) );
+  result.yield = new TH1D(*(this->yield));
+  result.yield->Scale(k);
+
+  result.yield_btagUp = new TH1D(*(this->yield_btagUp));
+  result.yield_btagUp->Scale(k);
+
+  result.yield_btagDown = new TH1D(*(this->yield_btagDown));
+  result.yield_btagDown->Scale(k);
+
+  return result;
 
 }
 
@@ -195,11 +194,18 @@ MT2EstimateSyst MT2EstimateSyst::operator*( float k ) const{
 
 MT2EstimateSyst MT2EstimateSyst::operator/( float k ) const{
 
-  this->yield->Scale(1./k);
-  this->yield_btagUp->Scale(1./k);
-  this->yield_btagDown->Scale(1./k);
-  
-  return *this;
+  MT2EstimateSyst result(this->getName(), *(this->region) );
+  result.yield = new TH1D(*(this->yield));
+  result.yield->Scale(1./k);
+
+  result.yield_btagUp = new TH1D(*(this->yield_btagUp));
+  result.yield_btagUp->Scale(1./k);
+
+  result.yield_btagDown = new TH1D(*(this->yield_btagDown));
+  result.yield_btagDown->Scale(1./k);
+
+  return result;
+
 
 }
 
@@ -207,31 +213,48 @@ MT2EstimateSyst MT2EstimateSyst::operator/( float k ) const{
 
 MT2EstimateSyst MT2EstimateSyst::operator+=( const MT2EstimateSyst& rhs ) const {
 
-  return (*this) + rhs ;
+  this->yield->Add(rhs.yield);
+  this->yield_btagUp->Add(rhs.yield_btagUp);
+  this->yield_btagDown->Add(rhs.yield_btagDown);
+  return (*this);
 
 }
 
 MT2EstimateSyst MT2EstimateSyst::operator/=( const MT2EstimateSyst& rhs ) const {
 
-  return (*this) / rhs ;
+  this->yield->Divide(rhs.yield);
+  this->yield_btagUp->Divide(rhs.yield_btagUp);
+  this->yield_btagDown->Divide(rhs.yield_btagDown);
+  return (*this);
 
 }
 
 MT2EstimateSyst MT2EstimateSyst::operator*=( const MT2EstimateSyst& rhs ) const {
 
-  return (*this) * rhs ;
+  this->yield->Multiply(rhs.yield);
+  this->yield_btagUp->Multiply(rhs.yield_btagUp);
+  this->yield_btagDown->Multiply(rhs.yield_btagDown);
+  return (*this);
 
 }
 
+
+
 MT2EstimateSyst MT2EstimateSyst::operator*=( float k ) const {
 
-  return (*this) * k ;
+  this->yield->Scale(k);
+  this->yield_btagUp->Scale(k);
+  this->yield_btagDown->Scale(k);
+  return (*this);
 
 }
 
 MT2EstimateSyst MT2EstimateSyst::operator/=( float k ) const {
 
-  return (*this) / k ;
+  this->yield->Scale(1./k);
+  this->yield_btagUp->Scale(1./k);
+  this->yield_btagDown->Scale(1./k);
+  return (*this);
 
 }
 
