@@ -126,12 +126,12 @@ MT2Estimate MT2Estimate::operator+( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  this->yield->Add(rhs.yield);
-  //MT2Estimate result(*this);
-  //result.yield->Add(rhs.yield);
+  //this->yield->Add(rhs.yield);
+  MT2Estimate result(*this);
+  result.yield->Add(rhs.yield);
 
-  return *this;
-  //return result;
+  //return *this;
+  return result;
 
 }
 
@@ -147,13 +147,13 @@ MT2Estimate MT2Estimate::operator/( const MT2Estimate& rhs ) const {
   }
 
 
-  this->yield->Divide(rhs.yield);
-  //MT2Estimate result(name, *(this->region) );
-  //result.yield = new TH1D(*(this->yield));
-  //result.yield->Divide(rhs.yield);
+  //this->yield->Divide(rhs.yield);
+  MT2Estimate result(name, *(this->region) );
+  result.yield = new TH1D(*(this->yield));
+  result.yield->Divide(rhs.yield);
 
-  return *this;
-  //return result;
+  //return *this;
+  return result;
 
 }
 
@@ -165,13 +165,13 @@ MT2Estimate MT2Estimate::operator*( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  this->yield->Multiply(rhs.yield);
-  //MT2Estimate result(name, *(this->region) );
-  //result.yield = new TH1D(*(this->yield));
-  //result.yield->Multiply(rhs.yield);
+  //this->yield->Multiply(rhs.yield);
+  MT2Estimate result(name, *(this->region) );
+  result.yield = new TH1D(*(this->yield));
+  result.yield->Multiply(rhs.yield);
 
-  return *this;
-  //return result;
+  //return *this;
+  return result;
 
 }
 
@@ -179,18 +179,31 @@ MT2Estimate MT2Estimate::operator*( const MT2Estimate& rhs ) const {
 
 MT2Estimate MT2Estimate::operator/( float k ) const {
 
-  this->yield->Scale(1./k);
+  MT2Estimate result(name, *(this->region) );
+  result.yield = new TH1D(*(this->yield));
+  result.yield->Scale(1./k);
 
-  return *this;
+  return result;
+
+  //this->yield->Scale(1./k);
+
+  //return *this;
 
 }
 
 
 MT2Estimate MT2Estimate::operator*( float k ) const {
 
-  this->yield->Scale(k);
+  MT2Estimate result(name, *(this->region) );
+  result.yield = new TH1D(*(this->yield));
+  result.yield->Scale(k);
 
-  return *this;
+  return result;
+
+
+  //this->yield->Scale(k);
+
+  //return *this;
 
 }
 
@@ -199,7 +212,9 @@ MT2Estimate MT2Estimate::operator*( float k ) const {
 
 MT2Estimate MT2Estimate::operator/=( const MT2Estimate& rhs ) const {
 
-  return (*this) / rhs ;
+  this->yield->Divide(rhs.yield);
+  return (*this);
+  //return (*this) / rhs ;
 
 }
 
@@ -207,28 +222,36 @@ MT2Estimate MT2Estimate::operator/=( const MT2Estimate& rhs ) const {
 
 MT2Estimate MT2Estimate::operator+=( const MT2Estimate& rhs ) const {
 
-  return (*this) + rhs ;
+  this->yield->Add(rhs.yield);
+  return (*this);
+  //return (*this) + rhs ;
 
 }
 
 
 MT2Estimate MT2Estimate::operator*=( const MT2Estimate& rhs ) const {
 
-  return (*this) * rhs ;
+  this->yield->Multiply(rhs.yield);
+  return (*this);
+  //return (*this) * rhs ;
 
 }
 
 
 MT2Estimate MT2Estimate::operator*=( float k ) const {
 
-  return (*this) * k ;
+  this->yield->Scale(k);
+  return (*this);
+  //return (*this) * k ;
 
 }
 
 
 MT2Estimate MT2Estimate::operator/=( float k ) const {
 
-  return (*this) / k ;
+  this->yield->Scale(1./k);
+  return (*this);
+  //return (*this) / k ;
 
 }
 
@@ -242,6 +265,8 @@ void MT2Estimate::getShit( TFile* file, const std::string& path ) {
   yield = (TH1D*)file->Get(Form("%s/%s", path.c_str(), yield->GetName()));
 
 }
+
+
 
 void MT2Estimate::print(const std::string& ofs){
 
