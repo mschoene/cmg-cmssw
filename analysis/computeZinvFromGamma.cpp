@@ -11,7 +11,7 @@
 #include "interface/MT2EstimateSyst.h"
 
 #define mt2_cxx
-#include "../interface/mt2.h"
+#include "../interface/mt2_float.h"
 
 
 #include "TCanvas.h"
@@ -44,6 +44,7 @@ int main( int argc, char* argv[] ) {
 
 
   std::string samplesFileName = "CSA14_Zinv";
+  //std::string samplesFileName = "CSA14_skimprune_Zinv";
   if( argc>1 ) {
     std::string samplesFileName_tmp(argv[1]); 
     samplesFileName = samplesFileName_tmp;
@@ -80,6 +81,7 @@ int main( int argc, char* argv[] ) {
   }
 
 
+  //std::string regionsSet = "13TeV_inclusive";
   std::string regionsSet = "13TeV_CSA14";
 
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
@@ -93,7 +95,6 @@ int main( int argc, char* argv[] ) {
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
     (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet, "gamma_" ));
   }
-
 
   
   MT2Analysis<MT2EstimateSyst>* qcd = new MT2Analysis<MT2EstimateSyst>( "qcd", regionsSet );
@@ -116,39 +117,33 @@ int main( int argc, char* argv[] ) {
   }
   
 
-  //TH1::AddDirectory(kTRUE); // stupid ROOT memory allocation needs this
 
-  //MT2Analysis<MT2EstimateSyst>* ZgammaRatio = new MT2Analysis<MT2EstimateSyst>( (*Zinv)/(*gammaJet) );
-  //ZgammaRatio->setName("ZgammaRatio");
   MT2Analysis<MT2EstimateSyst>* ZgammaRatio = new MT2Analysis<MT2EstimateSyst>( "ZgammaRatio", regionsSet );
-  (*ZgammaRatio) = (*Zinv);
-  (*ZgammaRatio) /= (*gammaJet);
-
+  (*ZgammaRatio) = (*Zinv) / (*gammaJet);
 
   // now that the MC ratio is done, add poisson error to gammajet sample:
   addPoissonError(gammaJet);
 
 
 
-  //MT2Analysis<MT2EstimateSyst>* ZinvEstimate = new MT2Analysis<MT2EstimateSyst>( "ZinvEstimate" );
-  //(*ZinvEstimate) = (*ZgammaRatio);
-  //(*ZinvEstimate) *= (*gammaJet);
-  MT2Analysis<MT2EstimateSyst>* ZinvEstimate = new MT2Analysis<MT2EstimateSyst>( (*ZgammaRatio)*(*gammaJet) );
+  MT2Analysis<MT2EstimateSyst>* ZinvEstimate = new MT2Analysis<MT2EstimateSyst>( *gammaJet );
   ZinvEstimate->setName("ZinvEstimate");
+  //MT2Analysis<MT2EstimateSyst>* ZinvEstimate = new MT2Analysis<MT2EstimateSyst>( "ZinvEstimate" );
+  (*ZinvEstimate) = (*ZgammaRatio) * (*gammaJet);
+  ZinvEstimate->writeToFile( outputdir + "/MT2ZinvEstimate.root" );
+
 
   std::string outputdirPlots = outputdir + "/plots";
   system(Form("mkdir -p %s", outputdirPlots.c_str()));
 
-
-  ZinvEstimate->writeToFile( "MT2ZinvEstimate.root" );
-
-  gammaJet->writeToFile( "prova_gammaJet.root" );
-  Zinv->writeToFile( "prova_Zinv.root" );
-  ZgammaRatio->writeToFile( "prova_ZgammaRatio.root" );
-  ZinvEstimate->writeToFile( "prova_ZinvEstimate.root" );
-
   drawCompare( outputdirPlots, ZinvEstimate, Zinv );
-  
+
+
+  std::string mcFile = outputdir + "/mc.root";
+  gammaJet->writeToFile( mcFile );
+  qcd->addToFile( mcFile );
+  Zinv->addToFile( mcFile );
+  ZgammaRatio->addToFile( mcFile );
 
 
   return 0;
@@ -194,6 +189,8 @@ MT2Analysis<MT2EstimateSyst> computeYield( const MT2Sample& sample, const std::s
   tree->SetBranchAddress( Form("%sdeltaPhiMin", prefix.c_str()), &deltaPhiMin );
   float diffMetMht;
   tree->SetBranchAddress( Form("%sdiffMetMht", prefix.c_str()), &diffMetMht );
+
+
 
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
@@ -295,8 +292,8 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, TH1D
   h1_mc->SetMarkerStyle(20);
   h1_mc->SetMarkerSize(2);
 
-  h1_ratio->Draw();
-  h1_mc->Draw("p same");
+  h1_mc->Draw("p");
+  h1_ratio->Draw("same");
   
   c1->SaveAs( Form("%s/estVsMc_%s.eps", outputdir.c_str(), name.c_str()) );
   c1->SaveAs( Form("%s/estVsMc_%s.png", outputdir.c_str(), name.c_str()) );
