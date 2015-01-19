@@ -100,13 +100,6 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
   MT2Analysis<MT2EstimateZinvGamma> analysis( sample.sname, regionsSet, sample.id );
 
-  int nbins_templ = 500;
-  float xmax_templ = 100.;
-
-  TH1D* templ_inclusive_prompt = new TH1D( "templ_prompt", "", nbins_templ, 0, xmax_templ );
-  templ_inclusive_prompt->Sumw2();
-  TH1D* templ_inclusive_fake = new TH1D( "templ_fake", "", nbins_templ, 0, xmax_templ );
-  templ_inclusive_fake->Sumw2();
   
   MT2Tree myTree;
   myTree.loadGenStuff = false;
@@ -166,10 +159,8 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( myTree.gamma_mcMatchId[0]==22 ) {
       thisEstimate->template_prompt->Fill(myTree.gamma_chHadIso[0], weight );
-      templ_inclusive_prompt->Fill(myTree.gamma_chHadIso[0], weight );
     } else if( myTree.gamma_mcMatchId[0]==0 ) {
       thisEstimate->template_fake->Fill(myTree.gamma_chHadIso[0], weight );
-      templ_inclusive_prompt->Fill(myTree.gamma_chHadIso[0], weight );
     }
 
 
@@ -191,9 +182,6 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
   delete tree;
 
 
-  file->cd();
-  templ_inclusive_prompt->Write();
-  templ_inclusive_fake->Write();
   file->Close();
   delete file;
   
