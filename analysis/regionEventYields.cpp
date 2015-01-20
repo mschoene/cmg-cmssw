@@ -97,7 +97,17 @@ int main( int argc, char* argv[] ) {
 
 
   std::string outputdir = "EventYields_" + configFileName;
-  if( dummyAnalysis ) outputdir += "_dummy";
+  if( dummyAnalysis ) {
+    double intpart;
+    double fracpart = modf(lumi, &intpart);
+    std::string suffix;
+    if( fracpart>0. )
+      suffix = std::string( Form("_dummy_%.0fp%.0ffb", intpart, 10.*fracpart ) );
+    else
+      suffix = std::string( Form("_dummy_%.0ffb", intpart ) );
+    outputdir += suffix;
+  }
+    
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   MT2Config cfg("cfgs/" + configFileName + ".txt");
