@@ -224,9 +224,11 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   std::string prefix = (isPrompt) ? "Prompt" : "Fake";
 
   c1->SaveAs( Form("%s/templ%s_%s%s.eps", outputdir.c_str(), prefix.c_str(), saveName.c_str(), suffix.c_str()) );
+  c1->SaveAs( Form("%s/templ%s_%s%s.pdf", outputdir.c_str(), prefix.c_str(), saveName.c_str(), suffix.c_str()) );
   c1->SaveAs( Form("%s/templ%s_%s%s.png", outputdir.c_str(), prefix.c_str(), saveName.c_str(), suffix.c_str()) );
 
   c1_log->SaveAs( Form("%s/templ%s_%s%s_log.eps", outputdir.c_str(), prefix.c_str(), saveName.c_str(), suffix.c_str()) );
+  c1_log->SaveAs( Form("%s/templ%s_%s%s_log.pdf", outputdir.c_str(), prefix.c_str(), saveName.c_str(), suffix.c_str()) );
   c1_log->SaveAs( Form("%s/templ%s_%s%s_log.png", outputdir.c_str(), prefix.c_str(), saveName.c_str(), suffix.c_str()) );
 
   delete c1;
