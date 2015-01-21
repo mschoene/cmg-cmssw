@@ -131,6 +131,10 @@ class MT2Region {
   int nJetsMax()  const { return sigRegion_->nJetsMax; };
   int nBJetsMin() const { return sigRegion_->nBJetsMin; };
   int nBJetsMax() const { return sigRegion_->nBJetsMax; };
+  float mtMax()   const { return sigRegion_->mtMax ; };
+  float mt2Min()  const { return sigRegion_->mt2Min; };
+  float mt2Max()  const { return sigRegion_->mt2Max; };
+  bool inBox() const { return sigRegion_->inBox; };
 
 
   bool operator==( const MT2Region& rhs ) const {
