@@ -33,6 +33,8 @@ class MT2Analysis {
   MT2Region* getRegion( float ht, int njets, int nbjets, float met=-1., float mt=-1., float mt2=-1. ) const;
   T* get( const MT2Region& r ) const;
   T* get( float ht, int njets, int nbjets, float met=-1., float mt=-1., float mt2=-1. ) const;
+  std::string getName() const { return name; };
+  std::string getFullName() const { return fullName; };
 
   void setName( const std::string& newName );
   void setFullName( const std::string& newName ) { fullName = newName; };
@@ -67,8 +69,6 @@ class MT2Analysis {
 
   void finalize();
 
-  std::string name;
-  std::string fullName;
   int id;
 
 
@@ -92,6 +92,9 @@ class MT2Analysis {
 
   std::set<MT2HTRegion> htRegions_;
   std::set<MT2SignalRegion> signalRegions_;
+
+  std::string name;
+  std::string fullName;
 
 };
 
@@ -145,7 +148,6 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400., false)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400., false)); 
     signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400., false)); 
-
 
   } else if( regionsSet=="8TeV" ) {
 
@@ -219,6 +221,7 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, std::set<T*> newdata, int
 template<class T> 
 MT2Analysis<T>::MT2Analysis( const MT2Analysis& rhs ) {
 
+
   htRegions_ = rhs.getHTRegions();
   signalRegions_ = rhs.getSignalRegions();
 
@@ -231,6 +234,7 @@ MT2Analysis<T>::MT2Analysis( const MT2Analysis& rhs ) {
   *this = rhs;
 
 }
+
 
 
 // destructor
@@ -891,6 +895,7 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
 
 template<class T> 
 std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName, const std::string& matchExpression, bool verbose ) {
+
 
   TFile* file = TFile::Open(fileName.c_str());
  
