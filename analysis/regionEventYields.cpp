@@ -97,7 +97,17 @@ int main( int argc, char* argv[] ) {
 
 
   std::string outputdir = "EventYields_" + configFileName;
-  if( dummyAnalysis ) outputdir += "_dummy";
+  if( dummyAnalysis ) {
+    double intpart;
+    double fracpart = modf(lumi, &intpart);
+    std::string suffix;
+    if( fracpart>0. )
+      suffix = std::string( Form("_dummy_%.0fp%.0ffb", intpart, 10.*fracpart ) );
+    else
+      suffix = std::string( Form("_dummy_%.0ffb", intpart ) );
+    outputdir += suffix;
+  }
+    
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   MT2Config cfg("cfgs/" + configFileName + ".txt");
@@ -482,7 +492,7 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       histoFile->cd();
       for( unsigned i=0; i<bgYields.size(); ++i ) {  
         TH1D* h1_bg = bgYields[i]->get(thisRegion)->yield;
-        legend->AddEntry( h1_bg, bgYields[i]->fullName.c_str(), "F" );
+        legend->AddEntry( h1_bg, bgYields[i]->getFullName().c_str(), "F" );
         h1_bg->Write();
       }
 

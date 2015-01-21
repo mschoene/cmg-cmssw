@@ -124,13 +124,17 @@ class MT2Region {
     return sigRegion_;
   }
 
-  float htMin() { return htRegion_->htMin; };
-  float htMax() { return htRegion_->htMax; };
-  float metMin() { return htRegion_->metMin; };
-  int nJetsMin() { return sigRegion_->nJetsMin; };
-  int nJetsMax() { return sigRegion_->nJetsMax; };
-  int nBJetsMin() { return sigRegion_->nBJetsMin; };
-  int nBJetsMax() { return sigRegion_->nBJetsMax; };
+  float htMin()   const { return htRegion_->htMin; };
+  float htMax()   const { return htRegion_->htMax; };
+  float metMin()  const { return htRegion_->metMin; };
+  int nJetsMin()  const { return sigRegion_->nJetsMin; };
+  int nJetsMax()  const { return sigRegion_->nJetsMax; };
+  int nBJetsMin() const { return sigRegion_->nBJetsMin; };
+  int nBJetsMax() const { return sigRegion_->nBJetsMax; };
+  float mtMax()   const { return sigRegion_->mtMax ; };
+  float mt2Min()  const { return sigRegion_->mt2Min; };
+  float mt2Max()  const { return sigRegion_->mt2Max; };
+  bool inBox() const { return sigRegion_->inBox; };
 
 
   bool operator==( const MT2Region& rhs ) const {

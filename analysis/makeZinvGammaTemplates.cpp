@@ -51,7 +51,7 @@ int main( int argc, char* argv[] ) {
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
 
-  std::string outputdir = "ZinvGammaPurity_" + samplesFileName;
+  std::string outputdir = "ZinvGammaPurity_" + samplesFileName + "_" + regionsSet;
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
@@ -68,7 +68,7 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string templateFileName = "gammaTemplates_" + samplesFileName + ".root";
+  std::string templateFileName = "gammaTemplates_" + samplesFileName + "_" + regionsSet + ".root";
   templates->writeToFile(templateFileName);
   templates_qcd->addToFile(templateFileName);
 

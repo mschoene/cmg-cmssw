@@ -153,20 +153,17 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator+( const MT2EstimateZinvGamma
     exit(113);
   }
 
-  //MT2EstimateZinvGamma result(*this);
-  //result.yield->Add(rhs.yield);
-  //result.yield_btagUp->Add(rhs.yield_btagUp);
-  //result.yield_btagDown->Add(rhs.yield_btagDown);
+  MT2EstimateZinvGamma result(*this);
+  result.yield->Add(rhs.yield);
+  result.template_prompt->Add(rhs.template_prompt);
+  result.template_fake->Add(rhs.template_fake);
+  result.template_unmatched->Add(rhs.template_unmatched);
   
-  this->yield->Add(rhs.yield);
-  this->template_prompt->Add(rhs.template_prompt);
-  this->template_fake->Add(rhs.template_fake);
-  this->template_unmatched->Add(rhs.template_unmatched);
-  
-  return *this;
-  //return result;
+  return result;
 
 }
+
+
 
 
 MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/( const MT2EstimateZinvGamma& rhs ) const{
@@ -177,18 +174,13 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/( const MT2EstimateZinvGamma
     exit(113);
   }
 
-  //MT2EstimateZinvGamma result(*this);
-  //result.yield->Add(rhs.yield);
-  //result.yield_btagUp->Add(rhs.yield_btagUp);
-  //result.yield_btagDown->Add(rhs.yield_btagDown);
+  MT2EstimateZinvGamma result(*this);
+  result.yield->Divide(rhs.yield);
+  result.template_prompt->Divide(rhs.template_prompt);
+  result.template_fake->Divide(rhs.template_fake);
+  result.template_unmatched->Divide(rhs.template_unmatched);
   
-  this->yield->Divide(rhs.yield);
-  this->template_prompt->Divide(rhs.template_prompt);
-  this->template_fake->Divide(rhs.template_fake);
-  this->template_unmatched->Divide(rhs.template_unmatched);
-  
-  return *this;
-  //return result;
+  return result;
 
 }
 
@@ -196,13 +188,21 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/( const MT2EstimateZinvGamma
 
 MT2EstimateZinvGamma MT2EstimateZinvGamma::operator+=( const MT2EstimateZinvGamma& rhs ) const {
 
-  return (*this) + rhs ;
+  this->yield->Add(rhs.yield);
+  this->template_prompt->Add(rhs.template_prompt);
+  this->template_fake->Add(rhs.template_fake);
+  this->template_unmatched->Add(rhs.template_unmatched);
+  return (*this);
 
 }
 
 MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/=( const MT2EstimateZinvGamma& rhs ) const {
 
-  return (*this) / rhs ;
+  this->yield->Divide(rhs.yield);
+  this->template_prompt->Divide(rhs.template_prompt);
+  this->template_fake->Divide(rhs.template_fake);
+  this->template_unmatched->Divide(rhs.template_unmatched);
+  return (*this);
 
 }
 

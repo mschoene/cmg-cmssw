@@ -41,7 +41,7 @@ int main( int argc, char* argv[] ) {
 
   MT2Analysis<MT2EstimateSyst>* analysisSum = new MT2Analysis<MT2EstimateSyst>( *(analyses_bg[0]) );
   for(unsigned a =1;  a < analyses_bg.size(); ++a)
-    (*analysisSum) += (*(analyses_bg[1]));
+    (*analysisSum) += (*(analyses_bg[a]));
 
   analysisSum->setName("FullBkg");
 
