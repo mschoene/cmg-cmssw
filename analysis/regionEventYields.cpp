@@ -492,7 +492,7 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       histoFile->cd();
       for( unsigned i=0; i<bgYields.size(); ++i ) {  
         TH1D* h1_bg = bgYields[i]->get(thisRegion)->yield;
-        legend->AddEntry( h1_bg, bgYields[i]->fullName.c_str(), "F" );
+        legend->AddEntry( h1_bg, bgYields[i]->getFullName().c_str(), "F" );
         h1_bg->Write();
       }
 
