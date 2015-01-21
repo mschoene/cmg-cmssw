@@ -103,7 +103,7 @@ int main( int argc, char* argv[] ) {
     if( isig==-1 )
       path = dir; // these are the templates
     else {
-      path = dir + "/datacards_" + signals[isig]->name;
+      path = dir + "/datacards_" + signals[isig]->getName();
       system(Form("mkdir -p %s", path.c_str()));
       std::cout << "-> Creating datacards in: " << path << std::endl;
     }
@@ -135,7 +135,7 @@ int main( int argc, char* argv[] ) {
        
        datacard << "shapes ";
        if( this_signal!=0 )
-         datacard << signals[isig]->name;
+         datacard << signals[isig]->getName();
        else
          datacard << "sig";
        datacard  << " " << thisRegion.getName() << " " << dir << "/sig_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
@@ -157,7 +157,7 @@ int main( int argc, char* argv[] ) {
        datacard << "bin \t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << "\t" << thisRegion.getName() << std::endl;
        datacard << "process \t ";
        if( this_signal!=0 )
-         datacard << signals[isig]->name;
+         datacard << signals[isig]->getName();
        else
          datacard << "sig ";
        datacard << " \t qcd \t zinv \t llep" << std::endl;
@@ -253,8 +253,8 @@ MT2Analysis<MT2Estimate>* get( const std::string& name, std::vector< MT2Analysis
 
   for( unsigned i=0; i<analyses.size(); ++i ) {
 
-    if( analyses[i]->name == name1 || analyses[i]->name == name2 || analyses[i]->name == name3 || analyses[i]->name == name4 ) {
-      std::cout << "  added: " << analyses[i]->name << std::endl;
+    if( analyses[i]->getName() == name1 || analyses[i]->getName() == name2 || analyses[i]->getName() == name3 || analyses[i]->getName() == name4 ) {
+      std::cout << "  added: " << analyses[i]->getName() << std::endl;
       (*returnAnalysis) += (*analyses[i]);
     }
 
@@ -280,7 +280,7 @@ void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float
 
       TH1D* h1 = analysis->get( thisRegion )->yield;
 
-      TString analysisName(analysis->name);
+      TString analysisName(analysis->getName());
       if(h1->Integral() == 0.){
 	for( int b=1; b < h1->GetNbinsX()+1; ++b)
 	  h1->SetBinContent(b, analysisName.Contains("SMS") ? 1e-4 : 1e-2);
