@@ -298,12 +298,13 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
     if( myTree.nPFLep5LowMT > 0) continue;
     if( myTree.nPFHad10LowMT > 0) continue;
   
+    if( myTree.deltaPhiMin<0.3 ) continue;
+    if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
+
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
     if( myTree.njet<2 ) continue;
     if( myTree.jet_pt[1]<100. ) continue;
-    if( myTree.deltaPhiMin<0.3 ) continue;
-    if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
