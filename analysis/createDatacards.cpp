@@ -68,7 +68,7 @@ int main( int argc, char* argv[] ) {
   else
     zinv = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14/MT2ZinvEstimate.root", "ZinvEstimate");
   zinv->setName("zinv");
-  zinv->addToFile( mc_fileName );
+  zinv->addToFile( mc_fileName, true );
 
 
   MT2Analysis<MT2Estimate>* llep;
@@ -80,7 +80,7 @@ int main( int argc, char* argv[] ) {
     llep = MT2Analysis<MT2Estimate>::readFromFile( "MT2LostLeptEstimate.root" );
   }
   llep->setName( "llep" );
-  llep->addToFile( mc_fileName );
+  llep->addToFile( mc_fileName, true );
 
 
 
@@ -210,8 +210,10 @@ int main( int argc, char* argv[] ) {
        // QCD SYSTEMATICS:
 
        if( this_qcd->Integral()>0. ) {
-         for( unsigned i=1; i<this_qcd->GetNbinsX()+1; ++i ) 
+         for( unsigned i=1; i<this_qcd->GetNbinsX()+1; ++i ) {
+           if( this_qcd->GetBinContent(i)==0. ) continue;
            datacard << this_qcd->GetName() << "_bin_" << i << " shapeN2 - 1 - -" << std::endl;
+         }
        }
 
 
@@ -229,16 +231,14 @@ int main( int argc, char* argv[] ) {
            //  datacard << "syst_zinv_Z1b_" << thisRegion.getName() << " lnN \t - - 1.3 -" << std::endl;
            //}
 
-           // uncorrelated:
-           for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
-             datacard << this_zinv->GetName() << "_stat_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 1/sqrt(k*N)
-
-         } else { // 2 btags
-
-           for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) 
-             datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 100% of MC
-
          }
+
+         // uncorrelated:
+         for( unsigned i=1; i<this_zinv->GetNbinsX()+1; ++i ) {
+           if( this_zinv->GetBinContent(i)==0. ) continue;
+           datacard << this_zinv->GetName() << "_bin_" << i << " shapeN2 - - 1 -" << std::endl; // this is 1/sqrt(k*N)
+         }
+
 
        } // if zinv
 
@@ -248,8 +248,10 @@ int main( int argc, char* argv[] ) {
        // LOST LEPTON SYSTEMATICS:
 
        if( this_llep->Integral()>0. ) {
-         for( unsigned i=1; i<this_llep->GetNbinsX()+1; ++i ) 
+         for( unsigned i=1; i<this_llep->GetNbinsX()+1; ++i ) {
+           if( this_zinv->GetBinContent(i)==0. ) continue;
            datacard << this_llep->GetName() << "_bin_" << i << " shapeN2 - - - 1" << std::endl;
+         }
        }
 
 
