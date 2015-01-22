@@ -106,8 +106,7 @@ int main( int argc, char* argv[] ) {
   *gamma_plus_qcd += *qcd;
   
   MT2Analysis<MT2EstimateSyst>* purity = new MT2Analysis<MT2EstimateSyst>( "purity", regionsSet );
-  *purity = *gammaJet;
-  *purity /= *gamma_plus_qcd;
+  (*purity) = (*gammaJet) / (*gamma_plus_qcd);
   purity->setName( "purity" );
 
   MT2Analysis<MT2EstimateSyst>* Zinv = new MT2Analysis<MT2EstimateSyst>( "Zinv", regionsSet );
@@ -141,6 +140,8 @@ int main( int argc, char* argv[] ) {
   qcd->addToFile( mcFile );
   Zinv->addToFile( mcFile );
   ZgammaRatio->addToFile( mcFile );
+
+  purity->writeToFile( outputdir + "/MT2GammaPurity.root" );
 
 
   return 0;
