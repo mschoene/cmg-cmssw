@@ -127,7 +127,10 @@ int main( int argc, char* argv[] ) {
   (*ZinvEstimateFromGamma) = (*ZgammaRatio) * (*gammaJet);
 
 
-  MT2Analysis<MT2EstimateSyst>* ZinvEstimate = combineDataAndMC( ZinvEstimateFromGamma, Zinv );
+  MT2Analysis<MT2EstimateSyst>* ZJets = MT2Analysis<MT2EstimateSyst>::readFromFile( "EventYields_mc_PHYS14_dummy_5fb/analyses.root", "ZJets" );
+
+  MT2Analysis<MT2EstimateSyst>* ZinvEstimate = combineDataAndMC( ZinvEstimateFromGamma, ZJets );
+  //MT2Analysis<MT2EstimateSyst>* ZinvEstimate = combineDataAndMC( ZinvEstimateFromGamma, Zinv );
   ZinvEstimate->writeToFile( outputdir + "/MT2ZinvEstimate.root" );
 
 
@@ -311,9 +314,15 @@ MT2Analysis<MT2EstimateSyst>* combineDataAndMC( MT2Analysis<MT2EstimateSyst>* da
     MT2EstimateSyst* dataEst = data->get(*iR);
     MT2EstimateSyst* mcEst = mc->get(*iR);
 
-    MT2EstimateSyst* thisNewEstimate = (iR->nBJetsMin()>1) ? mcEst : dataEst;
- 
-    newData.insert( new MT2EstimateSyst(*thisNewEstimate) );
+    MT2EstimateSyst* thisNewEstimate;
+    if( iR->nBJetsMin()>1 ) {
+      thisNewEstimate =  new MT2EstimateSyst(*mcEst);
+      for( unsigned ibin=1; ibin<thisNewEstimate->yield->GetNbinsX()+1; ++ibin )
+        thisNewEstimate->yield->SetBinError( ibin, thisNewEstimate->yield->GetBinContent(ibin) );
+    } else {
+      thisNewEstimate =  new MT2EstimateSyst(*dataEst);
+    }
+    newData.insert( thisNewEstimate );
 
   }
 
