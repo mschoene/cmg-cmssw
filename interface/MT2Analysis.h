@@ -56,9 +56,9 @@ class MT2Analysis {
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
   static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, const std::string& matchExpression="", bool verbose=true );
-  void writeToFile( const std::string& fileName, const std::string& option="RECREATE" );
-  void addToFile( const std::string& fileName ) {
-    return this->writeToFile(fileName,"UPDATE");
+  void writeToFile( const std::string& fileName, const std::string& option="RECREATE", bool overwrite=false );
+  void addToFile( const std::string& fileName, bool overwrite=false ) {
+    return this->writeToFile(fileName,"UPDATE",overwrite);
   }
 
   static void printFromFile (  const std::string& fileName, const std::string& ofs, const std::string& matchName="" );
@@ -764,10 +764,20 @@ MT2Analysis<T> MT2Analysis<T>::operator/( float k ) {
 
 
 template<class T> 
-void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string& option ) {
+void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string& option, bool overwrite ) {
 
   TFile* file = TFile::Open(fileName.c_str(), option.c_str() );
   file->cd();
+
+  if( file->cd(this->name.c_str()) ) {
+    file->cd();
+    if( overwrite ) {
+      file->rmdir(this->name.c_str());
+    } else {
+      std::cout << "[MT2Analysis::writeToFile] Directory '" << this->name << "' already exists in file '" << fileName << "'. Will not overwrite." << std::endl;
+      return;
+    }
+  }
 
   file->mkdir(this->name.c_str());
   file->cd(this->name.c_str());
@@ -844,18 +854,20 @@ template<class T>
 void MT2Analysis<T>::print( const std::string& ofs ) const {
 
   ifstream isExist(ofs);
-  if(isExist){
+  if(isExist) {
     
-    std::cout << "File " << ofs.c_str() << " already exist!" << std::endl;
-    exit(1);
+    system( Form("rm %s", ofs.c_str()) );
+    //std::cout << "File " << ofs.c_str() << " already exist!" << std::endl;
+    //exit(1);
 
   }
 
   ofstream ofs_file;
   if (ofs_file)
-  ofs_file.open( ofs, std::ofstream::app );
+    ofs_file.open( ofs, std::ofstream::app );
   
   std::set<MT2HTRegion> htRegions = this->getHTRegions();
+  std::set<MT2SignalRegion> sigRegions = this->getSignalRegions();
   
   for ( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) { // loop on ht regions
    
@@ -863,7 +875,6 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
     for ( unsigned i=0; i < htRegionName.size(); ++i )
       ofs_file << htRegionName[i] << std::endl;
 
-    std::set<MT2SignalRegion> sigRegions = this->getSignalRegions();
     
     for ( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ){
       
@@ -878,7 +889,6 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
              	
       MT2Region thisRegion( *iHT, *iSR );
       T* thisT = this->get(thisRegion);
-      
       thisT->print( ofs );
 
     } // for signal regions                                                                                                                                                          
