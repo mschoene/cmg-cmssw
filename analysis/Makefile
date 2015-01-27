@@ -85,6 +85,10 @@ drawZinvGamma: drawZinvGamma.cpp MT2Region.o MT2Estimate.o MT2DrawTools.o
 drawGammaTemplates: drawGammaTemplates.cpp MT2Region.o MT2Estimate.o MT2EstimateZinvGamma.o MT2DrawTools.o 
 	$(CC) -Wall $(INCLUDES) -o drawGammaTemplates drawGammaTemplates.cpp MT2Region.o MT2Estimate.o MT2EstimateZinvGamma.o MT2DrawTools.o  $(ROOTFLAG) $(EXTRALIBS)
 
+fitPurityGamma: fitPurityGamma.cpp  
+	$(CC) -Wall $(INCLUDES) -o fitPurityGamma fitPurityGamma.cpp  $(ROOTFLAG) $(EXTRALIBS)
+
+
 
 
 MT2Sample.o: ../src/MT2Sample.cc 
