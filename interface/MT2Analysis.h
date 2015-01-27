@@ -149,6 +149,20 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400., false)); 
     signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400., false)); 
 
+  } else if( regionsSet=="13TeV_CSA14_noMT" ) {
+
+    htRegions_.insert(MT2HTRegion( 450.,   575., 200.));
+    htRegions_.insert(MT2HTRegion( 575.,  1000., 200.));
+    htRegions_.insert(MT2HTRegion(1000.,    -1.,  30.));
+
+    signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 1,  1)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 1,  1)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2));
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2));
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1));
+
   } else if( regionsSet=="8TeV" ) {
 
     htRegions_.insert(MT2HTRegion( 450.,  750., 200. ));
