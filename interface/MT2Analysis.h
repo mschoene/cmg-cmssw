@@ -31,8 +31,11 @@ class MT2Analysis {
   std::set<MT2SignalRegion> getSignalRegions() const { return signalRegions_; };
 
   MT2Region* getRegion( float ht, int njets, int nbjets, float met=-1., float mt=-1., float mt2=-1. ) const;
+  MT2Region* matchRegion( MT2Region region ) const;
+
   T* get( const MT2Region& r ) const;
   T* get( float ht, int njets, int nbjets, float met=-1., float mt=-1., float mt2=-1. ) const;
+
   std::string getName() const { return name; };
   std::string getFullName() const { return fullName; };
 
@@ -115,7 +118,23 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
   id = aid;
 
 
-  if( regionsSet=="13TeV_inclusive" ) {
+  if( regionsSet=="8TeV" ) {
+
+    htRegions_.insert(MT2HTRegion( 450.,  750., 200. ));
+    htRegions_.insert(MT2HTRegion( 750., 1200.,  30. ));
+    htRegions_.insert(MT2HTRegion(1200.,   -1.,  30. ));
+
+    signalRegions_.insert(MT2SignalRegion(2, 2, 0, 0));  // 2j0b
+    signalRegions_.insert(MT2SignalRegion(2, 2, 1, 2));  // 2j1to2b
+    signalRegions_.insert(MT2SignalRegion(3, 5, 0, 0));  // 3to5j0b
+    signalRegions_.insert(MT2SignalRegion(3, 5, 1, 1));  // 3to5j1b
+    signalRegions_.insert(MT2SignalRegion(3, 5, 2, 2));  // 3to5j2b
+    signalRegions_.insert(MT2SignalRegion(6, -1, 0, 0));  // 6j0b
+    signalRegions_.insert(MT2SignalRegion(6, -1, 1, 1));  // 6j1b
+    signalRegions_.insert(MT2SignalRegion(6, -1, 2, 2));  // 6j2b
+    signalRegions_.insert(MT2SignalRegion(-1, -1, 3, -1));  // 3b
+
+  } else if( regionsSet=="13TeV_inclusive" ) {
 
     htRegions_.insert(MT2HTRegion( 450.,  -1., 200.));
     signalRegions_.insert(MT2SignalRegion(2, -1, 0, -1)); 
@@ -163,21 +182,28 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2));
     signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1));
 
-  } else if( regionsSet=="8TeV" ) {
+  } else if( regionsSet=="13TeV_onlyHT" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,  750., 200. ));
-    htRegions_.insert(MT2HTRegion( 750., 1200.,  30. ));
-    htRegions_.insert(MT2HTRegion(1200.,   -1.,  30. ));
+    htRegions_.insert(MT2HTRegion( 450.,   575., 200.));
+    htRegions_.insert(MT2HTRegion( 575.,  1000., 200.));
+    htRegions_.insert(MT2HTRegion(1000.,    -1.,  30.));
 
-    signalRegions_.insert(MT2SignalRegion(2, 2, 0, 0));  // 2j0b
-    signalRegions_.insert(MT2SignalRegion(2, 2, 1, 2));  // 2j1to2b
-    signalRegions_.insert(MT2SignalRegion(3, 5, 0, 0));  // 3to5j0b
-    signalRegions_.insert(MT2SignalRegion(3, 5, 1, 1));  // 3to5j1b
-    signalRegions_.insert(MT2SignalRegion(3, 5, 2, 2));  // 3to5j2b
-    signalRegions_.insert(MT2SignalRegion(6, -1, 0, 0));  // 6j0b
-    signalRegions_.insert(MT2SignalRegion(6, -1, 1, 1));  // 6j1b
-    signalRegions_.insert(MT2SignalRegion(6, -1, 2, 2));  // 6j2b
-    signalRegions_.insert(MT2SignalRegion(-1, -1, 3, -1));  // 3b
+    signalRegions_.insert(MT2SignalRegion(2,  -1, 0,  -1)); 
+
+  } else if( regionsSet=="13TeV_onlyJets" ) {
+
+    htRegions_.insert(MT2HTRegion( 450.,   -1., 200.));
+
+    signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 1,  1)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 1,  1)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400.)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400.)); 
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400.)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400., false)); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400., false)); 
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400., false)); 
 
   } else {
 
@@ -350,6 +376,30 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
   return foundRegion;
 
 }
+
+
+
+template<class T>
+MT2Region* MT2Analysis<T>::matchRegion( MT2Region region ) const {
+
+
+  MT2Region* foundRegion = 0;
+  
+  for( typename std::set<T*>::iterator it=data.begin(); it!=data.end(); ++it ) {
+
+    if( !( region.htRegion()->isIncluded((*it)->region->htRegion()) ) ) continue;
+    if( !( region.sigRegion()->isIncluded((*it)->region->sigRegion()) ) ) continue;
+
+    foundRegion = (*it)->region;
+    break;
+
+  }  // for
+
+  return foundRegion;
+
+
+}
+
 
 
 
