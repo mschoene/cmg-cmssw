@@ -60,20 +60,30 @@ int main( int argc, char* argv[] ) {
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
-  MT2Analysis<MT2EstimateZinvGamma>* controlRegion = new MT2Analysis<MT2EstimateZinvGamma>( "gammaCR", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* gammaJet = new MT2Analysis<MT2EstimateZinvGamma>( "gammaJet", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
-    (*controlRegion) += (computeYield( samples_gammaJet[i], regionsSet ));
+    (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet ));
   }
+
+  MT2Analysis<MT2EstimateZinvGamma>* qcd = new MT2Analysis<MT2EstimateZinvGamma>( "qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-    (*controlRegion) += (computeYield( samples_qcd[i], regionsSet ));
+    (*qcd) += (computeYield( samples_qcd[i], regionsSet ));
   }
 
+  MT2Analysis<MT2EstimateZinvGamma>* gammaCR = new MT2Analysis<MT2EstimateZinvGamma>( "gammaCR", regionsSet );
+  (*gammaCR) = (*gammaJet) + (*qcd);
 
-  controlRegion->writeToFile( outputdir + "/mc.root" );
+
+  MT2Analysis<MT2EstimateZinvGamma>* purity = new MT2Analysis<MT2EstimateZinvGamma>( "purityMC", regionsSet );
+  (*purity) = (*gammaJet) / ( (*gammaJet) + (*qcd) );
+
+
+  gammaCR->writeToFile( outputdir + "/mc.root" );
+  purity->writeToFile( outputdir + "/purityMC.root" );
 
   // emulate data:
-  randomizePoisson(controlRegion);
-  controlRegion->writeToFile( outputdir + "/data.root" );
+  randomizePoisson(gammaCR);
+  gammaCR->writeToFile( outputdir + "/data.root" );
 
 
   return 0;
