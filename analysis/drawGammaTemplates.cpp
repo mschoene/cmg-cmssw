@@ -27,13 +27,15 @@ int main( int argc, char* argv[] ) {
   }
 
 
+  std::string regions = "13TeV_CSA14";
+
   MT2DrawTools::setStyle();
 
-  std::string outputdir = "Plots_GammaTemplates_" + samples;
+  std::string outputdir = "Plots_GammaTemplates_" + samples + "_" + regions;
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
-  MT2Analysis<MT2EstimateZinvGamma>* templates_gJet = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples + ".root", "templates");
-  MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples + ".root", "templates_qcd");
+  MT2Analysis<MT2EstimateZinvGamma>* templates_gJet = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples +  "_" + regions + ".root", "templates");
+  MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples + "_" + regions + ".root", "templates_qcd");
   
 
   std::vector<MT2Region> r_lowHT_vs_njet;
@@ -52,7 +54,7 @@ int main( int argc, char* argv[] ) {
   r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 4, -1, 1, 1 ) );
 
   compareRegions( outputdir, r_medHT_vs_njet, templates_gJet, true );
-  compareRegions( outputdir, r_medHT_vs_njet, templates_gJet, false );
+  compareRegions( outputdir, r_medHT_vs_njet, templates_qcd, false );
 
   std::vector<MT2Region> r_highHT_vs_njet;
   r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 2,  3, 0, 0 ) );
@@ -61,7 +63,7 @@ int main( int argc, char* argv[] ) {
   r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 4, -1, 1, 1 ) );
 
   compareRegions( outputdir, r_highHT_vs_njet, templates_gJet, true );
-  compareRegions( outputdir, r_highHT_vs_njet, templates_gJet, false );
+  compareRegions( outputdir, r_highHT_vs_njet, templates_qcd, false );
 
 
   //std::vector<MT2Region> r_medHT_vs_nbjet;
@@ -87,7 +89,7 @@ int main( int argc, char* argv[] ) {
   r_vsHT.push_back( MT2Region( 1000., -1. ,  30., 2, 3, 0, 0 ) );
 
   compareRegions( outputdir, r_vsHT, templates_gJet, true );
-  compareRegions( outputdir, r_vsHT, templates_gJet, false );
+  compareRegions( outputdir, r_vsHT, templates_qcd , false );
 
 
 
@@ -98,7 +100,7 @@ int main( int argc, char* argv[] ) {
   r_vsHT2.push_back( MT2Region( 1000., -1. ,  30., 4, -1, 0, 0 ) );
 
   compareRegions( outputdir, r_vsHT2, templates_gJet, true );
-  compareRegions( outputdir, r_vsHT2, templates_gJet, false );
+  compareRegions( outputdir, r_vsHT2, templates_qcd , false );
 
   return 0;
 
@@ -138,7 +140,8 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
   c1_log->SetLogy();
 
-  float xMax = (isPrompt) ? 8. : 50.;
+  float xMax = 1.2;
+  //float xMax = (isPrompt) ? 8. : 50.;
 
   TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., 0.85 );
   h2_axes->SetXTitle( "Photon Charged Isolation [GeV]" );
@@ -167,27 +170,19 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
       exit(119);
     }
 
-    TH1D* thisTempl_prompt = (isPrompt) ? thisEstimate->template_prompt : thisEstimate->template_fake;
-    thisTempl_prompt->SetLineColor(colors[i]);
-    thisTempl_prompt->SetLineWidth(2);
-    //if( !isPrompt ) thisTempl_prompt->Rebin(5);
-
-    //TH1D* thisTempl_fake = thisEstimate_qcd->template_fake;
-    //thisTempl_fake->SetLineColor(colors[i]);
-    //thisTempl_fake->SetLineWidth(2);
-    //thisTempl_fake->SetLineStyle(2);
+    TH1D* thisTempl = thisEstimate->iso;
+    thisTempl->SetLineColor(colors[i]);
+    thisTempl->SetLineWidth(2);
 
     c1->cd();
-    thisTempl_prompt->DrawNormalized("same" );
-    //thisTempl_fake->DrawNormalized("same" );
+    thisTempl->DrawNormalized("same" );
     c1_log->cd();
-    thisTempl_prompt->DrawNormalized("same" );
-    //thisTempl_fake->DrawNormalized("same" );
+    thisTempl->DrawNormalized("same" );
 
     if( loopOnHT )
-      legend->AddEntry( thisTempl_prompt, regions[i].htRegion()->getNiceNames()[0].c_str(), "L" );
+      legend->AddEntry( thisTempl, regions[i].htRegion()->getNiceNames()[0].c_str(), "L" );
     else
-      legend->AddEntry( thisTempl_prompt, regions[i].sigRegion()->getNiceName().c_str(), "L" );
+      legend->AddEntry( thisTempl, regions[i].sigRegion()->getNiceName().c_str(), "L" );
 
   }
 
@@ -195,7 +190,7 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();
 
-  TPaveText* labelPrompt = new TPaveText( 0.4, 0.7, 0.49, 0.8 );
+  TPaveText* labelPrompt = new TPaveText( 0.2, 0.8, 0.49, 0.9, "brNDC" );
   labelPrompt->SetFillColor(0);
   labelPrompt->SetTextSize(0.035);
   labelPrompt->SetTextAlign(11); // align left
@@ -207,15 +202,15 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
 
 
   c1->cd();
-  legend->Draw("same");
   labelTop->Draw("same");
   labelPrompt->Draw("same");
+  legend->Draw("same");
   gPad->RedrawAxis();
 
   c1_log->cd();
-  legend->Draw("same");
   labelTop->Draw("same");
   labelPrompt->Draw("same");
+  legend->Draw("same");
   gPad->RedrawAxis();
 
 
