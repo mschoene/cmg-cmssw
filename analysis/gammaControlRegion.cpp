@@ -162,7 +162,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
     float mcMatchId = myTree.gamma_mcMatchId[0];
-    thisEstimate->fillIso( iso, weight, mcMatchId, myTree.gamma_mt2 );
+    thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
 
     
   } // for entries
@@ -198,13 +198,9 @@ void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data ) {
 
       randomizeSingleHisto(rand, data->get(thisRegion)->yield);
       randomizeSingleHisto(rand, data->get(thisRegion)->iso);
-      randomizeSingleHisto(rand, data->get(thisRegion)->iso_prompt);
-      randomizeSingleHisto(rand, data->get(thisRegion)->iso_fake);
 
       for( unsigned i=0; i < data->get(thisRegion)->iso_bins.size(); ++i ) {
         randomizeSingleHisto(rand, data->get(thisRegion)->iso_bins[i]);
-        randomizeSingleHisto(rand, data->get(thisRegion)->iso_prompt_bins[i]);
-        randomizeSingleHisto(rand, data->get(thisRegion)->iso_fake_bins[i]);
       }
 
     }// for signal regions
