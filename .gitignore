@@ -1,4 +1,6 @@
 *.root
+*.log
+*.tar
 *.o
 *.eps
 *.pdf
