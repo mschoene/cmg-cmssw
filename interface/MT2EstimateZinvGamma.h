@@ -19,13 +19,9 @@ class MT2EstimateZinvGamma : public MT2Estimate {
  
   // integrated over mt2:
   TH1D* iso;
-  TH1D* iso_prompt;
-  TH1D* iso_fake;
 
   // for each bin of mt2:
   std::vector<TH1D*> iso_bins;
-  std::vector<TH1D*> iso_prompt_bins;
-  std::vector<TH1D*> iso_fake_bins; 
 
 
   const MT2EstimateZinvGamma& operator=( const MT2EstimateZinvGamma& rhs );
@@ -40,7 +36,7 @@ class MT2EstimateZinvGamma : public MT2Estimate {
   //MT2EstimateZinvGamma operator*=( float k ) const;
 
 
-  void fillIso( float iso, float weight=1., int mcMatchId=-1, float mt2=-1 );
+  void fillIso( float iso, float weight=1., float mt2=-1 );
 
   virtual void finalize();
 
