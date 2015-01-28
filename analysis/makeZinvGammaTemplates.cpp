@@ -16,19 +16,32 @@ float lumi = 5.; //fb-1
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet );
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool prompt );
 
 
 
 
 int main( int argc, char* argv[] ) {
 
+  if( argc==1 ) {
+    std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
+    std::cout << "  13TeV_CSA14" << std::endl;
+    std::cout << "  13TeV_onlyHT" << std::endl;
+    std::cout << "  13TeV_onlyJets" << std::endl;
+    std::cout << "  13TeV_inclusive" << std::endl;
+    exit(101);
+  }
+
+  //std::string regionsSet = "13TeV_onlyHT";
+  std::string regionsSet = "13TeV_CSA14";
+  //std::string regionsSet = "13TeV_inclusive";
+  //std::string regionsSet = "13TeV_ZinvGammaPurity";
+  if( argc>1 ) {
+    std::string regionsSet_tmp(argv[1]); 
+    regionsSet = regionsSet_tmp;
+  }
 
   std::string samplesFileName = "CSA14_Zinv";
-  if( argc>1 ) {
-    std::string samplesFileName_tmp(argv[1]); 
-    samplesFileName = samplesFileName_tmp;
-  }
 
   std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
   
@@ -45,8 +58,6 @@ int main( int argc, char* argv[] ) {
   
 
 
-  std::string regionsSet = "13TeV_CSA14";
-  //std::string regionsSet = "13TeV_ZinvGammaPurity";
 
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
@@ -57,14 +68,14 @@ int main( int argc, char* argv[] ) {
   
   MT2Analysis<MT2EstimateZinvGamma>* templates = new MT2Analysis<MT2EstimateZinvGamma>( "templates", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
-    (*templates) += (computeYield( samples_gammaJet[i], regionsSet ));
+    (*templates) += (computeYield( samples_gammaJet[i], regionsSet, true ));
   }
 
 
   
   MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = new MT2Analysis<MT2EstimateZinvGamma>( "templates_qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-    (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet ));
+    (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet, false ));
   }
 
 
@@ -85,7 +96,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet ) {
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool prompt ) {
 
 
   std::cout << std::endl << std::endl;
@@ -157,19 +168,24 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
 
-    if( myTree.gamma_mcMatchId[0]==22 ) {
-      thisEstimate->template_prompt->Fill(myTree.gamma_chHadIso[0], weight );
-    } else if( myTree.gamma_mcMatchId[0]==0 ) {
-      thisEstimate->template_fake->Fill(myTree.gamma_chHadIso[0], weight );
-    }
+    float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
+    float mcMatchId = myTree.gamma_mcMatchId[0];
+    if( prompt  && mcMatchId!=22 ) continue;
+    if( !prompt && mcMatchId!=0  ) continue;
 
+    thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
 
+    //if( myTree.gamma_mcMatchId[0]==22 ) {
+    //  thisEstimate->iso_prompt->Fill(iso, weight );
+    //} else if( myTree.gamma_mcMatchId[0]==0 ) {
+    //  thisEstimate->iso_fake->Fill(iso, weight );
+    //}
 
     //for( unsigned i=0; i<myTree.ngamma; ++i ) {
     //  if( myTree.gamma_mcMatchId[i]==22 )
-    //    thisEstimate->template_prompt->Fill(myTree.gamma_chHadIso[i], weight );
+    //    thisEstimate->iso_prompt->Fill(myTree.gamma_chHadIso[i], weight );
     //  else if( myTree.gamma_mcMatchId[i]==0 )
-    //    thisEstimate->template_fake->Fill(myTree.gamma_chHadIso[i], weight );
+    //    thisEstimate->iso_fake->Fill(myTree.gamma_chHadIso[i], weight );
     //}
 
     
