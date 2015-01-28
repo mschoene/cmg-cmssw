@@ -88,6 +88,10 @@ drawGammaTemplates: drawGammaTemplates.cpp MT2Region.o MT2Estimate.o MT2Estimate
 fitPurityGamma: fitPurityGamma.cpp  
 	$(CC) -Wall $(INCLUDES) -o fitPurityGamma fitPurityGamma.cpp  $(ROOTFLAG) $(EXTRALIBS)
 
+gammaControlRegion: gammaControlRegion.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateZinvGamma.o
+	$(CC) -Wall $(INCLUDES) -o gammaControlRegion gammaControlRegion.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateZinvGamma.o $(ROOTFLAG) $(EXTRALIBS)
+
+
 
 
 
