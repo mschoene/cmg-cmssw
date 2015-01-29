@@ -8,22 +8,32 @@
 
 
 
+
 MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2Region& aregion ) : MT2Estimate( aname, aregion ) {
 
   int nbins = 25;
   float xmax = 1.;
 
+  // this histo will be used to create histogram templates:
   iso = new TH1D( this->getHistoName("iso").c_str(), "", nbins, 0., xmax);
   iso->Sumw2();
+
+  x_ = new RooRealVar( "x", "", 0., xmax );
 
   int nbins_mt2;
   double *bins_mt2;
   aregion.getBins( nbins_mt2, bins_mt2 );
 
+
   for( unsigned i=0; i<nbins_mt2; ++i ) {
-    TH1D* this_iso = new TH1D( this->getHistoName(Form("iso_bin%d", i)).c_str() , "", nbins, 0., xmax);
-    this_iso->Sumw2();
-    iso_bins.push_back(this_iso);
+
+    RooDataSet* isoDataset = new RooDataSet( this->getHistoName(Form("iso_bin%d", i)).c_str(), "", *x_ );
+    iso_bins.push_back(isoDataset);
+
+    TH1D* this_iso_hist = new TH1D( this->getHistoName(Form("iso_bin%d_hist", i)).c_str() , "", nbins, 0., xmax);
+    this_iso_hist->Sumw2();
+    iso_bins_hist.push_back(this_iso_hist);
+
   }
 
 }
@@ -36,17 +46,26 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const MT2EstimateZinvGamma& rhs ) : 
   this->iso = new TH1D(*(rhs.iso));
 
   for( unsigned i=0; i<rhs.iso_bins.size(); ++i ) {
-    this->iso_bins.push_back(new TH1D(*(rhs.iso_bins[i])));
+    RooDataSet* newDataSet = new RooDataSet( *(rhs.iso_bins[i]) );
+    this->iso_bins.push_back(newDataSet);
+    TH1D* this_iso_hist = new TH1D( *(rhs.iso_bins_hist[i]) );
+    iso_bins_hist.push_back(this_iso_hist);
   }
 
 }
 
 
+
+// destructor
+
 MT2EstimateZinvGamma::~MT2EstimateZinvGamma() {
 
   delete iso;
 
-  for( unsigned i=0; i<iso_bins.size(); ++i ) delete iso_bins[i];
+  for( unsigned i=0; i<iso_bins.size(); ++i ) { 
+    delete iso_bins[i];
+    delete iso_bins_hist[i];
+  }
 
 
 }
@@ -61,6 +80,7 @@ void MT2EstimateZinvGamma::setName( const std::string& newName ) {
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
     iso_bins[i]->SetName( this->getHistoName(Form("iso_bin%d", i)).c_str() );
+    iso_bins_hist[i]->SetName( this->getHistoName(Form("iso_bin%d_hist", i)).c_str() );
   }
 
 }
@@ -77,7 +97,9 @@ void MT2EstimateZinvGamma::fillIso( float iso, float weight, float mt2 ) {
     if( foundBin > this->yield->GetNbinsX() ) foundBin=this->yield->GetNbinsX(); // overflow will go in last bin
     foundBin-=1; // want first bin to be 0 (fuck you root)
     if( foundBin>=0 ) {
-      iso_bins[foundBin]->Fill( iso, weight );
+      x_->setVal(iso);
+      iso_bins[foundBin]->add( *x_, weight );
+      iso_bins_hist[foundBin]->Fill( iso, weight );
     }
   }
       
@@ -93,7 +115,7 @@ void MT2EstimateZinvGamma::finalize() {
   MT2Estimate::addOverflowSingleHisto( iso );
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
-    MT2Estimate::addOverflowSingleHisto(iso_bins[i]);
+    MT2Estimate::addOverflowSingleHisto(iso_bins_hist[i]);
   }
 
 }
@@ -106,7 +128,8 @@ void MT2EstimateZinvGamma::getShit( TFile* file, const std::string& path ) {
   iso = (TH1D*)file->Get(Form("%s/%s", path.c_str(), iso->GetName()));
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
-    iso_bins[i] = (TH1D*)file->Get(Form("%s/%s", path.c_str(), iso_bins[i]->GetName()));
+    iso_bins[i] = (RooDataSet*)file->Get(Form("%s/%s", path.c_str(), iso_bins[i]->GetName()));
+    iso_bins_hist[i] = (TH1D*)file->Get(Form("%s/%s", path.c_str(), iso_bins_hist[i]->GetName()));
   }
 
 
@@ -129,6 +152,7 @@ void MT2EstimateZinvGamma::write() const {
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
     iso_bins[i]->Write();
+    iso_bins_hist[i]->Write();
   }
 
 }
@@ -148,7 +172,8 @@ const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator=( const MT2EstimateZi
     this->iso = new TH1D(*(rhs.iso));
 
     for( unsigned i=0; i<iso_bins.size(); ++i ) {
-      this->iso_bins[i] = new TH1D( *(rhs.iso_bins[i]) );
+      this->iso_bins[i] = new RooDataSet( *(rhs.iso_bins[i]) );
+      this->iso_bins_hist[i] = new TH1D( *(rhs.iso_bins_hist[i]) );
     }
 
 
@@ -171,8 +196,12 @@ const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator=( const MT2EstimateZi
     for( unsigned i=0; i<iso_bins.size(); ++i ) {
 
       std::string oldName_bin = this->iso_bins[i]->GetName();
-      this->iso_bins[i] = new TH1D( *(rhs.iso_bins[i]) );
-      this->iso_bins[i]->SetName(oldName_bin.c_str());
+      this->iso_bins[i] = new RooDataSet( *(rhs.iso_bins[i]) );
+      this->iso_bins[i]->SetName( oldName_bin.c_str() );
+
+      std::string oldName_bin_hist = this->iso_bins_hist[i]->GetName();
+      this->iso_bins_hist[i] = new TH1D( *(rhs.iso_bins_hist[i]) );
+      this->iso_bins_hist[i]->SetName( oldName_bin_hist.c_str() );
 
     }
 
@@ -200,7 +229,10 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator+( const MT2EstimateZinvGamma
   result.iso->Add(rhs.iso);
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
-    result.iso_bins[i]->Add(rhs.iso_bins[i]);
+
+    result.iso_bins[i]->append( *(rhs.iso_bins[i]) );
+    result.iso_bins_hist[i]->Add( rhs.iso_bins_hist[i] );
+
   }
   
   return result;
@@ -210,6 +242,7 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator+( const MT2EstimateZinvGamma
 
 
 
+/*
 MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/( const MT2EstimateZinvGamma& rhs ) const{
 
 
@@ -230,23 +263,29 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/( const MT2EstimateZinvGamma
   return result;
 
 }
+*/
 
 
-
-MT2EstimateZinvGamma MT2EstimateZinvGamma::operator+=( const MT2EstimateZinvGamma& rhs ) const {
+const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator+=( const MT2EstimateZinvGamma& rhs ) {
 
   this->yield->Add(rhs.yield);
 
   this->iso->Add(rhs.iso);
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
-    this->iso_bins[i]->Add(rhs.iso_bins[i]);
+
+    this->iso_bins[i]->append( *(rhs.iso_bins[i]) );
+    this->iso_bins_hist[i]->Add( rhs.iso_bins_hist[i] );
+
   }
 
   return (*this);
 
 }
 
+
+
+/*
 MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/=( const MT2EstimateZinvGamma& rhs ) const {
 
   this->yield->Divide(rhs.yield);
@@ -260,5 +299,5 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/=( const MT2EstimateZinvGamm
   return (*this);
 
 }
-
+*/
 
