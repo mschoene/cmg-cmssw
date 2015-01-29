@@ -48,8 +48,8 @@ int main( int argc, char* argv[] ) {
   
 
 
-  std::string regionsSet = "13TeV_onlyHT";
-  //std::string regionsSet = "13TeV_CSA14";
+  //std::string regionsSet = "13TeV_onlyHT";
+  std::string regionsSet = "13TeV_CSA14";
   //std::string regionsSet = "13TeV_inclusive";
   //std::string regionsSet = "13TeV_ZinvGammaPurity";
 
@@ -74,8 +74,9 @@ int main( int argc, char* argv[] ) {
   (*gammaCR) = (*gammaJet) + (*qcd);
 
 
-  MT2Analysis<MT2EstimateZinvGamma>* purity = new MT2Analysis<MT2EstimateZinvGamma>( "purityMC", regionsSet );
-  (*purity) = (*gammaJet) / ( (*gammaJet) + (*qcd) );
+  MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purityMC", regionsSet );
+  (*purity) = *( (MT2Analysis<MT2Estimate>*) (gammaJet) );
+  (*purity) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR) );
 
 
   gammaCR->writeToFile( outputdir + "/mc.root" );
@@ -209,8 +210,8 @@ void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data ) {
       randomizeSingleHisto(rand, data->get(thisRegion)->yield);
       randomizeSingleHisto(rand, data->get(thisRegion)->iso);
 
-      for( unsigned i=0; i < data->get(thisRegion)->iso_bins.size(); ++i ) {
-        randomizeSingleHisto(rand, data->get(thisRegion)->iso_bins[i]);
+      for( unsigned i=0; i < data->get(thisRegion)->iso_bins_hist.size(); ++i ) {
+        randomizeSingleHisto(rand, data->get(thisRegion)->iso_bins_hist[i]);
       }
 
     }// for signal regions
