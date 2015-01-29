@@ -16,10 +16,10 @@ int main() {
   MT2Analysis<MT2EstimateSyst> *analysis = new MT2Analysis<MT2EstimateSyst>("pippo", "13TeV_CSA14", 702);
   // ^ the above command creates the whole HT x SR structure, and instantiates one MT2EstimateSyst per region
 
-  float ht = 1000.;
-  float met = 200.;
-  int njets = 4;
-  int nbjets = 1;
+  float ht = 500.;
+  float met = 300.;
+  int njets = 2;
+  int nbjets = 0;
   float mt2 = 305.;
 
   float weight = 1.;
