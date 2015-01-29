@@ -192,7 +192,7 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
 
   } else if( regionsSet=="13TeV_onlyJets" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,   -1., 200.));
+    htRegions_.insert(MT2HTRegion( 450.,   -1., 30.));
 
     signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
@@ -988,6 +988,9 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
   // these are the uppermost dirs in the file, 
   // so one dir per analysis name (tyipically only one anyways)
   while(TObject *obj = next()) { 
+
+    TString thisdirname( obj->GetName() );
+    if( thisdirname.BeginsWith("ProcessID") ) continue;
 
     std::string analysisName(obj->GetName());
     file->cd(analysisName.c_str()); 
