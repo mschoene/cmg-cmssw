@@ -59,14 +59,14 @@ class MT2Estimate {
   MT2Estimate operator+( const MT2Estimate& rhs ) const;
   MT2Estimate operator/( const MT2Estimate& rhs ) const;
   MT2Estimate operator*( const MT2Estimate& rhs ) const;
-  MT2Estimate operator+=( const MT2Estimate& rhs ) const;
-  MT2Estimate operator/=( const MT2Estimate& rhs ) const;
-  MT2Estimate operator*=( const MT2Estimate& rhs ) const;
+  const MT2Estimate& operator+=( const MT2Estimate& rhs );
+  const MT2Estimate& operator/=( const MT2Estimate& rhs );
+  const MT2Estimate& operator*=( const MT2Estimate& rhs );
 
   MT2Estimate operator/ ( float k ) const;
   MT2Estimate operator* ( float k ) const;
-  MT2Estimate operator/=( float k ) const;
-  MT2Estimate operator*=( float k ) const;
+  const MT2Estimate& operator/=( float k );
+  const MT2Estimate& operator*=( float k );
 
 
   virtual void finalize() {

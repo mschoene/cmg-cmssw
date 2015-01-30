@@ -210,7 +210,7 @@ MT2Estimate MT2Estimate::operator*( float k ) const {
 
 
 
-MT2Estimate MT2Estimate::operator/=( const MT2Estimate& rhs ) const {
+const MT2Estimate& MT2Estimate::operator/=( const MT2Estimate& rhs ) {
 
   this->yield->Divide(rhs.yield);
   return (*this);
@@ -220,7 +220,7 @@ MT2Estimate MT2Estimate::operator/=( const MT2Estimate& rhs ) const {
 
 
 
-MT2Estimate MT2Estimate::operator+=( const MT2Estimate& rhs ) const {
+const MT2Estimate& MT2Estimate::operator+=( const MT2Estimate& rhs ) {
 
   this->yield->Add(rhs.yield);
   return (*this);
@@ -229,7 +229,7 @@ MT2Estimate MT2Estimate::operator+=( const MT2Estimate& rhs ) const {
 }
 
 
-MT2Estimate MT2Estimate::operator*=( const MT2Estimate& rhs ) const {
+const MT2Estimate& MT2Estimate::operator*=( const MT2Estimate& rhs ) {
 
   this->yield->Multiply(rhs.yield);
   return (*this);
@@ -238,7 +238,7 @@ MT2Estimate MT2Estimate::operator*=( const MT2Estimate& rhs ) const {
 }
 
 
-MT2Estimate MT2Estimate::operator*=( float k ) const {
+const MT2Estimate& MT2Estimate::operator*=( float k ) {
 
   this->yield->Scale(k);
   return (*this);
@@ -247,7 +247,7 @@ MT2Estimate MT2Estimate::operator*=( float k ) const {
 }
 
 
-MT2Estimate MT2Estimate::operator/=( float k ) const {
+const MT2Estimate& MT2Estimate::operator/=( float k ) {
 
   this->yield->Scale(1./k);
   return (*this);

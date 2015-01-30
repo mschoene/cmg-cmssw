@@ -15,7 +15,7 @@ class MT2EstimateSyst : public MT2Estimate {
     this->yield_btagDown = new TH1D(*(rhs.yield_btagDown));
   }
   MT2EstimateSyst( const std::string& aname, const MT2Region& aregion );
-  ~MT2EstimateSyst();
+  virtual ~MT2EstimateSyst();
 
   virtual void setName( const std::string& newName );
  
@@ -26,14 +26,14 @@ class MT2EstimateSyst : public MT2Estimate {
   MT2EstimateSyst operator+( const MT2EstimateSyst& rhs ) const;
   MT2EstimateSyst operator/( const MT2EstimateSyst& rhs ) const;
   MT2EstimateSyst operator*( const MT2EstimateSyst& rhs ) const;
-  MT2EstimateSyst operator+=( const MT2EstimateSyst& rhs ) const;
-  MT2EstimateSyst operator/=( const MT2EstimateSyst& rhs ) const;
-  MT2EstimateSyst operator*=( const MT2EstimateSyst& rhs ) const;
+  const MT2EstimateSyst& operator+=( const MT2EstimateSyst& rhs );
+  const MT2EstimateSyst& operator/=( const MT2EstimateSyst& rhs );
+  const MT2EstimateSyst& operator*=( const MT2EstimateSyst& rhs );
 
   MT2EstimateSyst operator/ ( float k ) const;
   MT2EstimateSyst operator* ( float k ) const;
-  MT2EstimateSyst operator/=( float k ) const;
-  MT2EstimateSyst operator*=( float k ) const;
+  const MT2EstimateSyst& operator/=( float k );
+  const MT2EstimateSyst& operator*=( float k );
 
 
   virtual void finalize() {

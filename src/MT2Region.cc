@@ -149,7 +149,17 @@ bool MT2HTRegion::operator<( const MT2HTRegion& rhs ) const {
 
 
 
+bool MT2HTRegion::isIncluded( MT2HTRegion* htRegion ) const {
 
+  bool returnBool = true;
+
+  if( htMin < htRegion->htMin ) returnBool = false;
+  if( htMax > htRegion->htMax && htRegion->htMax>=0. ) returnBool = false;
+  if( metMin < htRegion->metMin && htRegion->metMin>0. ) returnBool = false;
+
+  return returnBool;
+
+}
 
 
 ////////////////////////////////////////////////////////
@@ -417,6 +427,35 @@ bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
 
 
 
+bool MT2SignalRegion::isIncluded( MT2SignalRegion* sigRegion ) const {
+
+  bool returnBool = true;
+
+  if( nJetsMin < sigRegion->nJetsMin ) returnBool = false;
+  if( nJetsMax > sigRegion->nJetsMax && sigRegion->nJetsMax>=0 ) returnBool = false;
+  if( nBJetsMin < sigRegion->nBJetsMin ) returnBool = false;
+  if( nBJetsMax > sigRegion->nBJetsMax && sigRegion->nBJetsMax>=0 ) returnBool = false;
+  if( mtMax > sigRegion->mtMax && sigRegion->mtMax>=0. ) returnBool = false;
+  if( mt2Min < sigRegion->mt2Min && sigRegion->mt2Min>=0. ) returnBool = false;
+  if( mt2Max > sigRegion->mt2Max && sigRegion->mt2Max>=0. ) returnBool = false;
+  if( inBox != sigRegion->inBox ) returnBool = false;
+
+  return returnBool;
+
+}
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////
+//
+//                  MT2Region
+//
+////////////////////////////////////////////////////////
 
 
 
@@ -569,5 +608,13 @@ std::vector< std::string > MT2Region::getNiceNames() const {
   names.push_back(sigRegion_->getNiceName());
 
   return names;
+
+}
+
+
+
+bool MT2Region::isIncluded( MT2Region* region ) const {
+
+  return ( ( sigRegion_->isIncluded( region->sigRegion() ) ) && ( htRegion_->isIncluded( region->htRegion() ) ) );
 
 }

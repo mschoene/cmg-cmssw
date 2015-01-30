@@ -32,6 +32,7 @@ class MT2HTRegion {
   bool operator!=( const MT2HTRegion& rhs ) const;
   bool operator<( const MT2HTRegion& rhs ) const;
 
+  bool isIncluded( MT2HTRegion* htRegion ) const;
 
  private:
 
@@ -72,6 +73,8 @@ class MT2SignalRegion {
   bool operator!=( const MT2SignalRegion& rhs ) const;
   bool operator<( const MT2SignalRegion& rhs ) const;
 
+  bool isIncluded( MT2SignalRegion* sigRegion ) const;
+  
 
  private:
 
@@ -153,6 +156,10 @@ class MT2Region {
     }
     return false;
   }
+
+
+  bool isIncluded( MT2Region* region ) const;
+  
 
 
  private:

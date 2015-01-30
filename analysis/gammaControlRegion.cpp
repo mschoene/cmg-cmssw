@@ -10,38 +10,28 @@
 
 #include "TLorentzVector.h"
 #include "TH1F.h"
+#include "TRandom3.h"
 
 
 float lumi = 5.; //fb-1
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool prompt );
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, int selectID=-1 );
+void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data );
+void randomizeSingleHisto( TRandom3 rand, TH1D* histo );
 
 
 
 
 int main( int argc, char* argv[] ) {
 
-  if( argc==1 ) {
-    std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
-    std::cout << "  13TeV_CSA14" << std::endl;
-    std::cout << "  13TeV_onlyHT" << std::endl;
-    std::cout << "  13TeV_onlyJets" << std::endl;
-    std::cout << "  13TeV_inclusive" << std::endl;
-    exit(101);
-  }
-
-  //std::string regionsSet = "13TeV_onlyHT";
-  std::string regionsSet = "13TeV_CSA14";
-  //std::string regionsSet = "13TeV_inclusive";
-  //std::string regionsSet = "13TeV_ZinvGammaPurity";
-  if( argc>1 ) {
-    std::string regionsSet_tmp(argv[1]); 
-    regionsSet = regionsSet_tmp;
-  }
 
   std::string samplesFileName = "CSA14_Zinv";
+  if( argc>1 ) {
+    std::string samplesFileName_tmp(argv[1]); 
+    samplesFileName = samplesFileName_tmp;
+  }
 
   std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
   
@@ -58,30 +48,51 @@ int main( int argc, char* argv[] ) {
   
 
 
+  //std::string regionsSet = "13TeV_onlyHT";
+  std::string regionsSet = "13TeV_CSA14";
+  //std::string regionsSet = "13TeV_inclusive";
+  //std::string regionsSet = "13TeV_ZinvGammaPurity";
 
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
 
-  std::string outputdir = "ZinvGammaPurity_" + samplesFileName + "_" + regionsSet;
+  std::string outputdir = "GammaControlRegion_" + samplesFileName + "_" + regionsSet;
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
-  MT2Analysis<MT2EstimateZinvGamma>* templates = new MT2Analysis<MT2EstimateZinvGamma>( "templates", regionsSet );
+
+  MT2Analysis<MT2EstimateZinvGamma>* prompt = new MT2Analysis<MT2EstimateZinvGamma>( "prompt", regionsSet );
+  //MT2Analysis<MT2EstimateZinvGamma>* fake = new MT2Analysis<MT2EstimateZinvGamma>( "fake", regionsSet );
+
+  MT2Analysis<MT2EstimateZinvGamma>* gammaJet = new MT2Analysis<MT2EstimateZinvGamma>( "gammaJet", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
-    (*templates) += (computeYield( samples_gammaJet[i], regionsSet, true ));
+    (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet ));
+    (*prompt) += (computeYield( samples_gammaJet[i], regionsSet, 22 ));
+    //(*fake) += (computeYield( samples_gammaJet[i], regionsSet, 0 ));
   }
 
-
-  
-  MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = new MT2Analysis<MT2EstimateZinvGamma>( "templates_qcd", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* qcd = new MT2Analysis<MT2EstimateZinvGamma>( "qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-    (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet, false ));
+    (*qcd) += (computeYield( samples_qcd[i], regionsSet ));
+    (*prompt) += (computeYield( samples_qcd[i], regionsSet, 22 ));
+    //(*fake) += (computeYield( samples_qcd[i], regionsSet, 0 ));
   }
 
+  MT2Analysis<MT2EstimateZinvGamma>* gammaCR = new MT2Analysis<MT2EstimateZinvGamma>( "gammaCR", regionsSet );
+  (*gammaCR) = (*gammaJet) + (*qcd);
 
-  std::string templateFileName = "gammaTemplates_" + samplesFileName + "_" + regionsSet + ".root";
-  templates->writeToFile(templateFileName);
-  templates_qcd->addToFile(templateFileName);
+
+  MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purityMC", regionsSet );
+  (*purity) = *( (MT2Analysis<MT2Estimate>*) (prompt) );
+  (*purity) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR) );
+
+
+  gammaCR->writeToFile( outputdir + "/mc.root" );
+  purity->writeToFile( outputdir + "/purityMC.root" );
+
+  // emulate data:
+  randomizePoisson(gammaCR);
+  gammaCR->writeToFile( outputdir + "/data.root" );
 
 
   return 0;
@@ -96,7 +107,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool prompt ) {
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, int selectID ) {
 
 
   std::cout << std::endl << std::endl;
@@ -147,7 +158,6 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( myTree.gamma_idCutBased[0]==0 ) continue;
     //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
-    
 
     TLorentzVector gamma;
     gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
@@ -164,6 +174,8 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     }
     if( found_pt<100. ) continue;
 
+    float mcMatchId = myTree.gamma_mcMatchId[0];
+    if( selectID>=0 && selectID!=mcMatchId ) continue;
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
 
@@ -173,24 +185,8 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
 
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
-    float mcMatchId = myTree.gamma_mcMatchId[0];
-    if( prompt  && mcMatchId!=22 ) continue;
-    if( !prompt && mcMatchId!=0  ) continue;
 
     thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
-
-    //if( myTree.gamma_mcMatchId[0]==22 ) {
-    //  thisEstimate->iso_prompt->Fill(iso, weight );
-    //} else if( myTree.gamma_mcMatchId[0]==0 ) {
-    //  thisEstimate->iso_fake->Fill(iso, weight );
-    //}
-
-    //for( unsigned i=0; i<myTree.ngamma; ++i ) {
-    //  if( myTree.gamma_mcMatchId[i]==22 )
-    //    thisEstimate->iso_prompt->Fill(myTree.gamma_chHadIso[i], weight );
-    //  else if( myTree.gamma_mcMatchId[i]==0 )
-    //    thisEstimate->iso_fake->Fill(myTree.gamma_chHadIso[i], weight );
-    //}
 
     
   } // for entries
@@ -210,3 +206,42 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 }
 
 
+
+void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data ) {
+
+  TRandom3 rand(13);
+
+
+  std::set<MT2HTRegion> HTRegions = data->getHTRegions();
+  std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
+
+  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+
+      MT2Region thisRegion( (*iHT), (*iSR) );
+
+      randomizeSingleHisto(rand, data->get(thisRegion)->yield);
+      randomizeSingleHisto(rand, data->get(thisRegion)->iso);
+
+      for( unsigned i=0; i < data->get(thisRegion)->iso_bins_hist.size(); ++i ) {
+        randomizeSingleHisto(rand, data->get(thisRegion)->iso_bins_hist[i]);
+      }
+
+    }// for signal regions
+  }// for HT regions
+
+}
+
+
+
+void randomizeSingleHisto( TRandom3 rand, TH1D* histo ) {
+
+  for( unsigned ibin=1; ibin<histo->GetXaxis()->GetNbins()+1; ++ibin ) {
+
+    int poisson_data = rand.Poisson(histo->GetBinContent(ibin));
+    histo->SetBinContent(ibin, poisson_data);
+    histo->SetBinError(ibin, 0.);
+
+  }  // for bins
+
+}
