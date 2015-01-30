@@ -833,7 +833,7 @@ void MT2Analysis<T>::writeToFile( const std::string& fileName, const std::string
   TFile* file = TFile::Open(fileName.c_str(), option.c_str() );
   file->cd();
 
-  if( file->cd(this->name.c_str()) ) {
+  if( file->GetDirectory(this->name.c_str()) ) {
     file->cd();
     if( overwrite ) {
       file->rmdir(this->name.c_str());
