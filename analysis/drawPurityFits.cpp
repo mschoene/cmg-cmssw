@@ -48,9 +48,9 @@ int main() {
   MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/purityMC.root" );
 
   std::vector< PurityFit > fits;
-  fits.push_back( PurityFit( "Full Granularity", "13TeV_CSA14"   , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_CSA14/purityFit_CSA14_Zinv_13TeV_CSA14.root"      ), 20, 46 ));
-  fits.push_back( PurityFit( "Only HT Regions" , "13TeV_onlyHT"  , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyHT/purityFit_CSA14_Zinv_13TeV_onlyHT.root"    ), 21, 29 ));
-  fits.push_back( PurityFit( "Only Jet Regions", "13TeV_onlyJet" , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyJets/purityFit_CSA14_Zinv_13TeV_onlyJets.root"), 24, 38 ));
+  fits.push_back( PurityFit( "Full Templates", "13TeV_CSA14"   , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_CSA14/purityFit_CSA14_Zinv_13TeV_CSA14.root"      ), 20, 46 ));
+  fits.push_back( PurityFit( "HT Templates"  , "13TeV_onlyHT"  , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyHT/purityFit_CSA14_Zinv_13TeV_onlyHT.root"    ), 21, 29 ));
+  fits.push_back( PurityFit( "Jet Templates" , "13TeV_onlyJet" , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyJets/purityFit_CSA14_Zinv_13TeV_onlyJets.root"), 24, 38 ));
 
 
   std::set<MT2Region> regions = purityMC->getRegions();
