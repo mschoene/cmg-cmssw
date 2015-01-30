@@ -17,7 +17,7 @@ float lumi = 5.; //fb-1
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet );
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, int selectID=-1 );
 void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data );
 void randomizeSingleHisto( TRandom3 rand, TH1D* histo );
 
@@ -60,14 +60,22 @@ int main( int argc, char* argv[] ) {
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
+
+  MT2Analysis<MT2EstimateZinvGamma>* prompt = new MT2Analysis<MT2EstimateZinvGamma>( "prompt", regionsSet );
+  //MT2Analysis<MT2EstimateZinvGamma>* fake = new MT2Analysis<MT2EstimateZinvGamma>( "fake", regionsSet );
+
   MT2Analysis<MT2EstimateZinvGamma>* gammaJet = new MT2Analysis<MT2EstimateZinvGamma>( "gammaJet", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
     (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet ));
+    (*prompt) += (computeYield( samples_gammaJet[i], regionsSet, 22 ));
+    //(*fake) += (computeYield( samples_gammaJet[i], regionsSet, 0 ));
   }
 
   MT2Analysis<MT2EstimateZinvGamma>* qcd = new MT2Analysis<MT2EstimateZinvGamma>( "qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
     (*qcd) += (computeYield( samples_qcd[i], regionsSet ));
+    (*prompt) += (computeYield( samples_qcd[i], regionsSet, 22 ));
+    //(*fake) += (computeYield( samples_qcd[i], regionsSet, 0 ));
   }
 
   MT2Analysis<MT2EstimateZinvGamma>* gammaCR = new MT2Analysis<MT2EstimateZinvGamma>( "gammaCR", regionsSet );
@@ -75,7 +83,7 @@ int main( int argc, char* argv[] ) {
 
 
   MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purityMC", regionsSet );
-  (*purity) = *( (MT2Analysis<MT2Estimate>*) (gammaJet) );
+  (*purity) = *( (MT2Analysis<MT2Estimate>*) (prompt) );
   (*purity) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR) );
 
 
@@ -99,7 +107,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet ) {
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, int selectID ) {
 
 
   std::cout << std::endl << std::endl;
@@ -148,6 +156,9 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( myTree.ngamma==0 ) continue;
 
+    if( myTree.gamma_idCutBased[0]==0 ) continue;
+    //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
+
     TLorentzVector gamma;
     gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
     float found_pt = 0.;
@@ -163,6 +174,8 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     }
     if( found_pt<100. ) continue;
 
+    float mcMatchId = myTree.gamma_mcMatchId[0];
+    if( selectID>=0 && selectID!=mcMatchId ) continue;
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
 
@@ -172,7 +185,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
 
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
-    float mcMatchId = myTree.gamma_mcMatchId[0];
+
     thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
 
     
