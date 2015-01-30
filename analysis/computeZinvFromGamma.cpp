@@ -239,7 +239,7 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
 
     if( myTree.ngamma>0 && prefix=="gamma_" ) {
 
-      if( myTree.gamma_idCutBased==0 ) continue;
+      if( myTree.gamma_idCutBased[0]==0 ) continue;
       if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
 
       TLorentzVector gamma;
