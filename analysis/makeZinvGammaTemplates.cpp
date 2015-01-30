@@ -145,6 +145,10 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( myTree.ngamma==0 ) continue;
 
+    if( myTree.gamma_idCutBased[0]==0 ) continue;
+    //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
+    
+
     TLorentzVector gamma;
     gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
     float found_pt = 0.;
