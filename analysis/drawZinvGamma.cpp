@@ -15,7 +15,7 @@
 
 
 void compareRegions( const std::string& outputdir, std::vector<MT2Region> regions, MT2Analysis<MT2Estimate>* analysis, const std::string& suffix="" );
-void drawClosure( const std::string& outputdir, MT2Region region, MT2Analysis<MT2Estimate>* zinv, MT2Analysis<MT2Estimate>* zinvEstimate );
+void drawComparison( const std::string& outputdir, const std::string& plotName, MT2Region region, MT2Analysis<MT2Estimate>* ana1, const std::string& legendName1, MT2Analysis<MT2Estimate>* ana2=0, const std::string& legendName2="" );
 
 
 int main( int argc, char* argv[] ) {
@@ -33,6 +33,19 @@ int main( int argc, char* argv[] ) {
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
   MT2Analysis<MT2Estimate>* zgammaRatio = MT2Analysis<MT2Estimate>::readFromFile(dir + "/mc.root", "ZgammaRatio");
+  MT2Analysis<MT2Estimate>* zinv = MT2Analysis<MT2Estimate>::readFromFile(dir + "/mc.root", "Zinv");
+  MT2Analysis<MT2Estimate>* zinvEstimate = MT2Analysis<MT2Estimate>::readFromFile(dir + "/MT2ZinvEstimate.root");
+  MT2Analysis<MT2Estimate>* gammaJet = MT2Analysis<MT2Estimate>::readFromFile(dir + "/mc.root", "gammaJet");
+
+  std::set<MT2Region> regions = zinv->getRegions();
+
+  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+    drawComparison( outputdir, "closure"    , *iR, zinv, "Z#rightarrow#nu#nu (MC)", zinvEstimate, "Z Invisible Estimate" );
+    drawComparison( outputdir, "Z_vs_gamma" , *iR, zinv, "Z#rightarrow#nu#nu", gammaJet, "#gamma+jet" );
+    drawComparison( outputdir, "ZgammaRatio", *iR, zgammaRatio, "Z#rightarrow#nu#nu / #gamma+jet" );
+  }
+
+
 
   std::vector<MT2Region> r_lowHT_vs_njet;
   r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 200., 2,  3, 0, 0 ) );
@@ -78,14 +91,6 @@ int main( int argc, char* argv[] ) {
   compareRegions( outputdir, r_vsHT2, zgammaRatio );
 
 
-
-  MT2Analysis<MT2Estimate>* zinv = MT2Analysis<MT2Estimate>::readFromFile(dir + "/mc.root", "Zinv");
-  MT2Analysis<MT2Estimate>* zinvEstimate = MT2Analysis<MT2Estimate>::readFromFile(dir + "/MT2ZinvEstimate.root");
-
-  std::set<MT2Region> regions = zinv->getRegions();
-
-  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR )
-    drawClosure( outputdir, *iR, zinv, zinvEstimate );
 
 
   return 0;
@@ -182,55 +187,131 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
 
 
 
-void drawClosure( const std::string& outputdir, MT2Region region, MT2Analysis<MT2Estimate>* zinv, MT2Analysis<MT2Estimate>* zinvEstimate ) {
+
+void drawComparison( const std::string& outputdir, const std::string& plotName, MT2Region region, MT2Analysis<MT2Estimate>* ana1, const std::string& legendName1, MT2Analysis<MT2Estimate>* ana2, const std::string& legendName2 ) {
 
 
-  TH1D* h1_zinv         = zinv        ->get( region )->yield;
-  TH1D* h1_zinvEstimate = zinvEstimate->get( region )->yield;
+  TH1D* h1_ana1 = ana1->get( region )->yield;
+  TH1D* h1_ana2;
+  if( ana2!=0 ) h1_ana2 = ana2->get( region )->yield;
 
   TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
   c1->cd();
+  TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
+  c1_log->SetLogy();
 
-  float xMin = h1_zinv->GetXaxis()->GetXmin();
-  float xMax = h1_zinv->GetXaxis()->GetXmax();
-  float yMax1 = h1_zinv->GetMaximum()*1.5;
-  float yMax2 = h1_zinvEstimate->GetMaximum()*1.5;
+  float xMin = h1_ana1->GetXaxis()->GetXmin();
+  float xMax = h1_ana1->GetXaxis()->GetXmax();
+  float yMax1 = h1_ana1->GetMaximum()*1.5;
+  float yMax2 = (ana2!=0) ? h1_ana2->GetMaximum()*1.5 : 0.;
   float yMax = (yMax1>yMax2) ? yMax1 : yMax2;
+  if( ana1->getName()=="ZgammaRatio" ) yMax=2.;
   
   TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax );
   h2_axes->SetXTitle("M_{T2} [GeV]");
   h2_axes->SetYTitle("Entries");
 
+  TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, xMin, xMax, 10, 0.01, 50.*yMax );
+  h2_axes_log->SetXTitle("M_{T2} [GeV]");
+  h2_axes_log->SetYTitle("Entries");
+
+  c1->cd();
   h2_axes->Draw();
 
-  h1_zinv->SetLineColor( 46 );
-  h1_zinv->SetLineWidth( 2 );
-  h1_zinv->Draw("histo same");
+  c1_log->cd();
+  h2_axes_log->Draw("");
 
-  h1_zinvEstimate->SetLineColor( kBlack );
-  h1_zinvEstimate->SetMarkerColor( kBlack );
-  h1_zinvEstimate->SetMarkerStyle( 20 );
-  h1_zinvEstimate->SetMarkerSize( 1.3 );
-  h1_zinvEstimate->Draw("p same");
 
-  TLegend* legend = new TLegend( 0.35, 0.9-3.*0.06, 0.93, 0.9, region.getName().c_str() );
+  bool isClosurePlot = ana2!=0 && ana2->getName()=="ZinvEstimate";
+
+  if( ana2!=0 ) {
+
+    if( isClosurePlot ) {
+
+      h1_ana1->SetLineColor( 46 );
+      h1_ana1->SetLineWidth( 2 );
+
+      h1_ana2->SetLineColor( kBlack );
+      h1_ana2->SetMarkerColor( kBlack );
+      h1_ana2->SetMarkerStyle( 20 );
+      h1_ana2->SetMarkerSize( 1.3 );
+
+    } else {
+
+      h1_ana1->SetLineColor( kBlack );
+      h1_ana1->SetMarkerColor( kBlack );
+      h1_ana1->SetMarkerStyle( 21 );
+      h1_ana1->SetMarkerSize( 1.2 );
+
+      h1_ana2->SetLineColor( 46 );
+      h1_ana2->SetMarkerColor( 46 );
+      h1_ana2->SetMarkerStyle( 20 );
+      h1_ana2->SetMarkerSize( 1.3 );
+
+    }
+
+  } else {
+
+    h1_ana1->SetLineColor( 46 );
+    h1_ana1->SetMarkerColor( 46 );
+    h1_ana1->SetMarkerStyle( 20 );
+    h1_ana1->SetMarkerSize( 1.3 );
+
+  }
+
+
+  bool jetCuts = region.sigRegion()->getName() != "j2toInf_b0toInf";
+
+  int nEntries = 2;
+  if( ana2!=0 ) nEntries++;
+  if( jetCuts!=0 ) nEntries++;
+
+
+  TLegend* legend;
+  if( jetCuts ) legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "#splitline{%s,  %s}{%s}", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str(), region.sigRegion()->getNiceName().c_str() ) );
+  else          legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "%s,  %s", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str()) );
   legend->SetTextSize(0.038);
   legend->SetTextFont(42);
   legend->SetFillColor(0);
-  legend->AddEntry( h1_zinv, "Z#rightarrow#nu#nu (MC)", "L" );
-  legend->AddEntry( h1_zinvEstimate, "Z Invisible Estimate", "P" );
-  legend->Draw("same");
+  if( isClosurePlot ) legend->AddEntry( h1_ana1, legendName1.c_str(), "L" );
+  else                legend->AddEntry( h1_ana1, legendName1.c_str(), "P" );
+  if( ana2!=0 ) legend->AddEntry( h1_ana2, legendName2.c_str(), "P" );
+
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();
-  labelTop->Draw("same");
 
+
+  c1->cd();
+  if( isClosurePlot ) h1_ana1->Draw("histo same");
+  else                h1_ana1->Draw("p same");
+  if( ana2!=0 ) h1_ana2->Draw("p same");
+  legend->Draw("same");
+  labelTop->Draw("same");
   gPad->RedrawAxis();
 
-  c1->SaveAs( Form("%s/closure_%s.eps", outputdir.c_str(), region.getName().c_str()) );
-  c1->SaveAs( Form("%s/closure_%s.png", outputdir.c_str(), region.getName().c_str()) );
-  c1->SaveAs( Form("%s/closure_%s.pdf", outputdir.c_str(), region.getName().c_str()) );
+  c1_log->cd();
+  if( isClosurePlot ) h1_ana1->Draw("histo same");
+  else                h1_ana1->Draw("p same");
+  if( ana2!=0 ) h1_ana2->Draw("p same");
+  legend->Draw("same");
+  labelTop->Draw("same");
+  gPad->RedrawAxis();
+
+  c1->SaveAs( Form("%s/%s_%s.eps", outputdir.c_str(), plotName.c_str(), region.getName().c_str()) );
+  c1->SaveAs( Form("%s/%s_%s.png", outputdir.c_str(), plotName.c_str(), region.getName().c_str()) );
+  c1->SaveAs( Form("%s/%s_%s.pdf", outputdir.c_str(), plotName.c_str(), region.getName().c_str()) );
+
+  c1_log->SaveAs( Form("%s/%s_%s_log.eps", outputdir.c_str(), plotName.c_str(), region.getName().c_str()) );
+  c1_log->SaveAs( Form("%s/%s_%s_log.png", outputdir.c_str(), plotName.c_str(), region.getName().c_str()) );
+  c1_log->SaveAs( Form("%s/%s_%s_log.pdf", outputdir.c_str(), plotName.c_str(), region.getName().c_str()) );
+
 
   delete c1;
+  delete c1_log;
   delete h2_axes;
+  delete h2_axes_log;
 
 }
+
+
+
