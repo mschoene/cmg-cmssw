@@ -18,8 +18,11 @@ class MT2EstimateTree : public MT2Estimate {
   void initTree();
   virtual void setName( const std::string& newName );
 
-  void assign( const MT2Tree& mt2tree, float w );
+  void assignTree( const MT2Tree& mt2tree, float w );
   void fillTree( const MT2Tree& mt2tree, float w );
+
+  static void addVar( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name );
+  void assignVar( const std::string& name, float value );
 
   int run;
   int lumi;
@@ -32,6 +35,8 @@ class MT2EstimateTree : public MT2Estimate {
   float met;
   int nJets;
   int nBJets;
+
+  std::map< std::string, float* > extraVars;
  
   TTree* tree;
 
