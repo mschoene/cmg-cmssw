@@ -85,52 +85,22 @@ int main( int argc, char* argv[] ) {
 
 
 
-  //std::cout << std::endl << std::endl;
-  //std::cout << "-> Creating BG templates file..." << std::endl;
-  //TFile* file_templateBG = TFile::Open(Form("%s/bkg_templates.root", dir.c_str()), "recreate");
-  //writeToTemplateFile( file_templateBG,  qcd, err_qcd_uncorr  );
-  //writeToTemplateFile( file_templateBG, llep, err_llep_uncorr );
-  //writeToTemplateFile( file_templateBG, zinv, err_zinv_uncorr );
-  ////writeToTemplateFile_poisson( file_templateBG, zinv );
-  //file_templateBG->Close();
-  //std::cout << "-> Created BG templates file: " << file_templateBG->GetName() << std::endl;
-
-
-
-  //std::cout << std::endl << std::endl;
-  //std::cout << "-> Creating signal templates file..." << std::endl;
   std::vector<MT2Analysis<MT2Estimate>*> signals = MT2Analysis<MT2Estimate>::readAllFromFile( mc_fileName, "SMS" );
-  //TFile* file_templateSignal = TFile::Open(Form("%s/sig_templates.root", dir.c_str()), "recreate");
-  //for( unsigned i=0; i<signals.size(); ++i ) 
-  //  writeToTemplateFile( file_templateSignal, signals[i], err_sig_uncorr );
-  //file_templateSignal->Close();
-  //std::cout << "-> Created signal templates file: " << file_templateSignal->GetName() << std::endl;
-
-  //std::cout << std::endl << std::endl;
-  //std::cout << "-> Creating data_obs file..." << std::endl;
-  //TFile* file_data_obs = TFile::Open(Form("%s/data_obs.root", dir.c_str()), "recreate");
-  //data->setName("data_obs");
-  //writeToTemplateFile( file_data_obs, data, 0. );
-  //file_data_obs->Close();
-  //std::cout << "-> Created data_obs file: " << file_data_obs->GetName() << std::endl;
-
-
 
 
 
 
   std::set<MT2Region> regions = data->getRegions();
 
-  for( int isig=0; isig<(int)signals.size(); ++isig ) { // loop on signals (first iteration with isig=-1 will create the templates)
-  //for( int isig=-1; isig<(int)signals.size(); ++isig ) { // loop on signals (first iteration with isig=-1 will create the templates)
+  for( int isig=-1; isig<(int)signals.size(); ++isig ) { // loop on signals (first iteration with isig=-1 will create the templates)
 
     std::string path;
-    if( isig==-1 )
-      path = dir; // these are the templates
-    else {
+    if( isig==-1 ) {
+      path = dir + "/datacard_templates";
+      system(Form("mkdir -p %s", path.c_str()));
+    } else {
       path = dir + "/datacards_" + signals[isig]->getName();
       system(Form("mkdir -p %s", path.c_str()));
-      std::cout << "-> Creating datacards in: " << path << std::endl;
     }
   
     for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
@@ -158,19 +128,6 @@ int main( int argc, char* argv[] ) {
          datacard << "kmax *" << std::endl;
          datacard << "-------------" << std::endl;
          datacard << std::endl << std::endl;
-         
-         //datacard << "shapes ";
-         //if( this_signal!=0 )
-         //  datacard << signals[isig]->getName();
-         //else
-         //  datacard << "sig";
-         //datacard  << " " << iR->getName() << " " << dir << "/sig_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
-         //datacard << "shapes qcd "      << iR->getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
-         //datacard << "shapes zinv "     << iR->getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
-         //datacard << "shapes llep "     << iR->getName() << " " << dir << "/bkg_templates.root yield_$PROCESS_$CHANNEL $SYSTEMATIC" << std::endl;
-         //datacard << "shapes data_obs " << iR->getName() << " " << dir << "/data_obs.root yield_$PROCESS_$CHANNEL" << std::endl;
-
-         //datacard << "-------------" << std::endl;
 
 
          datacard << std::endl << std::endl;
@@ -198,12 +155,6 @@ int main( int argc, char* argv[] ) {
 
          datacard << "syst_sig    lnN    " << 1.+err_sig_corr << " - - -" << std::endl;
 
-         int N_llep = (int)this_llep->GetBinContent(iBin);
-         float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 0.;
-         float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
-         llep_tot_err+=1.;
-         datacard << "syst_llep_corr_" << iR->getName() << "  lnN   - - - " << llep_tot_err << std::endl;
-
 
 
 
@@ -211,7 +162,7 @@ int main( int argc, char* argv[] ) {
          // QCD SYSTEMATICS:
 
          if( this_qcd->GetBinContent(iBin)>0. ) {
-           datacard << this_qcd->GetName() << "_bin_" << iBin << " lnN - 2.00 - -" << std::endl;
+           datacard << this_qcd->GetName() << "_bin_" << iBin << " lnN - " << 1.+err_qcd_uncorr << " - -" << std::endl;
          }
 
 
@@ -242,7 +193,17 @@ int main( int argc, char* argv[] ) {
          // LOST LEPTON SYSTEMATICS:
 
          if( this_llep->GetBinContent(iBin)>0. ) {
+
+           // uncorrelated:
            datacard << this_llep->GetName() << "_bin_" << iBin << " lnN - - - " << 1.+err_llep_uncorr << std::endl;
+
+           // correlated within the SR (stat-like):
+           int N_llep = (int)(this_llep->Integral());
+           float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 0.;
+           float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
+           llep_tot_err+=1.;
+           datacard << "syst_llep_corr_" << iR->getName() << "  lnN   - - - " << llep_tot_err << std::endl;
+
          }
 
 
@@ -250,6 +211,8 @@ int main( int argc, char* argv[] ) {
 
          if( isig==-1 )
            std::cout << "-> Created template datacard: " << datacardName << std::endl;
+         else
+           std::cout << "-> Created datacards in " << path << std::endl;
        
 
       } // for bins
