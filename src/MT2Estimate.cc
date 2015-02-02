@@ -8,17 +8,6 @@
 
 
 
-MT2Estimate::MT2Estimate( const MT2Estimate& rhs ) {
-
-  name = rhs.getName();
-
-  region = new MT2Region(*(rhs.region));
-
-  yield = new TH1D(*(rhs.yield));
-
-}
-
-
 
 MT2Estimate::MT2Estimate( const std::string& aname, const MT2Region& aregion ) {
 
@@ -32,6 +21,17 @@ MT2Estimate::MT2Estimate( const std::string& aname, const MT2Region& aregion ) {
 
   yield = new TH1D(this->getHistoName("yield").c_str(), "", nBins, bins);
   yield->Sumw2();
+
+}
+
+
+MT2Estimate::MT2Estimate( const MT2Estimate& rhs ) {
+
+  name = rhs.getName();
+
+  region = new MT2Region(*(rhs.region));
+
+  yield = new TH1D(*(rhs.yield));
 
 }
 
@@ -126,11 +126,9 @@ MT2Estimate MT2Estimate::operator+( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  //this->yield->Add(rhs.yield);
   MT2Estimate result(*this);
   result.yield->Add(rhs.yield);
 
-  //return *this;
   return result;
 
 }
@@ -147,12 +145,10 @@ MT2Estimate MT2Estimate::operator/( const MT2Estimate& rhs ) const {
   }
 
 
-  //this->yield->Divide(rhs.yield);
   MT2Estimate result(name, *(this->region) );
   result.yield = new TH1D(*(this->yield));
   result.yield->Divide(rhs.yield);
 
-  //return *this;
   return result;
 
 }
@@ -165,12 +161,10 @@ MT2Estimate MT2Estimate::operator*( const MT2Estimate& rhs ) const {
     exit(113);
   }
 
-  //this->yield->Multiply(rhs.yield);
   MT2Estimate result(name, *(this->region) );
   result.yield = new TH1D(*(this->yield));
   result.yield->Multiply(rhs.yield);
 
-  //return *this;
   return result;
 
 }
@@ -185,10 +179,6 @@ MT2Estimate MT2Estimate::operator/( float k ) const {
 
   return result;
 
-  //this->yield->Scale(1./k);
-
-  //return *this;
-
 }
 
 
@@ -200,11 +190,6 @@ MT2Estimate MT2Estimate::operator*( float k ) const {
 
   return result;
 
-
-  //this->yield->Scale(k);
-
-  //return *this;
-
 }
 
 
@@ -214,7 +199,6 @@ const MT2Estimate& MT2Estimate::operator/=( const MT2Estimate& rhs ) {
 
   this->yield->Divide(rhs.yield);
   return (*this);
-  //return (*this) / rhs ;
 
 }
 
@@ -224,7 +208,6 @@ const MT2Estimate& MT2Estimate::operator+=( const MT2Estimate& rhs ) {
 
   this->yield->Add(rhs.yield);
   return (*this);
-  //return (*this) + rhs ;
 
 }
 
@@ -233,7 +216,6 @@ const MT2Estimate& MT2Estimate::operator*=( const MT2Estimate& rhs ) {
 
   this->yield->Multiply(rhs.yield);
   return (*this);
-  //return (*this) * rhs ;
 
 }
 
@@ -242,7 +224,6 @@ const MT2Estimate& MT2Estimate::operator*=( float k ) {
 
   this->yield->Scale(k);
   return (*this);
-  //return (*this) * k ;
 
 }
 
@@ -251,7 +232,6 @@ const MT2Estimate& MT2Estimate::operator/=( float k ) {
 
   this->yield->Scale(1./k);
   return (*this);
-  //return (*this) / k ;
 
 }
 
