@@ -1051,7 +1051,6 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
       file->cd(analysisName.c_str());
 
     } // while ht regions
-
     TString analysisName_tstr(analysisName);
     if( matchExpression!="" && !(analysisName_tstr.Contains(matchExpression)) ) continue;
 
@@ -1101,32 +1100,35 @@ template<class T>
 MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const std::string& matchName ) {
 
 
-  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName, "", false);
+  std::vector<MT2Analysis<T>*> analyses = readAllFromFile(fileName, matchName, false);
 
   if( analyses.size()==0 ) {
-    std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
+    if( matchName!="" )
+      std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis matching '" << matchName << "' in file " << fileName << std::endl;
+    else
+      std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis in file " << fileName << std::endl;
     return 0;
   }
 
 
-  MT2Analysis<T>* analysis = 0;
-  if( matchName=="" ) {
-    analysis = *(analyses.begin());
-  } else {
-    for( typename std::vector<MT2Analysis<T>*>::iterator iAn=analyses.begin(); iAn!=analyses.end(); ++iAn ) {
-      if( (*iAn)->name == matchName ) {
-        analysis = new MT2Analysis<T>(*(*iAn));
-        break;
-      }
-    }
-    if( analysis==0 ) {
-      std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis named '" << matchName << "' in file " << fileName << std::endl;
-      return 0;
-    }
-  }
+  MT2Analysis<T>* analysis = *(analyses.begin());
+  //if( matchName=="" ) {
+  //  analysis = *(analyses.begin());
+  //} else {
+  //  for( typename std::vector<MT2Analysis<T>*>::iterator iAn=analyses.begin(); iAn!=analyses.end(); ++iAn ) {
+  //    if( (*iAn)->name == matchName ) {
+  //      analysis = new MT2Analysis<T>(*(*iAn));
+  //      break;
+  //    }
+  //  }
+  //  if( analysis==0 ) {
+  //    std::cout << "[MT2Analysis::readFromFile] WARNING!!! Didn't find any MT2Analysis named '" << matchName << "' in file " << fileName << std::endl;
+  //    return 0;
+  //  }
+  //}
 
 
-  if( analyses.size()>1 && matchName=="" ) {
+  if( analyses.size()>1 ) {
     std::cout << "[MT2Analysis::readFromFile] WARNING!!! Multiple analyses found, but reading only one ('" << analysis->name << "')" << std::endl;
     std::cout << "[MT2Analysis::readFromFile] (if you want to read all of them you should use readAllFromFile)" << std::endl;
   } else {
