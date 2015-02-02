@@ -71,9 +71,36 @@ void MT2EstimateTree::setName( const std::string& newName ) {
 }
 
 
+
+void MT2EstimateTree::addVar( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name ) {
+
+
+  for( std::set<MT2EstimateTree*>::iterator iD=analysis->data.begin(); iD!=analysis->data.end(); ++iD ) {
+
+    float* x = new float();
+    (*iD)->extraVars[name] = x;
+
+    (*iD)->tree->Branch( name.c_str(), x, Form("%s/F", name.c_str()) );
+
+  }
+
+}
+
+
+
+void MT2EstimateTree::assignVar( const std::string& name, float value ) {
+
+  float* x = extraVars[name];
+  *x = value;
+
+}
+
+
+
+
 void MT2EstimateTree::fillTree( const MT2Tree& mt2tree, float w ) {
 
-  this->assign( mt2tree, w );
+  this->assignTree( mt2tree, w );
 
   tree->Fill();
 
@@ -81,7 +108,7 @@ void MT2EstimateTree::fillTree( const MT2Tree& mt2tree, float w ) {
 
 
 
-void MT2EstimateTree::assign( const MT2Tree& mt2tree, float w ) {
+void MT2EstimateTree::assignTree( const MT2Tree& mt2tree, float w ) {
 
   run    = mt2tree.run;
   lumi   = mt2tree.lumi;
@@ -94,6 +121,7 @@ void MT2EstimateTree::assign( const MT2Tree& mt2tree, float w ) {
   met    = mt2tree.met_pt;
   nJets  = mt2tree.nJet40;
   nBJets = mt2tree.nBJet40;
+
 }
   
 
@@ -104,8 +132,12 @@ void MT2EstimateTree::getShit( TFile* file, const std::string& path ) {
 
   MT2Estimate::getShit(file, path);
 
+  tree = (TTree*)file->Get(Form("%s/%s", path.c_str(), tree->GetName()));
+
+  this->initTree();
 
 }
+
 
 
 void MT2EstimateTree::write() const {

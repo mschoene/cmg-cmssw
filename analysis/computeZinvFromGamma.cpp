@@ -8,7 +8,7 @@
 #include "interface/MT2Sample.h"
 #include "interface/MT2Region.h"
 #include "interface/MT2Analysis.h"
-#include "interface/MT2Estimate.h"
+#include "interface/MT2EstimateTree.h"
 
 #define mt2_cxx
 //#include "../interface/mt2.h"
@@ -28,7 +28,7 @@ float lumi = 5.; // fb-1
 
 
 
-MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix="" );
+MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix="" );
 void addPoissonError( MT2Analysis<MT2Estimate>* analysis );
 MT2Analysis<MT2Estimate>* combineDataAndMC( MT2Analysis<MT2Estimate>* data, MT2Analysis<MT2Estimate>* mc );
 
@@ -94,26 +94,26 @@ int main( int argc, char* argv[] ) {
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
-  MT2Analysis<MT2Estimate>* gammaJet = new MT2Analysis<MT2Estimate>( "gammaJet", regionsSet );
+  MT2Analysis<MT2EstimateTree>* gammaJet = new MT2Analysis<MT2EstimateTree>( "gammaJet", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
     (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet, "gamma_" ));
   }
 
   
-  MT2Analysis<MT2Estimate>* qcd = new MT2Analysis<MT2Estimate>( "qcd", regionsSet );
+  MT2Analysis<MT2EstimateTree>* qcd = new MT2Analysis<MT2EstimateTree>( "qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
     (*qcd) += (computeYield( samples_qcd[i], regionsSet, "gamma_" ));
   }
 
   MT2Analysis<MT2Estimate>* gamma_plus_qcd = new MT2Analysis<MT2Estimate>( "gamma_plus_qcd", regionsSet );
-  *gamma_plus_qcd = *gammaJet;
-  *gamma_plus_qcd += *qcd;
+  *gamma_plus_qcd = *((MT2Analysis<MT2Estimate>*)gammaJet);
+  *gamma_plus_qcd += *((MT2Analysis<MT2Estimate>*)qcd);
   
   MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purity", regionsSet );
-  (*purity) = (*gammaJet) / (*gamma_plus_qcd);
+  (*purity) = (*((MT2Analysis<MT2Estimate>*)gammaJet)) / (*((MT2Analysis<MT2Estimate>*)gamma_plus_qcd));
   purity->setName( "purity" );
 
-  MT2Analysis<MT2Estimate>* Zinv = new MT2Analysis<MT2Estimate>( "Zinv", regionsSet );
+  MT2Analysis<MT2EstimateTree>* Zinv = new MT2Analysis<MT2EstimateTree>( "Zinv", regionsSet );
   for( unsigned i=0; i<samples_Zinv.size(); ++i ) {
     (*Zinv) += (computeYield( samples_Zinv[i], regionsSet ));
   }
@@ -121,21 +121,21 @@ int main( int argc, char* argv[] ) {
 
 
   MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( "ZgammaRatio", regionsSet );
-  (*ZgammaRatio) = (*Zinv) / (*gammaJet);
+  (*ZgammaRatio) = (*((MT2Analysis<MT2Estimate>*)Zinv)) / (*((MT2Analysis<MT2Estimate>*)gammaJet));
 
   // now that the MC ratio is done, add poisson error to gammajet sample:
-  addPoissonError(gammaJet);
+  addPoissonError( (MT2Analysis<MT2Estimate>*)gammaJet);
 
 
   MT2Analysis<MT2Estimate>* ZinvEstimateFromGamma = new MT2Analysis<MT2Estimate>( "ZinvEstimateFromGamma", regionsSet );
-  (*ZinvEstimateFromGamma) = (*ZgammaRatio) * (*gammaJet);
+  (*ZinvEstimateFromGamma) = (*ZgammaRatio) * (*(MT2Analysis<MT2Estimate>*)(gammaJet));
 
 
   //MT2Analysis<MT2Estimate>* ZJets = MT2Analysis<MT2Estimate>::readFromFile( "EventYields_mc_PHYS14_noMT_dummy_5fb/analyses.root", "ZJets" );
-  MT2Analysis<MT2Estimate>* ZJets = MT2Analysis<MT2Estimate>::readFromFile( "EventYields_mc_PHYS14_dummy_5fb/analyses.root", "ZJets" );
+  //MT2Analysis<MT2Estimate>* ZJets = MT2Analysis<MT2Estimate>::readFromFile( "EventYields_mc_PHYS14_dummy_5fb/analyses.root", "ZJets" );
 
-  MT2Analysis<MT2Estimate>* ZinvEstimate = combineDataAndMC( ZinvEstimateFromGamma, ZJets );
-  //MT2Analysis<MT2Estimate>* ZinvEstimate = combineDataAndMC( ZinvEstimateFromGamma, Zinv );
+  //MT2Analysis<MT2Estimate>* ZinvEstimate = combineDataAndMC( ZinvEstimateFromGamma, ZJets );
+  MT2Analysis<MT2Estimate>* ZinvEstimate = combineDataAndMC( ZinvEstimateFromGamma, (MT2Analysis<MT2Estimate>*)Zinv );
   ZinvEstimate->writeToFile( outputdir + "/MT2ZinvEstimate.root" );
 
 
@@ -161,7 +161,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix ) {
+MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix ) {
 
 
   std::cout << std::endl << std::endl;
@@ -174,7 +174,8 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
 
 
 
-  MT2Analysis<MT2Estimate> analysis( sample.sname, regionsSet, sample.id );
+  MT2Analysis<MT2EstimateTree> analysis( sample.sname, regionsSet, sample.id );
+  MT2EstimateTree::addVar( &analysis, "ptV" );
 
   
   MT2Tree myTree;
@@ -237,6 +238,9 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
 
     if( njets<2 ) continue;
 
+
+    float ptV = -1.;
+
     if( myTree.ngamma>0 && prefix=="gamma_" ) {
 
       if( myTree.gamma_idCutBased[0]==0 ) continue;
@@ -257,20 +261,35 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
       }
       if( found_pt<100. ) continue;
 
+      ptV = gamma.Pt();
+
+
     } else {
 
       if( myTree.jet_pt[1]<100. ) continue;
+
+      //for( unsigned i=0; i<myTree.nGenPart; ++i ) {
+      //  if( myTree.genPart_pdgId!=23 ) continue;
+      //  ptV = genPart_pt;
+      //  break;
+      //}
+      ptV = met;
 
     }
 
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
 
-    MT2Estimate* thisEstimate = analysis.get( ht, njets, nbjets, met, minMTBMet, mt2 );
+    MT2EstimateTree* thisEstimate = analysis.get( ht, njets, nbjets, met, minMTBMet, mt2 );
     if( thisEstimate==0 ) continue;
 
     //std::cout << myTree.evt << std::endl;
     thisEstimate->yield->Fill(mt2, weight );
+
+    thisEstimate->assignTree( myTree, weight );
+    thisEstimate->assignVar( "ptV", ptV );
+    thisEstimate->tree->Fill();
+ 
 
     
   } // for entries
