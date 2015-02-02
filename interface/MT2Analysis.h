@@ -9,7 +9,7 @@
 #include "MT2Region.h"
 #include "TFile.h"
 
-
+#include "../interface/mt2_float.h"
 
 
 
@@ -34,6 +34,7 @@ class MT2Analysis {
   MT2Region* matchRegion( MT2Region region ) const;
 
   T* get( const MT2Region& r ) const;
+  T* get( const MT2Tree& mt2tree ) const;
   T* get( float ht, int njets, int nbjets, float met=-1., float mt=-1., float mt2=-1. ) const;
 
   std::string getName() const { return name; };
@@ -402,6 +403,14 @@ MT2Region* MT2Analysis<T>::matchRegion( MT2Region region ) const {
 
 
 
+
+
+template<class T>
+T* MT2Analysis<T>::get( const MT2Tree& mt2tree ) const {
+
+  return this->get( mt2tree.ht, mt2tree.nJet40, mt2tree.nBJet40, mt2tree.met_pt, mt2tree.minMTBMet, mt2tree.mt2 );
+
+}
 
 
 template<class T>
