@@ -83,11 +83,14 @@ int main( int argc, char* argv[] ) {
 
 
   MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purityMC", regionsSet );
+  //(*purity) = *( (MT2Analysis<MT2Estimate>*) (gammaJet) );
   (*purity) = *( (MT2Analysis<MT2Estimate>*) (prompt) );
   (*purity) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR) );
 
 
   gammaCR->writeToFile( outputdir + "/mc.root" );
+  qcd->addToFile( outputdir + "/mc.root" );
+  gammaJet->addToFile( outputdir + "/mc.root" );
   purity->writeToFile( outputdir + "/purityMC.root" );
 
   // emulate data:
@@ -175,7 +178,8 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     if( found_pt<100. ) continue;
 
     float mcMatchId = myTree.gamma_mcMatchId[0];
-    if( selectID>=0 && selectID!=mcMatchId ) continue;
+    if( selectID>0 && mcMatchId==0 ) continue;
+    //if( selectID>=0 && selectID!=mcMatchId ) continue;
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
 
