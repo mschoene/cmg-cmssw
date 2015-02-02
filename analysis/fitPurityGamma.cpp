@@ -53,6 +53,10 @@ int main( int argc, char* argv[] ) {
     regionsSet = regionsSet_tmp;
   }
 
+
+  TH1::AddDirectory(kFALSE);
+
+
   MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/data.root", "gammaCR" );
 
   MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templates" );
