@@ -173,8 +173,9 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
 
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
-    float mcMatchId = myTree.gamma_mcMatchId[0];
-    if( prompt  && mcMatchId!=22 ) continue;
+    int mcMatchId = myTree.gamma_mcMatchId[0];
+
+    if( prompt  && !(mcMatchId==22 || mcMatchId==7) ) continue;
     if( !prompt && mcMatchId!=0  ) continue;
 
     thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
