@@ -82,9 +82,9 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  //std::string regionsSet = "13TeV_inclusive";
+  std::string regionsSet = "13TeV_inclusive";
   //std::string regionsSet = "13TeV_CSA14";
-  std::string regionsSet = "13TeV_onlyHT";
+  //std::string regionsSet = "13TeV_onlyHT";
   //std::string regionsSet = "13TeV_CSA14_noMT";
 
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
@@ -269,7 +269,7 @@ MT2Analysis<MT2Estimate> computeYield( const MT2Sample& sample, const std::strin
     MT2Estimate* thisEstimate = analysis.get( ht, njets, nbjets, met, minMTBMet, mt2 );
     if( thisEstimate==0 ) continue;
 
-    std::cout << myTree.evt << std::endl;
+    //std::cout << myTree.evt << std::endl;
     thisEstimate->yield->Fill(mt2, weight );
 
     
