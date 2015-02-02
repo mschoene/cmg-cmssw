@@ -132,8 +132,12 @@ void MT2EstimateTree::getShit( TFile* file, const std::string& path ) {
 
   MT2Estimate::getShit(file, path);
 
+  tree = (TTree*)file->Get(Form("%s/%s", path.c_str(), tree->GetName()));
+
+  this->initTree();
 
 }
+
 
 
 void MT2EstimateTree::write() const {
