@@ -9,13 +9,20 @@
 #include "../interface/MT2Analysis.h"
 #include "../interface/MT2Region.h"
 #include "../interface/MT2Estimate.h"
+#include "../interface/MT2EstimateTree.h"
 #include "../interface/MT2DrawTools.h"
 
 
 
 
+float lumi = 5.;
+
+
+
 void compareRegions( const std::string& outputdir, std::vector<MT2Region> regions, MT2Analysis<MT2Estimate>* analysis, const std::string& suffix="" );
-void drawComparison( const std::string& outputdir, const std::string& plotName, MT2Region region, MT2Analysis<MT2Estimate>* ana1, const std::string& legendName1, MT2Analysis<MT2Estimate>* ana2=0, const std::string& legendName2="" );
+void drawComparison( const std::string& outputdir, std::string plotName, const std::string& axisName, const std::string& units, MT2Region region, MT2Analysis<MT2Estimate>* ana1, const std::string& legendName1, MT2Analysis<MT2Estimate>* ana2=0, const std::string& legendName2="" );
+void drawHistos( const std::string& outputdir, std::string plotName, const std::string& axisName, const std::string& units, const MT2Region& region, TH1D* h1_ana1, const std::string& legendName1, TH1D* h1_ana2=0, const std::string& legendName2=""  );
+void drawFromTree( const std::string& outputdir, const std::string& varName, int nBins, float xMin, float xMax, const std::string& axisName, const std::string& units, MT2Region region, MT2Analysis<MT2EstimateTree>* ana1, const std::string& legendName1, MT2Analysis<MT2EstimateTree>* ana2=0, const std::string& legendName2="" );
 
 
 int main( int argc, char* argv[] ) {
@@ -33,16 +40,17 @@ int main( int argc, char* argv[] ) {
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
   MT2Analysis<MT2Estimate>* zgammaRatio = MT2Analysis<MT2Estimate>::readFromFile(dir + "/mc.root", "ZgammaRatio");
-  MT2Analysis<MT2Estimate>* zinv = MT2Analysis<MT2Estimate>::readFromFile(dir + "/mc.root", "Zinv");
+  MT2Analysis<MT2EstimateTree>* zinv = MT2Analysis<MT2EstimateTree>::readFromFile(dir + "/mc.root", "Zinv");
   MT2Analysis<MT2Estimate>* zinvEstimate = MT2Analysis<MT2Estimate>::readFromFile(dir + "/MT2ZinvEstimate.root");
-  MT2Analysis<MT2Estimate>* gammaJet = MT2Analysis<MT2Estimate>::readFromFile(dir + "/mc.root", "gammaJet");
+  MT2Analysis<MT2EstimateTree>* gammaJet = MT2Analysis<MT2EstimateTree>::readFromFile(dir + "/mc.root", "gammaJet");
 
   std::set<MT2Region> regions = zinv->getRegions();
 
   for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
-    drawComparison( outputdir, "closure"    , *iR, zinv, "Z#rightarrow#nu#nu (MC)", zinvEstimate, "Z Invisible Estimate" );
-    drawComparison( outputdir, "Z_vs_gamma" , *iR, zinv, "Z#rightarrow#nu#nu", gammaJet, "#gamma+jet" );
-    drawComparison( outputdir, "ZgammaRatio", *iR, zgammaRatio, "Z#rightarrow#nu#nu / #gamma+jet" );
+    drawComparison( outputdir, "closure"             , "M_{T2}", "GeV", *iR, (MT2Analysis<MT2Estimate>*)zinv, "Z#rightarrow#nu#nu (MC)", zinvEstimate, "Z Invisible Estimate" );
+    //drawComparison( outputdir, "Z_vs_gamma"          , "M_{T2}", "GeV", *iR, (MT2Analysis<MT2Estimate>*)zinv, "Z#rightarrow#nu#nu", (MT2Analysis<MT2Estimate>*)gammaJet, "#gamma+jet" );
+    //drawComparison( outputdir, "ZgammaRatio"         , "M_{T2}", "GeV", *iR, zgammaRatio, "Z#rightarrow#nu#nu / #gamma+jet" );
+    drawFromTree  ( outputdir, "ptV", 100, 0., 1500., "p_{T}(V)", "GeV", *iR, zinv, "Z#rightarrow#nu#nu", gammaJet, "#gamma+jet" );
   }
 
 
@@ -188,43 +196,33 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
 
 
 
-void drawComparison( const std::string& outputdir, const std::string& plotName, MT2Region region, MT2Analysis<MT2Estimate>* ana1, const std::string& legendName1, MT2Analysis<MT2Estimate>* ana2, const std::string& legendName2 ) {
+void drawComparison( const std::string& outputdir, std::string plotName, const std::string& axisName, const std::string& units, MT2Region region, MT2Analysis<MT2Estimate>* ana1, const std::string& legendName1, MT2Analysis<MT2Estimate>* ana2, const std::string& legendName2 ) {
 
 
   TH1D* h1_ana1 = ana1->get( region )->yield;
-  TH1D* h1_ana2;
+  TH1D* h1_ana2 = 0;
   if( ana2!=0 ) h1_ana2 = ana2->get( region )->yield;
 
-  TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
-  c1->cd();
-  TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
-  c1_log->SetLogy();
 
-  float xMin = h1_ana1->GetXaxis()->GetXmin();
-  float xMax = h1_ana1->GetXaxis()->GetXmax();
-  float yMax1 = h1_ana1->GetMaximum()*1.5;
-  float yMax2 = (ana2!=0) ? h1_ana2->GetMaximum()*1.5 : 0.;
-  float yMax = (yMax1>yMax2) ? yMax1 : yMax2;
-  if( ana1->getName()=="ZgammaRatio" ) yMax=2.;
-  
-  TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax );
-  h2_axes->SetXTitle("M_{T2} [GeV]");
-  h2_axes->SetYTitle("Entries");
+  drawHistos( outputdir, plotName, axisName, units, region, h1_ana1, legendName1, h1_ana2, legendName2 );
 
-  TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, xMin, xMax, 10, 0.01, 50.*yMax );
-  h2_axes_log->SetXTitle("M_{T2} [GeV]");
-  h2_axes_log->SetYTitle("Entries");
-
-  c1->cd();
-  h2_axes->Draw();
-
-  c1_log->cd();
-  h2_axes_log->Draw("");
+}
 
 
-  bool isClosurePlot = ana2!=0 && ana2->getName()=="ZinvEstimate";
 
-  if( ana2!=0 ) {
+
+void drawHistos( const std::string& outputdir, std::string plotName, const std::string& axisName, const std::string& units, const MT2Region& region, TH1D* h1_ana1, const std::string& legendName1, TH1D* h1_ana2, const std::string& legendName2  ) {
+
+
+  bool use_lumi = true;
+
+  TString ana1_name(h1_ana1->GetName());
+  TString ana2_name;
+  if( h1_ana2!=0 ) ana2_name = TString(h1_ana2->GetName());
+  bool isClosurePlot = h1_ana2!=0 && ana2_name.Contains("ZinvEstimate");
+  bool isRatioPlot = ana1_name.Contains("Ratio");
+
+  if( h1_ana2!=0 ) {
 
     if( isClosurePlot ) {
 
@@ -260,40 +258,103 @@ void drawComparison( const std::string& outputdir, const std::string& plotName, 
   }
 
 
+  TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
+  c1->cd();
+  TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
+  c1_log->SetLogy();
+
+  float xMin = h1_ana1->GetXaxis()->GetXmin();
+  float xMax = h1_ana1->GetXaxis()->GetXmax();
+  float yMax1 = h1_ana1->GetMaximum()*1.5;
+  float yMax2 = (h1_ana2!=0) ? h1_ana2->GetMaximum()*1.5 : 0.;
+  float yMax = (yMax1>yMax2) ? yMax1 : yMax2;
+  if( isRatioPlot ) {
+    yMax=2.;
+    plotName = "ratio_" + plotName;
+    use_lumi = false;
+  }
+  
+  TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax );
+  if( units!="" )
+    h2_axes->SetXTitle(Form("%s [%s]", axisName.c_str(), units.c_str()) );
+  else
+    h2_axes->SetXTitle(axisName.c_str());
+  if( h1_ana2!=0 )
+    h2_axes->SetYTitle("Entries");
+  else
+    h2_axes->SetYTitle(legendName1.c_str());
+
+  TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, xMin, xMax, 10, 0.01, 50.*yMax );
+  if( units!="" )
+    h2_axes_log->SetXTitle(Form("%s [%s]", axisName.c_str(), units.c_str()) );
+  else
+    h2_axes_log->SetXTitle(axisName.c_str());
+  if( h1_ana2!=0 )
+    h2_axes_log->SetYTitle("Entries");
+  else
+    h2_axes_log->SetYTitle(legendName1.c_str());
+
+  c1->cd();
+  h2_axes->Draw();
+
+  c1_log->cd();
+  h2_axes_log->Draw("");
+
   bool jetCuts = region.sigRegion()->getName() != "j2toInf_b0toInf";
 
   int nEntries = 2;
-  if( ana2!=0 ) nEntries++;
+  if( h1_ana2!=0 ) nEntries++;
   if( jetCuts!=0 ) nEntries++;
 
 
   TLegend* legend;
-  if( jetCuts ) legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "#splitline{%s,  %s}{%s}", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str(), region.sigRegion()->getNiceName().c_str() ) );
-  else          legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "%s,  %s", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str()) );
-  legend->SetTextSize(0.038);
-  legend->SetTextFont(42);
-  legend->SetFillColor(0);
-  if( isClosurePlot ) legend->AddEntry( h1_ana1, legendName1.c_str(), "L" );
-  else                legend->AddEntry( h1_ana1, legendName1.c_str(), "P" );
-  if( ana2!=0 ) legend->AddEntry( h1_ana2, legendName2.c_str(), "P" );
+  if( h1_ana2!=0 ) {
+    if( jetCuts ) legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "#splitline{%s,  %s}{%s}", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str(), region.sigRegion()->getNiceName().c_str() ) );
+    else          legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "%s,  %s", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str()) );
+    legend->SetTextSize(0.038);
+    legend->SetTextFont(42);
+    legend->SetFillColor(0);
+    if( isClosurePlot ) legend->AddEntry( h1_ana1, legendName1.c_str(), "L" );
+    else                legend->AddEntry( h1_ana1, legendName1.c_str(), "P" );
+    legend->AddEntry( h1_ana2, legendName2.c_str(), "P" );
+  }
 
 
-  TPaveText* labelTop = MT2DrawTools::getLabelTop();
+  TPaveText* labelTop;
+  if( use_lumi )
+    labelTop = MT2DrawTools::getLabelTop(lumi);
+  else
+    labelTop = MT2DrawTools::getLabelTop();
 
+  TLine* line_one = new TLine( xMin, 1., xMax, 1. );
 
   c1->cd();
-  if( isClosurePlot ) h1_ana1->Draw("histo same");
-  else                h1_ana1->Draw("p same");
-  if( ana2!=0 ) h1_ana2->Draw("p same");
-  legend->Draw("same");
+  if( isClosurePlot ) { 
+    h1_ana1->Draw("histo same");
+  } else {
+    h1_ana1->Draw("p same");
+  }
+  if( isRatioPlot )
+    line_one->Draw("same");
+  if( h1_ana2!=0 ) {
+    h1_ana2->Draw("p same");
+    legend->Draw("same");
+  }
   labelTop->Draw("same");
   gPad->RedrawAxis();
 
   c1_log->cd();
-  if( isClosurePlot ) h1_ana1->Draw("histo same");
-  else                h1_ana1->Draw("p same");
-  if( ana2!=0 ) h1_ana2->Draw("p same");
-  legend->Draw("same");
+  if( isClosurePlot ) { 
+    h1_ana1->Draw("histo same");
+  } else {
+    h1_ana1->Draw("p same");
+  }
+  if( isRatioPlot )
+    line_one->Draw("same");
+  if( h1_ana2!=0 ) {
+    h1_ana2->Draw("p same");
+    legend->Draw("same");
+  }
   labelTop->Draw("same");
   gPad->RedrawAxis();
 
@@ -311,7 +372,48 @@ void drawComparison( const std::string& outputdir, const std::string& plotName, 
   delete h2_axes;
   delete h2_axes_log;
 
+  if( isClosurePlot ) {
+
+    TH1D* h1_ratio = new TH1D( *h1_ana1 );
+    h1_ratio->SetName(Form("h1_Ratio_vs_%s", plotName.c_str()));
+    h1_ratio->Divide( h1_ana2 );
+
+    drawHistos( outputdir, plotName, axisName, units, region, h1_ratio, std::string( legendName1 + " / " + legendName2 ) ); 
+
+  }
+    
+    
 }
 
 
 
+
+
+void drawFromTree( const std::string& outputdir, const std::string& varName, int nBins, float xMin, float xMax, const std::string& axisName, const std::string& units, MT2Region region, MT2Analysis<MT2EstimateTree>* ana1, const std::string& legendName1, MT2Analysis<MT2EstimateTree>* ana2, const std::string& legendName2 )  {
+
+  // need this = true here. love these root features.
+  TH1F::AddDirectory(kTRUE);
+
+  TH1D* h1_ana1 = new TH1D( Form("h1_%s", ana1->getName().c_str()), "", nBins, xMin, xMax );
+  h1_ana1->Sumw2();
+  TH1D* h1_ana2 = new TH1D( Form("h1_%s", ana2->getName().c_str()), "", nBins, xMin, xMax );
+  h1_ana2->Sumw2();
+
+  ana1->get( region )->tree->Project( h1_ana1->GetName(), varName.c_str(), "weight" );
+  ana2->get( region )->tree->Project( h1_ana2->GetName(), varName.c_str(), "weight" );
+
+  drawHistos( outputdir, varName, axisName, units, region, h1_ana1, legendName1, h1_ana2, legendName2 );
+
+  TH1D* h1_ratio = new TH1D( *h1_ana1 );
+  h1_ratio->SetName(Form("h1_Ratio_vs_%s", varName.c_str()));
+  h1_ratio->Divide( h1_ana2 );
+  drawHistos( outputdir, varName, axisName, units, region, h1_ratio, "Z#rightarrow#nu#nu / #gamma+jet" );
+
+
+  delete h1_ana1;
+  delete h1_ana2;
+
+  // setting back to false
+  TH1F::AddDirectory(kFALSE);
+
+}
