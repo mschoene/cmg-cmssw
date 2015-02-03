@@ -68,13 +68,13 @@ int main() {
     thisPurityMC->SetLineWidth( 2 );
 
     TH2D* axes = new TH2D( "axes", "", 10, thisPurityMC->GetXaxis()->GetXmin(), thisPurityMC->GetXaxis()->GetXmax(), 10, 0., 1. );
-    axes->SetXTitle( "MT_{2} [GeV]");
+    axes->SetXTitle( "M_{T2} [GeV]");
     axes->SetYTitle( "Photon Purity" );
     axes->Draw("");
 
     thisPurityMC->Draw("same");
 
-    TLegend* legend = new TLegend( 0.55, 0.2, 0.9, 0.2+0.06*(fits.size()+1.) );
+    TLegend* legend = new TLegend( 0.175, 0.2, 0.65, 0.2+0.06*(fits.size()+1.) );
     legend->SetTextSize(0.038); 
     legend->SetFillColor(0);
     legend->AddEntry( thisPurityMC, "MC Purity", "L" );
@@ -98,7 +98,7 @@ int main() {
     labelTop->Draw("same");
 
     std::vector<std::string> regionNames = iR->getNiceNames();
-    TPaveText* labelRegion = new TPaveText( 0.23, 0.2, 0.48, 0.35, "brNDC" );
+    TPaveText* labelRegion = new TPaveText( 0.57, 0.2, 0.92, 0.35, "brNDC" );
     labelRegion->SetTextSize(0.034); 
     labelRegion->SetFillColor(0);
     for( unsigned i=0; i<regionNames.size(); ++i ) labelRegion->AddText( regionNames[i].c_str() );
