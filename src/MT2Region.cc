@@ -42,7 +42,7 @@ MT2HTRegion::MT2HTRegion( const std::string& name ) {
   }
 
 
-  int htMin(-1), htMax(-1), metMin(0);
+  int htMin(-1), htMax(-1);
 
   char htMax_char[100];
   sscanf( parts[0].c_str(), "HT%dto%s", &htMin, htMax_char);
@@ -53,13 +53,9 @@ MT2HTRegion::MT2HTRegion( const std::string& name ) {
     sscanf( parts[0].c_str(), "HT%dto%d", &htMin, &htMax);
 
 
-  if( parts.size()==2 )  // also a met cut
-    sscanf( parts[1].c_str(), "met%d", &metMin);
-  
-
   this->htMin  = htMin;
   this->htMax  = htMax;
-  this->metMin = metMin;
+  this->metMin = (htMin<999.) ? 200. : 30.;
 
 }
 
@@ -90,10 +86,7 @@ std::string MT2HTRegion::getName() const {
   if( htMax==-1 ) htMax_str = "Inf";
 
   char n[512];
-  if( metMin > 0. )
-    sprintf( n, "HT%.0fto%s_met%.0f", htMin, htMax_str.c_str(), metMin );
-  else
-    sprintf( n, "HT%.0fto%s", htMin, htMax_str.c_str() );
+  sprintf( n, "HT%.0fto%s", htMin, htMax_str.c_str() );
   std::string n_str(n);
 
   return n_str;
@@ -101,7 +94,7 @@ std::string MT2HTRegion::getName() const {
 }
 
 
-std::vector< std::string > MT2HTRegion::getNiceNames() const {
+std::string MT2HTRegion::getNiceName() const {
 
   std::string htMax_str(Form("%.0f", htMax));
   char htPart[500];
@@ -111,16 +104,8 @@ std::vector< std::string > MT2HTRegion::getNiceNames() const {
     sprintf( htPart, "%.0f < H_{T} < %.0f GeV", htMin, htMax );
   std::string htPart_str(htPart);
 
-  char metPart[200];
-  if( metMin>0. )
-    sprintf( metPart, "E_{T}^{miss} > %.0f GeV", metMin );
-  std::string metPart_str(metPart);
-
-  std::vector< std::string > niceNames;
-  niceNames.push_back(htPart_str);
-  if( metPart_str!="" ) niceNames.push_back(metPart);
  
-  return niceNames;
+  return htPart_str;
 
 }
 
@@ -187,24 +172,35 @@ MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
 
   int jMin(-1), jMax(-1);
 
-  char jMax_char[100];
-  sscanf( parts[0].c_str(), "j%dto%s", &jMin, jMax_char);
-  std::string jMax_str(jMax_char);
-  if( jMax_str=="Inf" ) 
-    jMax = -1;
-  else
-    sscanf( parts[0].c_str(), "j%dto%d", &jMin, &jMax);
+  if( parts[0].size()<= 3 ) {
+    sscanf( parts[0].c_str(), "j%d", &jMin );
+    jMax = jMin;
+  } else {
+    char jMax_char[100];
+    sscanf( parts[0].c_str(), "j%dto%s", &jMin, jMax_char);
+    std::string jMax_str(jMax_char);
+    if( jMax_str=="Inf" ) 
+      jMax = -1;
+    else
+      sscanf( parts[0].c_str(), "j%dto%d", &jMin, &jMax);
+  }
 
 
   int bMin(-1), bMax(-1);
 
-  char bMax_char[100];
-  sscanf( parts[1].c_str(), "b%dto%s", &bMin, bMax_char);
-  std::string bMax_str(bMax_char);
-  if( bMax_str=="Inf" ) 
-    bMax = -1;
-  else
-    sscanf( parts[1].c_str(), "b%dto%d", &bMin, &bMax);
+  if( parts[1].size()<= 3 ) {
+    sscanf( parts[1].c_str(), "b%d", &bMin );
+    bMax = bMin;
+  } else {
+    char bMax_char[100];
+    sscanf( parts[1].c_str(), "b%dto%s", &bMin, bMax_char);
+    std::string bMax_str(bMax_char);
+    if( bMax_str=="Inf" ) 
+      bMax = -1;
+    else
+      sscanf( parts[1].c_str(), "b%dto%d", &bMin, &bMax);
+  }
+
 
   nJetsMin  = jMin;
   nJetsMax  = jMax;
@@ -212,29 +208,12 @@ MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
   nBJetsMax = bMax;
   
   
+  mtCut = "";
+  if( parts.size()>2 ) mtCut = parts[2];
 
-  mtMax  = -1.;
-  inBox = true;
-  
-  if( parts.size()>2 ) {
-    TString mtPart(parts[2]);
-    if( mtPart.BeginsWith("NOT") ) {
-      sscanf( parts[2].c_str(), "NOTmt%f", &mtMax );
-      inBox = false;
-    } else {
-      sscanf( parts[2].c_str(), "mt%f", &mtMax );
-      inBox = true;
-    }
-  }
-
-  mt2Min = -1.;
-  mt2Max = -1.;
-  if( parts.size()>3 ) {
-    char mt2Max_char[100];
-    sscanf( parts[3].c_str(), "mtt%fto%s", &mt2Min, mt2Max_char );
-    std::string mt2Max_str(mt2Max_char);
-    if( mt2Max_str!="Inf" )
-      sscanf( parts[3].c_str(), "mtt%fto%f", &mt2Min, &mt2Max );
+  if( mtCut!="" && mtCut!="loMT" && mtCut!="hiMT" ) {
+    std::cout << "[MT2SignalRegion::MT2SignalRegion] ERROR! Unkown mtCut '" << mtCut << "'!" << std::endl;
+    exit(3535);
   }
 
 
@@ -243,7 +222,7 @@ MT2SignalRegion::MT2SignalRegion( const std::string& name ) {
 
 
 
-MT2SignalRegion::MT2SignalRegion(int njmin, int njmax, int nbmin, int nbmax, float mtMaxCut, float mt2MinCut, float mt2MaxCut, bool insideBox ) {
+MT2SignalRegion::MT2SignalRegion(int njmin, int njmax, int nbmin, int nbmax, const std::string& mtcut ) {
 
   nJetsMin = njmin;
   nJetsMax = njmax;
@@ -251,11 +230,7 @@ MT2SignalRegion::MT2SignalRegion(int njmin, int njmax, int nbmin, int nbmax, flo
   nBJetsMax = nbmax;
   if( nJetsMin<nBJetsMin ) nJetsMin = nBJetsMin;
 
-  mtMax  = mtMaxCut;
-  mt2Min = mt2MinCut;
-  mt2Max = mt2MaxCut;
-
-  inBox = insideBox;
+  mtCut = mtcut;
 
 }
 
@@ -269,11 +244,7 @@ MT2SignalRegion::MT2SignalRegion( const MT2SignalRegion& rhs ) {
   nBJetsMin = rhs.nBJetsMin;
   nBJetsMax = rhs.nBJetsMax;
 
-  mtMax  = rhs.mtMax;
-  mt2Min = rhs.mt2Min;
-  mt2Max = rhs.mt2Max;
-
-  inBox = rhs.inBox;
+  mtCut = rhs.mtCut;
 
 }
 
@@ -284,10 +255,28 @@ std::string MT2SignalRegion::getName() const {
   std::string jString = getSingleJetString( "j", nJetsMin,  nJetsMax  );
   std::string bString = getSingleJetString( "b", nBJetsMin, nBJetsMax );
 
-  std::string nameMt = getNameMt();
-
   std::string signal_region = jString + "_" + bString;
-  if( nameMt!="" ) signal_region += "_" + nameMt;
+  if( mtCut!="" ) signal_region += "_" + mtCut;
+
+  return signal_region;
+
+}
+
+
+
+std::string MT2SignalRegion::getSingleJetString( const std::string& prefix, int n_min , int n_max ) const {
+
+  std::string n_min_str(Form("%d", n_min));
+  std::string n_max_str(Form("%d", n_max));
+
+  if( n_max<0 ) n_max_str="Inf";
+  if( n_min<0 ) n_min_str=(prefix=="j") ? "2" : "0";
+  
+  std::string signal_region;
+  if( n_min_str!=n_max_str )
+    signal_region = prefix + n_min_str + "to" +  n_max_str;
+  else
+    signal_region = prefix + n_min_str;
 
   return signal_region;
 
@@ -303,8 +292,8 @@ std::string MT2SignalRegion::getNiceName() const {
 
   std::string niceName = niceName_j + ",  " + niceName_b;
 
-  if( mtMax>0. && inBox  ) niceName += " (low M_{T})";
-  if( mtMax>0. && !inBox ) niceName += " (high M_{T})";
+  if( mtCut=="loMT"  ) niceName += " (low M_{T})";
+  else if( mtCut=="hiMT" ) niceName += " (high M_{T})";
 
   return niceName;
 
@@ -331,90 +320,36 @@ std::string MT2SignalRegion::getNiceJetName( const std::string& pedix, int nmin,
 
 
 
-std::string MT2SignalRegion::getSingleJetString( const std::string& suffix, int n_min , int n_max ) const {
-
-  std::string n_min_str(Form("%d", n_min));
-  std::string n_max_str(Form("%d", n_max));
-
-  if( n_max<0 ) n_max_str="Inf";
-  if( n_min<0 ) n_min_str=(suffix=="j") ? "2" : "0";
-  
-  std::string signal_region(Form("%s%sto%s", suffix.c_str(), n_min_str.c_str(), n_max_str.c_str()));
-
-  return signal_region;
-
-}
-
-
-std::string MT2SignalRegion::getNameMt() const {
-
-  std::string name="";
-
-  if( mtMax>=0. ) {
-  
-    char mtPart_char[300];
-    sprintf( mtPart_char, "mt%.0f", mtMax );
-    std::string mtPart(mtPart_char);
-    if( !inBox ) mtPart = "NOT" + mtPart;
-
-    std::string mt2Part="";
-    if( mt2Min>=0. ) {
-      char mt2Part_char[200];
-      if( mt2Max<0. ) 
-        sprintf( mt2Part_char, "mtt%.0ftoInf", mt2Min );
-      else
-        sprintf( mt2Part_char, "mtt%.0fto%.0f", mt2Min, mt2Max );
-      std::string mt2Part_tmp(mt2Part_char);
-      mt2Part = mt2Part_tmp;
-    }
-
-    name = mtPart;
-    if( mt2Part!="" ) name += "_" + mt2Part;
-
-  }
-    
-  return name;
-
-}
-
 
 
 
 bool MT2SignalRegion::operator==( const MT2SignalRegion& rhs ) const {
 
-  return ( nJetsMin==rhs.nJetsMin && nJetsMax==rhs.nJetsMax && nBJetsMin==rhs.nBJetsMin && nBJetsMax==rhs.nBJetsMax && mtMax==rhs.mtMax && mt2Min==rhs.mt2Min && mt2Max==rhs.mt2Max && inBox==rhs.inBox );
+  return ( nJetsMin==rhs.nJetsMin && nJetsMax==rhs.nJetsMax && nBJetsMin==rhs.nBJetsMin && nBJetsMax==rhs.nBJetsMax && mtCut==rhs.mtCut );
  
 }
 
 
 bool MT2SignalRegion::operator!=( const MT2SignalRegion& rhs ) const {
 
-  return ( nJetsMin!=rhs.nJetsMin || nJetsMax!=rhs.nJetsMax || nBJetsMin!=rhs.nBJetsMin || nBJetsMax!=rhs.nBJetsMax || mtMax!=rhs.mtMax || mt2Min!=rhs.mt2Min || mt2Max!=rhs.mt2Max || inBox!=rhs.inBox );
+  return ( nJetsMin!=rhs.nJetsMin || nJetsMax!=rhs.nJetsMax || nBJetsMin!=rhs.nBJetsMin || nBJetsMax!=rhs.nBJetsMax || mtCut!=rhs.mtCut );
  
 }
 
 
 bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
 
-  if( nJetsMin!=rhs.nJetsMin ) {
-    return nJetsMin<rhs.nJetsMin;
+  if( nBJetsMin!=rhs.nBJetsMin) {
+    return nBJetsMin<rhs.nBJetsMin;
   } else {
-    if( nBJetsMin!=rhs.nBJetsMin) {
-      return nBJetsMin<rhs.nBJetsMin;
+    if( nJetsMin!=rhs.nJetsMin ) {
+      return nJetsMin<rhs.nJetsMin;
     } else {
-      if( inBox!=rhs.inBox ) {
-        return inBox;
-      } else {
-        if( mtMax!=rhs.mtMax ) {
-          return mtMax<rhs.mtMax;
-        } else {
-          if( mt2Min!=rhs.mt2Min ) {
-            return mt2Min<rhs.mt2Min;
-          } else {
-            if( mt2Max!=rhs.mt2Max ) {
-              return mt2Max<rhs.mt2Max;
-            }
-          }
+      if( mtCut!=rhs.mtCut ) {
+        if( mtCut=="loMT" ) {
+          return true;
+        } else { 
+          return false;
         }
       }
     }
@@ -435,10 +370,7 @@ bool MT2SignalRegion::isIncluded( MT2SignalRegion* sigRegion ) const {
   if( nJetsMax > sigRegion->nJetsMax && sigRegion->nJetsMax>=0 ) returnBool = false;
   if( nBJetsMin < sigRegion->nBJetsMin ) returnBool = false;
   if( nBJetsMax > sigRegion->nBJetsMax && sigRegion->nBJetsMax>=0 ) returnBool = false;
-  if( mtMax > sigRegion->mtMax && sigRegion->mtMax>=0. ) returnBool = false;
-  if( mt2Min < sigRegion->mt2Min && sigRegion->mt2Min>=0. ) returnBool = false;
-  if( mt2Max > sigRegion->mt2Max && sigRegion->mt2Max>=0. ) returnBool = false;
-  if( inBox != sigRegion->inBox ) returnBool = false;
+  if( sigRegion->mtCut != "" && mtCut != sigRegion->mtCut ) return false;
 
   return returnBool;
 
@@ -604,7 +536,8 @@ void MT2Region::getBins( int &nBins, double*& bins) const {
 
 std::vector< std::string > MT2Region::getNiceNames() const {
 
-  std::vector< std::string > names = htRegion_->getNiceNames();
+  std::vector< std::string > names;
+  names.push_back(htRegion_->getNiceName());
   names.push_back(sigRegion_->getNiceName());
 
   return names;

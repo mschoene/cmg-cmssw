@@ -28,11 +28,26 @@ void drawFromTree( const std::string& outputdir, const std::string& varName, int
 int main( int argc, char* argv[] ) {
 
 
-  std::string dir = "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14";
-  if( argc>1 ) {
-    std::string dir_tmp(argv[1]); 
-    dir = dir_tmp;
+  std::string samples = "CSA14_Zinv";
+
+  if( argc==1 ) {
+    std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
+    std::cout << "  13TeV_CSA14" << std::endl;
+    std::cout << "  13TeV_onlyHT" << std::endl;
+    std::cout << "  13TeV_onlyJets" << std::endl;
+    std::cout << "  13TeV_inclusive" << std::endl;
+    exit(101);
   }
+
+
+  std::string regionsSet = "13TeV_CSA14";
+  if( argc>1 ) {
+    std::string regionsSet_tmp(argv[1]); 
+    regionsSet = regionsSet_tmp;
+  }
+
+  std::string dir = "ZinvEstimateFromGamma_" + samples + "_" + regionsSet;
+
 
   MT2DrawTools::setStyle();
 
@@ -43,16 +58,6 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2EstimateTree>* zinv = MT2Analysis<MT2EstimateTree>::readFromFile(dir + "/mc.root", "Zinv");
   MT2Analysis<MT2Estimate>* zinvEstimate = MT2Analysis<MT2Estimate>::readFromFile(dir + "/MT2ZinvEstimate.root");
   MT2Analysis<MT2EstimateTree>* gammaJet = MT2Analysis<MT2EstimateTree>::readFromFile(dir + "/mc.root", "gammaJet");
-
-  std::set<MT2Region> regions = zinv->getRegions();
-
-  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
-    drawComparison( outputdir, "closure"             , "M_{T2}", "GeV", *iR, (MT2Analysis<MT2Estimate>*)zinv, "Z#rightarrow#nu#nu (MC)", zinvEstimate, "Z Invisible Estimate" );
-    //drawComparison( outputdir, "Z_vs_gamma"          , "M_{T2}", "GeV", *iR, (MT2Analysis<MT2Estimate>*)zinv, "Z#rightarrow#nu#nu", (MT2Analysis<MT2Estimate>*)gammaJet, "#gamma+jet" );
-    //drawComparison( outputdir, "ZgammaRatio"         , "M_{T2}", "GeV", *iR, zgammaRatio, "Z#rightarrow#nu#nu / #gamma+jet" );
-    drawFromTree  ( outputdir, "ptV", 100, 0., 1500., "p_{T}(V)", "GeV", *iR, zinv, "Z#rightarrow#nu#nu", gammaJet, "#gamma+jet" );
-  }
-
 
 
   std::vector<MT2Region> r_lowHT_vs_njet;
@@ -100,6 +105,18 @@ int main( int argc, char* argv[] ) {
 
 
 
+  std::set<MT2Region> regions = zinv->getRegions();
+
+  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+    drawComparison( outputdir, "closure"             , "M_{T2}", "GeV", *iR, (MT2Analysis<MT2Estimate>*)zinv, "Z#rightarrow#nu#nu (MC)", zinvEstimate, "Z Invisible Estimate" );
+    //drawComparison( outputdir, "Z_vs_gamma"          , "M_{T2}", "GeV", *iR, (MT2Analysis<MT2Estimate>*)zinv, "Z#rightarrow#nu#nu", (MT2Analysis<MT2Estimate>*)gammaJet, "#gamma+jet" );
+    //drawComparison( outputdir, "ZgammaRatio"         , "M_{T2}", "GeV", *iR, zgammaRatio, "Z#rightarrow#nu#nu / #gamma+jet" );
+    drawFromTree  ( outputdir, "ptV", 100, 0., 1500., "p_{T}(V)", "GeV", *iR, zinv, "Z#rightarrow#nu#nu", gammaJet, "#gamma+jet" );
+  }
+
+
+
+
 
   return 0;
 
@@ -134,13 +151,13 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
   c1->cd();
 
-  TH2D* h2_axes = new TH2D( "axes", "", 10, 200., 1000., 10, 0., 1.5 );
+  TH2D* h2_axes = new TH2D( "axes", "", 10, 200., 1500., 10, 0., 1.5 );
   h2_axes->SetXTitle( "M_{T2} [GeV]" );
   h2_axes->SetYTitle( "Z/#gamma Ratio" );
   h2_axes->Draw("");
   
 
-  std::string legendTitle = (loopOnHT) ? regions[0].sigRegion()->getNiceName() : regions[0].htRegion()->getNiceNames()[0];
+  std::string legendTitle = (loopOnHT) ? regions[0].sigRegion()->getNiceName() : regions[0].htRegion()->getNiceName();
 
   TLegend* legend = new TLegend( 0.2, 0.9-0.07*regions.size(), 0.55, 0.9, legendTitle.c_str() );
   legend->SetTextSize(0.038);
@@ -151,8 +168,10 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
 
     MT2Estimate* thisEstimate = analysis->get( regions[i] );
     if( thisEstimate==0 ) {
-      std::cout << "ERROR! Didn't find estimate for region: " << regions[i].getName() << " ! Exiting." << std::endl;
-      exit(119);
+      std::cout << "-> Didn't find estimate for region: " << regions[i].getName() << " ! Skipping." << std::endl;
+      delete c1;
+      delete h2_axes;
+      return;
     }
 
     TH1D* thisRatio = thisEstimate->yield;
@@ -168,7 +187,7 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
     thisRatio->Draw("same" );
 
     if( loopOnHT )
-      legend->AddEntry( thisRatio, regions[i].htRegion()->getNiceNames()[0].c_str(), "PL" );
+      legend->AddEntry( thisRatio, regions[i].htRegion()->getNiceName().c_str(), "PL" );
     else
       legend->AddEntry( thisRatio, regions[i].sigRegion()->getNiceName().c_str(), "PL" );
 
@@ -309,8 +328,8 @@ void drawHistos( const std::string& outputdir, std::string plotName, const std::
 
   TLegend* legend;
   if( h1_ana2!=0 ) {
-    if( jetCuts ) legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "#splitline{%s,  %s}{%s}", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str(), region.sigRegion()->getNiceName().c_str() ) );
-    else          legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "%s,  %s", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str()) );
+    if( jetCuts ) legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "#splitline{%s}{%s}", region.htRegion()->getNiceName().c_str(), region.sigRegion()->getNiceName().c_str() ) );
+    else          legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "%s", region.htRegion()->getNiceName().c_str()) );
     legend->SetTextSize(0.038);
     legend->SetTextFont(42);
     legend->SetFillColor(0);

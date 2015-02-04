@@ -27,15 +27,23 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string regions = "13TeV_CSA14";
+  std::string regionsSet = "13TeV_CSA14";
 
   MT2DrawTools::setStyle();
 
-  std::string outputdir = "Plots_GammaTemplates_" + samples + "_" + regions;
+  std::string outputdir = "Plots_GammaTemplates_" + samples + "_" + regionsSet;
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
-  MT2Analysis<MT2EstimateZinvGamma>* templates_gJet = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples +  "_" + regions + ".root", "templates");
-  MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples + "_" + regions + ".root", "templates_qcd");
+  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples +  "_" + regionsSet + ".root", "templates");
+  MT2Analysis<MT2EstimateZinvGamma>* templatesFake = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesFake");
+
+
+  //std::set<MT2Region> regions = templatesPrompt->getRegions();
+
+  //for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+  //  drawComparison( outputdir, "gJet_vs_qcd", "Photon Charged Isolation", "GeV", *iR, templatesPrompt, "Prompts in #gamma+Jet", templatesFake, "Prompts in QCD");
+  //}
+
   
 
   std::vector<MT2Region> r_lowHT_vs_njet;
@@ -44,8 +52,8 @@ int main( int argc, char* argv[] ) {
   r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 200., 2,  3, 1, 1 ) );
   r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 200., 4, -1, 1, 1 ) );
 
-  compareRegions( outputdir, r_lowHT_vs_njet, templates_gJet, true  );
-  compareRegions( outputdir, r_lowHT_vs_njet, templates_qcd , false );
+  compareRegions( outputdir, r_lowHT_vs_njet, templatesPrompt, true  );
+  compareRegions( outputdir, r_lowHT_vs_njet, templatesFake , false );
 
   std::vector<MT2Region> r_medHT_vs_njet;
   r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 2,  3, 0, 0 ) );
@@ -53,8 +61,8 @@ int main( int argc, char* argv[] ) {
   r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 2,  3, 1, 1 ) );
   r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 4, -1, 1, 1 ) );
 
-  compareRegions( outputdir, r_medHT_vs_njet, templates_gJet, true );
-  compareRegions( outputdir, r_medHT_vs_njet, templates_qcd, false );
+  compareRegions( outputdir, r_medHT_vs_njet, templatesPrompt, true );
+  compareRegions( outputdir, r_medHT_vs_njet, templatesFake, false );
 
   std::vector<MT2Region> r_highHT_vs_njet;
   r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 2,  3, 0, 0 ) );
@@ -62,8 +70,8 @@ int main( int argc, char* argv[] ) {
   r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 2,  3, 1, 1 ) );
   r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 4, -1, 1, 1 ) );
 
-  compareRegions( outputdir, r_highHT_vs_njet, templates_gJet, true );
-  compareRegions( outputdir, r_highHT_vs_njet, templates_qcd, false );
+  compareRegions( outputdir, r_highHT_vs_njet, templatesPrompt, true );
+  compareRegions( outputdir, r_highHT_vs_njet, templatesFake, false );
 
 
   //std::vector<MT2Region> r_medHT_vs_nbjet;
@@ -71,7 +79,7 @@ int main( int argc, char* argv[] ) {
   //r_medHT_vs_nbjet.push_back( MT2Region( 575., 1000., 200., 2, 3, 1, 1 ) );
   //r_medHT_vs_nbjet.push_back( MT2Region( 575., 1000., 200., 2, 3, 2, 2, 200., 200., 400., false ) );
 
-  //compareRegions( outputdir, r_medHT_vs_nbjet, templates_gJet, templates_qcd, "_vsb" );
+  //compareRegions( outputdir, r_medHT_vs_nbjet, templatesPrompt, templatesFake, "_vsb" );
 
 
   //std::vector<MT2Region> r_highHT_vs_nbjet;
@@ -79,7 +87,7 @@ int main( int argc, char* argv[] ) {
   //r_highHT_vs_nbjet.push_back( MT2Region( 1000., -1., 30., 2, 3, 1, 1 ) );
   //r_highHT_vs_nbjet.push_back( MT2Region( 1000., -1., 30., 2, 3, 2, 2, 200., 200., 400., false ) );
 
-  //compareRegions( outputdir, r_highHT_vs_nbjet, templates_gJet, templates_qcd, "_vsb" );
+  //compareRegions( outputdir, r_highHT_vs_nbjet, templatesPrompt, templatesFake, "_vsb" );
 
 
   std::vector<MT2Region> r_vsHT;
@@ -88,8 +96,8 @@ int main( int argc, char* argv[] ) {
   r_vsHT.push_back( MT2Region( 575., 1000., 200., 2, 3, 0, 0 ) );
   r_vsHT.push_back( MT2Region( 1000., -1. ,  30., 2, 3, 0, 0 ) );
 
-  compareRegions( outputdir, r_vsHT, templates_gJet, true );
-  compareRegions( outputdir, r_vsHT, templates_qcd , false );
+  compareRegions( outputdir, r_vsHT, templatesPrompt, true );
+  compareRegions( outputdir, r_vsHT, templatesFake , false );
 
 
 
@@ -99,8 +107,8 @@ int main( int argc, char* argv[] ) {
   r_vsHT2.push_back( MT2Region( 575., 1000., 200., 4, -1, 0, 0 ) );
   r_vsHT2.push_back( MT2Region( 1000., -1. ,  30., 4, -1, 0, 0 ) );
 
-  compareRegions( outputdir, r_vsHT2, templates_gJet, true );
-  compareRegions( outputdir, r_vsHT2, templates_qcd , false );
+  compareRegions( outputdir, r_vsHT2, templatesPrompt, true );
+  compareRegions( outputdir, r_vsHT2, templatesFake , false );
 
   return 0;
 
@@ -155,7 +163,7 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   c1_log->cd();
   h2_axes_log->Draw("");
 
-  std::string legendTitle = (loopOnHT) ? regions[0].sigRegion()->getNiceName() : regions[0].htRegion()->getNiceNames()[0];
+  std::string legendTitle = (loopOnHT) ? regions[0].sigRegion()->getNiceName() : regions[0].htRegion()->getNiceName();
 
   TLegend* legend = new TLegend( 0.45, 0.9-0.08*regions.size(), 0.9, 0.9, legendTitle.c_str() );
   legend->SetTextSize(0.038);
@@ -180,7 +188,7 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
     thisTempl->DrawNormalized("same" );
 
     if( loopOnHT )
-      legend->AddEntry( thisTempl, regions[i].htRegion()->getNiceNames()[0].c_str(), "L" );
+      legend->AddEntry( thisTempl, regions[i].htRegion()->getNiceName().c_str(), "L" );
     else
       legend->AddEntry( thisTempl, regions[i].sigRegion()->getNiceName().c_str(), "L" );
 

@@ -211,15 +211,17 @@ int main( int argc, char* argv[] ) {
 
          if( isig==-1 )
            std::cout << "-> Created template datacard: " << datacardName << std::endl;
-         else
-           std::cout << "-> Created datacards in " << path << std::endl;
-       
 
       } // for bins
 
     } // for regions
 
-  } // for regions
+
+    if( isig>=0 )
+      std::cout << "-> Created datacards in " << path << std::endl;
+       
+
+  } // for signals
 
   return 0;
 

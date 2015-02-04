@@ -162,12 +162,12 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
     signalRegions_.insert(MT2SignalRegion(2,  3, 1,  1)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 1,  1)); 
-    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400.)); 
-    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400.)); 
-    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400.)); 
-    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400., false)); 
-    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400., false)); 
-    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400., false)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, "loMT" ));
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, "loMT" ));
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, "loMT" ));
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, "hiMT" ));
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, "hiMT" ));
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, "hiMT" ));
 
   } else if( regionsSet=="13TeV_CSA14_noMT" ) {
 
@@ -199,12 +199,12 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
     signalRegions_.insert(MT2SignalRegion(2,  3, 1,  1)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 1,  1)); 
-    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400.)); 
-    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400.)); 
-    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400.)); 
-    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, 200., 200., 400., false)); 
-    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, 200., 200., 400., false)); 
-    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, 200., 200., 400., false)); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, "loMT" )); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, "loMT" )); 
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, "loMT" )); 
+    signalRegions_.insert(MT2SignalRegion(2,  3, 2,  2, "hiMT" )); 
+    signalRegions_.insert(MT2SignalRegion(4, -1, 2,  2, "hiMT" )); 
+    signalRegions_.insert(MT2SignalRegion(3, -1, 3, -1, "hiMT" )); 
 
   } else {
 
@@ -349,23 +349,33 @@ MT2Region* MT2Analysis<T>::getRegion( float ht, int njets, int nbjets, float met
     if( nbjetsmin>=0 && nbjets<nbjetsmin ) continue;
     if( nbjetsmax>=0 && nbjets>nbjetsmax ) continue;
 
-    float mtMax   = (*it)->region->sigRegion()->mtMax;
-    float mt2Min  = (*it)->region->sigRegion()->mt2Min;
-    float mt2Max  = (*it)->region->sigRegion()->mt2Max;
-    bool  inBox   = (*it)->region->sigRegion()->inBox;
+    std::string mtCut = (*it)->region->sigRegion()->mtCut;
 
-    if( mtMax>0. && mt>0. ) {
-    
-      bool isInsideBox_mt = mt<mtMax;
+    if( mtCut == "loMT" ) {
 
-      bool isInsideBox_mt2 = true;
-      if( mt2Min>0. && mt2>=0. )  {
-        if( mt2<mt2Min )              isInsideBox_mt2 = false;
-        if( mt2Max>0. && mt2>mt2Max ) isInsideBox_mt2 = false;
-      }
+      float mtMin = 0.;
+      float mtMax = 200.;
+      float mt2Min = 200.;
+      float mt2Max = 400.;
+      bool insideMT  = ( mt  >= mtMin && mt <= mtMax );
+      bool insideMT2 = ( mt2 >= mt2Min && mt2 <= mt2Max );
+      bool insideBox = insideMT && insideMT2;
+      if( !insideBox ) continue;
+ 
+    } else if( mtCut == "hiMT" ) {
 
-      if( inBox  && !(isInsideBox_mt&&isInsideBox_mt2) ) continue;
-      if( !inBox &&  (isInsideBox_mt&&isInsideBox_mt2) ) continue;
+      float mtMin = 0.;
+      float mtMax = 200.;
+      float mt2Min = 200.;
+      float mt2Max = 400.;
+      bool insideMT  = ( mt  >= mtMin && mt <= mtMax );
+      bool insideMT2 = ( mt2 >= mt2Min && mt2 <= mt2Max );
+      bool insideBox = insideMT && insideMT2;
+      if( insideBox ) continue; // outside
+
+    } else if( mtCut != "" ) {
+
+      std::cout << "WARNING! Unknown mtCut '" << mtCut << "'! Will ignore." << std::endl;
 
     }
 
@@ -944,9 +954,8 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
   
   for ( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) { // loop on ht regions
    
-    std::vector < std::string > htRegionName = iHT->getNiceNames();
-    for ( unsigned i=0; i < htRegionName.size(); ++i )
-      ofs_file << htRegionName[i] << std::endl;
+    std::string htRegionName = iHT->getNiceName();
+    ofs_file << htRegionName << std::endl;
 
     
     for ( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ){
@@ -978,7 +987,6 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
 
 template<class T> 
 std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName, const std::string& matchExpression, bool verbose ) {
-
 
   TFile* file = TFile::Open(fileName.c_str());
  

@@ -59,8 +59,8 @@ int main( int argc, char* argv[] ) {
 
   MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/data.root", "gammaCR" );
 
-  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templates" );
-  MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templates_qcd" );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesFake" );
 
 
   std::string outputdir = "PurityFits_" + samples + "_" + regionsSet;

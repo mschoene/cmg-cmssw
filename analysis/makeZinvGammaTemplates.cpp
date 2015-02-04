@@ -66,22 +66,27 @@ int main( int argc, char* argv[] ) {
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   
-  MT2Analysis<MT2EstimateZinvGamma>* templates = new MT2Analysis<MT2EstimateZinvGamma>( "templates", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* templatesFake   = new MT2Analysis<MT2EstimateZinvGamma>( "templatesFake", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt_qcd   = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt_qcd", regionsSet );
+
+
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
-    (*templates) += (computeYield( samples_gammaJet[i], regionsSet, true ));
+    (*templatesPrompt) += (computeYield( samples_gammaJet[i], regionsSet, true  ));
+    //(*templatesFake)   += (computeYield( samples_gammaJet[i], regionsSet, false ));
   }
 
-
   
-  MT2Analysis<MT2EstimateZinvGamma>* templates_qcd = new MT2Analysis<MT2EstimateZinvGamma>( "templates_qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-    (*templates_qcd) += (computeYield( samples_qcd[i], regionsSet, false ));
+    (*templatesPrompt_qcd) += (computeYield( samples_qcd[i], regionsSet, true  ));
+    (*templatesFake)   += (computeYield( samples_qcd[i], regionsSet, false ));
   }
 
 
   std::string templateFileName = "gammaTemplates_" + samplesFileName + "_" + regionsSet + ".root";
-  templates->writeToFile(templateFileName);
-  templates_qcd->addToFile(templateFileName);
+  templatesPrompt->writeToFile(templateFileName);
+  templatesFake->addToFile(templateFileName);
+  templatesPrompt_qcd->writeToFile(templateFileName);
 
 
   return 0;
