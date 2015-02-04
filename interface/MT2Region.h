@@ -20,7 +20,7 @@ class MT2HTRegion {
   // univocal identifier:
   std::string getName() const;
 
-  std::vector< std::string > getNiceNames() const;
+  std::string getNiceName() const;
 
 
   float htMin;
@@ -47,7 +47,7 @@ class MT2SignalRegion {
  public:
 
   MT2SignalRegion( const std::string& name );
-  MT2SignalRegion( int njmin, int njmax, int nbmin, int nbmax, float mtMaxCut=-1., float mt2MinCut=-1., float mt2MaxCut=-1., bool insideBox=true );
+  MT2SignalRegion( int njmin, int njmax, int nbmin, int nbmax, const std::string& mtCut="" );
   MT2SignalRegion( const MT2SignalRegion& rhs );
 
   ~MT2SignalRegion() {};
@@ -63,11 +63,7 @@ class MT2SignalRegion {
   int nBJetsMin;
   int nBJetsMax;
 
-  float mtMax;
-  float mt2Min;
-  float mt2Max;
-
-  bool inBox; 
+  std::string mtCut; // can be "", "loMT", or "hiMT"
 
   bool operator==( const MT2SignalRegion& rhs ) const;
   bool operator!=( const MT2SignalRegion& rhs ) const;
@@ -79,7 +75,7 @@ class MT2SignalRegion {
  private:
 
   std::string getNiceJetName( const std::string& pedix, int nmin, int nmax ) const;
-  std::string getSingleJetString( const std::string& suffix, int n_min , int n_max=-1 ) const;
+  std::string getSingleJetString( const std::string& prefix, int n_min , int n_max=-1 ) const;
 
 };
 
@@ -101,9 +97,9 @@ class MT2Region {
     sigRegion_ = new MT2SignalRegion(sigRegion);
   }
 
-  MT2Region( float htMin, float htMax, float metMin, int njmin, int njmax, int nbmin, int nbmax, float mtMaxCut=-1., float mt2MinCut=-1., float mt2MaxCut=-1., bool insideBox=true ) {
+  MT2Region( float htMin, float htMax, float metMin, int njmin, int njmax, int nbmin, int nbmax, const std::string& mtCut="" ) {
     htRegion_ = new MT2HTRegion( htMin, htMax, metMin );
-    sigRegion_ = new MT2SignalRegion( njmin, njmax, nbmin, nbmax, mtMaxCut, mt2MinCut, mt2MaxCut, insideBox );
+    sigRegion_ = new MT2SignalRegion( njmin, njmax, nbmin, nbmax, mtCut );
   }
 
   ~MT2Region() {};
@@ -134,10 +130,7 @@ class MT2Region {
   int nJetsMax()  const { return sigRegion_->nJetsMax; };
   int nBJetsMin() const { return sigRegion_->nBJetsMin; };
   int nBJetsMax() const { return sigRegion_->nBJetsMax; };
-  float mtMax()   const { return sigRegion_->mtMax ; };
-  float mt2Min()  const { return sigRegion_->mt2Min; };
-  float mt2Max()  const { return sigRegion_->mt2Max; };
-  bool inBox() const { return sigRegion_->inBox; };
+  std::string mtCut() const {return sigRegion_->mtCut; };
 
 
   bool operator==( const MT2Region& rhs ) const {
