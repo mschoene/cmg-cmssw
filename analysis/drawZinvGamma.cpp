@@ -157,7 +157,7 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   h2_axes->Draw("");
   
 
-  std::string legendTitle = (loopOnHT) ? regions[0].sigRegion()->getNiceName() : regions[0].htRegion()->getNiceNames()[0];
+  std::string legendTitle = (loopOnHT) ? regions[0].sigRegion()->getNiceName() : regions[0].htRegion()->getNiceName();
 
   TLegend* legend = new TLegend( 0.2, 0.9-0.07*regions.size(), 0.55, 0.9, legendTitle.c_str() );
   legend->SetTextSize(0.038);
@@ -187,7 +187,7 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
     thisRatio->Draw("same" );
 
     if( loopOnHT )
-      legend->AddEntry( thisRatio, regions[i].htRegion()->getNiceNames()[0].c_str(), "PL" );
+      legend->AddEntry( thisRatio, regions[i].htRegion()->getNiceName().c_str(), "PL" );
     else
       legend->AddEntry( thisRatio, regions[i].sigRegion()->getNiceName().c_str(), "PL" );
 
@@ -328,8 +328,8 @@ void drawHistos( const std::string& outputdir, std::string plotName, const std::
 
   TLegend* legend;
   if( h1_ana2!=0 ) {
-    if( jetCuts ) legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "#splitline{%s,  %s}{%s}", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str(), region.sigRegion()->getNiceName().c_str() ) );
-    else          legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "%s,  %s", region.htRegion()->getNiceNames()[0].c_str(), region.htRegion()->getNiceNames()[1].c_str()) );
+    if( jetCuts ) legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "#splitline{%s}{%s}", region.htRegion()->getNiceName().c_str(), region.sigRegion()->getNiceName().c_str() ) );
+    else          legend = new TLegend( 0.35, 0.9-(float)nEntries*0.06, 0.93, 0.9, Form( "%s", region.htRegion()->getNiceName().c_str()) );
     legend->SetTextSize(0.038);
     legend->SetTextFont(42);
     legend->SetFillColor(0);
