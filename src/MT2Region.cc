@@ -71,11 +71,11 @@ MT2HTRegion::MT2HTRegion( const MT2HTRegion& rhs ) {
 
 
 
-MT2HTRegion::MT2HTRegion( float ahtMin, float ahtMax, float ametMin ) {
+MT2HTRegion::MT2HTRegion( float ahtMin, float ahtMax ) {
 
   htMin = ahtMin;
   htMax = ahtMax;
-  metMin = ametMin;
+  metMin = (htMin<999.) ? 200. : 30.;
 
 }
 
