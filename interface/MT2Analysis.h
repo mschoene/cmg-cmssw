@@ -9,7 +9,8 @@
 #include "MT2Region.h"
 #include "TFile.h"
 
-#include "../interface/mt2_float.h"
+#include "../interface/mt2.h"
+//#include "../interface/mt2_float.h"
 
 
 
@@ -121,9 +122,9 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
 
   if( regionsSet=="8TeV" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,  750., 200. ));
-    htRegions_.insert(MT2HTRegion( 750., 1200.,  30. ));
-    htRegions_.insert(MT2HTRegion(1200.,   -1.,  30. ));
+    htRegions_.insert(MT2HTRegion( 450.,  750. ));
+    htRegions_.insert(MT2HTRegion( 750., 1200. ));
+    htRegions_.insert(MT2HTRegion(1200.,   -1. ));
 
     signalRegions_.insert(MT2SignalRegion(2, 2, 0, 0));  // 2j0b
     signalRegions_.insert(MT2SignalRegion(2, 2, 1, 2));  // 2j1to2b
@@ -137,14 +138,14 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
 
   } else if( regionsSet=="13TeV_inclusive" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,  -1., 200.));
+    htRegions_.insert(MT2HTRegion( 450.,  -1. ));
     signalRegions_.insert(MT2SignalRegion(2, -1, 0, -1)); 
 
   } else if( regionsSet=="13TeV" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,   575., 0.));
-    htRegions_.insert(MT2HTRegion( 575.,  1000., 0.));
-    htRegions_.insert(MT2HTRegion(1000.,    -1., 0.));
+    htRegions_.insert(MT2HTRegion( 450.,   575.));
+    htRegions_.insert(MT2HTRegion( 575.,  1000.));
+    htRegions_.insert(MT2HTRegion(1000.,    -1.));
 
     signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
@@ -154,9 +155,9 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
 
   } else if( regionsSet=="13TeV_CSA14" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,   575., 200.));
-    htRegions_.insert(MT2HTRegion( 575.,  1000., 200.));
-    htRegions_.insert(MT2HTRegion(1000.,    -1.,  30.));
+    htRegions_.insert(MT2HTRegion( 450.,   575.));
+    htRegions_.insert(MT2HTRegion( 575.,  1000.));
+    htRegions_.insert(MT2HTRegion(1000.,    -1.));
 
     signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
@@ -171,9 +172,9 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
 
   } else if( regionsSet=="13TeV_CSA14_noMT" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,   575., 200.));
-    htRegions_.insert(MT2HTRegion( 575.,  1000., 200.));
-    htRegions_.insert(MT2HTRegion(1000.,    -1.,  30.));
+    htRegions_.insert(MT2HTRegion( 450.,   575.));
+    htRegions_.insert(MT2HTRegion( 575.,  1000.));
+    htRegions_.insert(MT2HTRegion(1000.,    -1.));
 
     signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
@@ -185,15 +186,15 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
 
   } else if( regionsSet=="13TeV_onlyHT" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,   575., 200.));
-    htRegions_.insert(MT2HTRegion( 575.,  1000., 200.));
-    htRegions_.insert(MT2HTRegion(1000.,    -1.,  30.));
+    htRegions_.insert(MT2HTRegion( 450.,   575.));
+    htRegions_.insert(MT2HTRegion( 575.,  1000.));
+    htRegions_.insert(MT2HTRegion(1000.,    -1.));
 
     signalRegions_.insert(MT2SignalRegion(2,  -1, 0,  -1)); 
 
   } else if( regionsSet=="13TeV_onlyJets" ) {
 
-    htRegions_.insert(MT2HTRegion( 450.,   -1., 30.));
+    htRegions_.insert(MT2HTRegion( 450.,   -1.));
 
     signalRegions_.insert(MT2SignalRegion(2,  3, 0,  0)); 
     signalRegions_.insert(MT2SignalRegion(4, -1, 0,  0)); 
