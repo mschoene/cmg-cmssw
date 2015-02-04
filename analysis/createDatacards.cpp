@@ -111,6 +111,16 @@ int main( int argc, char* argv[] ) {
        TH1D* this_zinv = zinv->get(*iR)->yield;
        TH1D* this_llep = llep->get(*iR)->yield;
 
+       float N_llep_CR = this_llep->Integral();
+       if( iR->mtCut()!="" ) { 
+         if( iR->mtCut()=="loMT" ) {
+           N_llep_CR += llep->get(MT2Region(iR->htMin(), iR->htMax(), iR->nJetsMin(), iR->nJetsMax(), iR->nBJetsMin(), iR->nBJetsMax(), "hiMT"))->yield->Integral();
+         } else {
+           N_llep_CR += llep->get(MT2Region(iR->htMin(), iR->htMax(), iR->nJetsMin(), iR->nJetsMax(), iR->nBJetsMin(), iR->nBJetsMax(), "loMT"))->yield->Integral();
+         }
+       }
+           
+
        TH1D* this_signal = 0;
        if( isig>-1 ) this_signal = signals[isig]->get(*iR)->yield;
 
@@ -198,8 +208,7 @@ int main( int argc, char* argv[] ) {
            datacard << this_llep->GetName() << "_bin_" << iBin << " lnN - - - " << 1.+err_llep_uncorr << std::endl;
 
            // correlated within the SR (stat-like):
-           int N_llep = (int)(this_llep->Integral());
-           float llep_stat_err = (N_llep>0) ? 1./sqrt((float)N_llep) : 0.;
+           float llep_stat_err = (N_llep_CR>0) ? 1./sqrt((float)N_llep_CR) : 0.;
            float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
            llep_tot_err+=1.;
            datacard << "syst_llep_corr_" << iR->getName() << "  lnN   - - - " << llep_tot_err << std::endl;
