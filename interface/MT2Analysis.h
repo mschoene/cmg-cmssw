@@ -6,11 +6,12 @@
 #include <set>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "MT2Region.h"
 #include "TFile.h"
 
-//#include "../interface/mt2.h"
-#include "../interface/mt2_float.h"
+#include "../interface/mt2.h"
+//#include "../interface/mt2_float.h"
 
 
 
@@ -953,6 +954,9 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
   std::set<MT2HTRegion> htRegions = this->getHTRegions();
   std::set<MT2SignalRegion> sigRegions = this->getSignalRegions();
   
+  //std::vector<MT2SignalRegion> sigRegions_vec(sigRegions.begin(), sigRegions.end());  
+  //std::sort( sigRegions_vec.begin(), sigRegions_vec.end() );
+
   for ( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) { // loop on ht regions
    
     std::string htRegionName = iHT->getNiceName();

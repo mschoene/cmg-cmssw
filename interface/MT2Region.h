@@ -68,6 +68,9 @@ class MT2SignalRegion {
   bool operator==( const MT2SignalRegion& rhs ) const;
   bool operator!=( const MT2SignalRegion& rhs ) const;
   bool operator<( const MT2SignalRegion& rhs ) const;
+  bool operator>( const MT2SignalRegion& rhs ) const;
+  bool operator<=( const MT2SignalRegion& rhs ) const;
+  bool operator>=( const MT2SignalRegion& rhs ) const;
 
   bool isIncluded( MT2SignalRegion* sigRegion ) const;
   
