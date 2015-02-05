@@ -339,11 +339,13 @@ bool MT2SignalRegion::operator!=( const MT2SignalRegion& rhs ) const {
 
 bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
 
-  if( nBJetsMin!=rhs.nBJetsMin) {
-    return nBJetsMin<rhs.nBJetsMin;
+  if( nJetsMax!=rhs.nJetsMax) {
+    if( rhs.nJetsMax == -1 )
+      return true;
+    else return nJetsMax<rhs.nJetsMax;
   } else {
-    if( nJetsMin!=rhs.nJetsMin ) {
-      return nJetsMin<rhs.nJetsMin;
+    if( nBJetsMin!=rhs.nBJetsMin ) {
+      return nBJetsMin<rhs.nBJetsMin;
     } else {
       if( mtCut!=rhs.mtCut ) {
         if( mtCut=="loMT" ) {
@@ -358,9 +360,46 @@ bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
   return false;
 
 }
+//bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
+//
+//  if( nBJetsMin!=rhs.nBJetsMin) {
+//    return nBJetsMin<rhs.nBJetsMin;
+//  } else {
+//    if( nJetsMin!=rhs.nJetsMin ) {
+//      return nJetsMin<rhs.nJetsMin;
+//    } else {
+//      if( mtCut!=rhs.mtCut ) {
+//        if( mtCut=="loMT" ) {
+//          return true;
+//        } else { 
+//          return false;
+//        }
+//      }
+//    }
+//  }
+//
+//  return false;
+//
+//}
 
 
+bool MT2SignalRegion::operator>( const MT2SignalRegion& rhs ) const {
+  
+  return !( (*this) < rhs );
 
+}
+
+bool MT2SignalRegion::operator>=( const MT2SignalRegion& rhs ) const {
+
+  return ( (*this) > rhs || (*this) == rhs );
+
+}
+
+bool MT2SignalRegion::operator<=( const MT2SignalRegion& rhs ) const {
+
+  return ( (*this) < rhs || (*this) == rhs );
+
+}
 
 bool MT2SignalRegion::isIncluded( MT2SignalRegion* sigRegion ) const {
 
