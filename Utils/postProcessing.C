@@ -25,14 +25,14 @@ using namespace std;
 
 int postProcessing(string inputFile="input.root",
 		   string outputFile="output.root",
-		   string treeName="treeProducerSusyFullHad",
+		   string treeName="tree",
 		   float filter=1.0, float kfactor=1.0, float xsec=-1.0, int id=1 );
 
 
 int run(string sampleFileName="samples_50ns_miniaod.txt",
-	string treeName="treeProducerSusyFullHad", 
-	string inputPath = "/scratch/mmasciov/12December/TOPOSTPROCESS/", 
-	string outputPath = "/scratch/mmasciov/12December/POSTPROCESS/",  
+	string treeName="tree", 
+	string inputPath = "/scratch/mmasciov/CSA14v2/ToPostProcess/", 
+	string outputPath = "/scratch/mmasciov/CSA14v2/PostProcess/",  
 	string fileExtension = "_post.root"){
   
 //int run(string sampleFileName="samples_50ns_miniaod.txt",
