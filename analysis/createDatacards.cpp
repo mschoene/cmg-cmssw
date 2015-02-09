@@ -186,14 +186,14 @@ int main( int argc, char* argv[] ) {
 
        if( this_llep->GetBinContent(iBin)>0. ) {
 
-         // uncorrelated:
-         datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
-
          // correlated within the SR (stat-like):
          float llep_stat_err = (N_llep_CR>0) ? 1./sqrt((float)N_llep_CR) : 0.;
          float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
          llep_tot_err+=1.;
          datacard << "llep_CRstat_" << iR->getName() << "  lnN   - - " << llep_tot_err << " -" << std::endl;
+
+         // uncorrelated:
+         datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
 
        }
 
