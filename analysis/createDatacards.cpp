@@ -66,7 +66,7 @@ int main( int argc, char* argv[] ) {
   if( useMC_zinv )
     zinv = MT2Analysis<MT2Estimate>::readFromFile( mc_fileName, "ZJets");
   else
-    zinv = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14/MT2ZinvEstimate.root", "ZinvEstimate");
+    zinv = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14_4fb/MT2ZinvEstimate.root", "ZinvEstimate");
   zinv->setName("zinv");
   zinv->addToFile( mc_fileName, true );
 
@@ -77,164 +77,197 @@ int main( int argc, char* argv[] ) {
     MT2Analysis<MT2Estimate>* top   = MT2Analysis<MT2Estimate>::readFromFile( mc_fileName, "Top");
     llep = new MT2Analysis<MT2Estimate>( (*wjets) + (*top) );
   } else {
-    llep = MT2Analysis<MT2Estimate>::readFromFile( "MT2LostLeptEstimate.root" );
+    llep = MT2Analysis<MT2Estimate>::readFromFile( "llep_CR_PHYS14_MTbins.root" );
   }
   llep->setName( "llep" );
   llep->addToFile( mc_fileName, true );
 
 
-
-
-  std::vector<MT2Analysis<MT2Estimate>*> signals = MT2Analysis<MT2Estimate>::readAllFromFile( mc_fileName, "SMS" );
-
-
+  MT2Analysis<MT2Estimate>* llepCR = MT2Analysis<MT2Estimate>::readFromFile( "llep_CR_PHYS14_MTbins.root" );
 
 
   std::set<MT2Region> regions = data->getRegions();
 
-  for( int isig=-1; isig<(int)signals.size(); ++isig ) { // loop on signals (first iteration with isig=-1 will create the templates)
 
-    std::string path;
-    if( isig==-1 ) {
-      path = dir + "/datacard_templates";
-      system(Form("mkdir -p %s", path.c_str()));
-    } else {
-      path = dir + "/datacards_" + signals[isig]->getName();
-      system(Form("mkdir -p %s", path.c_str()));
-    }
+
+
+  // first create template datacards
+
+  std::string path_templ = dir + "/datacard_templates";
+  system(Form("mkdir -p %s", path_templ.c_str()));
+
   
+  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+
+
+     TH1D* this_data = data->get(*iR)->yield;
+     TH1D* this_qcd  = qcd ->get(*iR)->yield;
+     TH1D* this_zinv = zinv->get(*iR)->yield;
+     TH1D* this_llep = llep->get(*iR)->yield;
+     TH1D* this_llepCR = llepCR->get(*iR)->yield;
+
+     float N_llep_CR = this_llepCR->Integral();
+     if( iR->mtCut()!="" ) { 
+       if( iR->mtCut()=="loMT" ) {
+         N_llep_CR += llepCR->get(MT2Region(iR->htMin(), iR->htMax(), iR->nJetsMin(), iR->nJetsMax(), iR->nBJetsMin(), iR->nBJetsMax(), "hiMT"))->yield->Integral();
+       } else {
+         N_llep_CR += llepCR->get(MT2Region(iR->htMin(), iR->htMax(), iR->nJetsMin(), iR->nJetsMax(), iR->nBJetsMin(), iR->nBJetsMax(), "loMT"))->yield->Integral();
+       }
+     }
+         
+
+
+     for( unsigned iBin=1; iBin<this_data->GetNbinsX()+1; ++iBin ) {
+
+       //std::string binName( Form("%s_bin%d", iR->getName().c_str(), iBin) );
+       float mt2Min = this_data->GetBinLowEdge( iBin );
+       float mt2Max = this_data->GetBinLowEdge( iBin+1 );
+
+       std::string binName( Form("%s_m%.0fto%.0f", iR->getName().c_str(), mt2Min, mt2Max) );
+
+       std::string datacardName( Form("%s/datacard_%s.txt", path_templ.c_str(), binName.c_str()) );
+       ofstream datacard( datacardName.c_str() );
+
+
+       datacard << "imax 1" << std::endl;
+       datacard << "jmax 3" << std::endl;
+       datacard << "kmax *" << std::endl;
+       datacard << "-------------" << std::endl;
+       datacard << std::endl << std::endl;
+
+
+       datacard << std::endl << std::endl;
+       datacard << "bin  " << binName<< std::endl;
+       datacard << "observation  " << this_data->GetBinContent(iBin) << std::endl;
+       datacard << "-------------" << std::endl;
+       datacard << std::endl << std::endl;
+
+       // sig qcd zinv llep
+       datacard << "bin \t" << binName << "\t" << binName << "\t" << binName << "\t" << binName << std::endl;
+       datacard << "process \t sig \t zinv \t llep \t qcd" << std::endl;
+       datacard << "process \t 0 \t 1 \t 2 \t 3" << std::endl;
+       datacard << "rate \t ";
+         datacard << "XXX";
+       datacard << " \t " << this_zinv->GetBinContent(iBin) << " \t " << this_llep->GetBinContent(iBin) << " \t " << this_qcd->GetBinContent(iBin) << std::endl;
+       datacard << "-------------" << std::endl;
+
+       datacard << "sig_syst    lnN    " << 1.+err_sig_corr << " - - -" << std::endl;
+
+
+
+
+
+
+       // Z INVISIBLE SYSTEMATICS:
+
+       if( this_zinv->GetBinContent(iBin)>0. ) {
+
+         if( iR->nBJetsMin()<2 ) { // 0 and 1 btag
+
+           // correlated:
+           datacard << "zinv_ZGratio lnN   - " << 1.+err_zinv_corr << " - -" << std::endl;
+
+         }
+
+         // uncorrelated:
+         if( this_zinv->GetBinContent(iBin)>0. ) {
+           float thisError_zinv_uncorr = 1. + this_zinv->GetBinError(iBin)/this_zinv->GetBinContent(iBin);
+           std::string iname = (iR->nBJetsMin()<2) ? "CRstat" : "MC";
+           datacard << "zinv_" << iname << "_" << binName << " lnN - " << thisError_zinv_uncorr << " - -" << std::endl;
+         }
+
+
+       } // if zinv
+
+
+
+
+       // LOST LEPTON SYSTEMATICS:
+
+       if( this_llep->GetBinContent(iBin)>0. ) {
+
+         // correlated within the SR (stat-like):
+         float llep_stat_err = (N_llep_CR>0) ? 1./sqrt((float)N_llep_CR) : 0.;
+         float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
+         llep_tot_err+=1.;
+         datacard << "llep_CRstat_" << iR->getName() << "  lnN   - - " << llep_tot_err << " -" << std::endl;
+
+         // uncorrelated:
+         datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
+
+       }
+
+
+
+       // QCD SYSTEMATICS:
+
+       if( this_qcd->GetBinContent(iBin)>0. ) {
+         datacard << "qcd_syst_" << binName << " lnN - - - " << 1.+err_qcd_uncorr << std::endl;
+       }
+
+
+
+       datacard.close();
+
+       std::cout << "-> Created template datacard: " << datacardName << std::endl;
+
+    } // for bins
+
+  } // for regions
+
+
+
+
+
+  // now create datacards for all signals
+  std::vector<MT2Analysis<MT2Estimate>*> signals = MT2Analysis<MT2Estimate>::readAllFromFile( mc_fileName, "SMS" );
+
+
+  for( unsigned  isig=0; isig<signals.size(); ++isig ) { 
+
+    std::string path = dir + "/datacards_" + signals[isig]->getName();
+    system(Form("mkdir -p %s", path.c_str()));
+
+
     for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
 
-
-       TH1D* this_data = data->get(*iR)->yield;
-       TH1D* this_qcd  = qcd ->get(*iR)->yield;
-       TH1D* this_zinv = zinv->get(*iR)->yield;
-       TH1D* this_llep = llep->get(*iR)->yield;
-
-       float N_llep_CR = this_llep->Integral();
-       if( iR->mtCut()!="" ) { 
-         if( iR->mtCut()=="loMT" ) {
-           N_llep_CR += llep->get(MT2Region(iR->htMin(), iR->htMax(), iR->nJetsMin(), iR->nJetsMax(), iR->nBJetsMin(), iR->nBJetsMax(), "hiMT"))->yield->Integral();
-         } else {
-           N_llep_CR += llep->get(MT2Region(iR->htMin(), iR->htMax(), iR->nJetsMin(), iR->nJetsMax(), iR->nBJetsMin(), iR->nBJetsMax(), "loMT"))->yield->Integral();
-         }
-       }
-           
-
-       TH1D* this_signal = 0;
-       if( isig>-1 ) this_signal = signals[isig]->get(*iR)->yield;
+      TH1D* this_signal = signals[isig]->get(*iR)->yield;
 
 
-       for( unsigned iBin=1; iBin<this_data->GetNbinsX()+1; ++iBin ) {
+      for( unsigned iBin=1; iBin<this_signal->GetNbinsX()+1; ++iBin ) {
 
-         std::string binName( Form("%s_bin%d", iR->getName().c_str(), iBin) );
+        float mt2Min = this_signal->GetBinLowEdge( iBin );
+        float mt2Max = this_signal->GetBinLowEdge( iBin+1 );
 
-         std::string datacardName( Form("%s/datacard_%s.txt", path.c_str(), binName.c_str()) );
-         ofstream datacard( datacardName.c_str() );
+        std::string binName( Form("%s_m%.0fto%.0f", iR->getName().c_str(), mt2Min, mt2Max) );
 
+        std::string templateDatacard( Form("%s/datacard_%s.txt", path_templ.c_str(), binName.c_str()) );
 
-         datacard << "imax 1" << std::endl;
-         datacard << "jmax 3" << std::endl;
-         datacard << "kmax *" << std::endl;
-         datacard << "-------------" << std::endl;
-         datacard << std::endl << std::endl;
+        std::string newDatacard( Form("%s/datacard_%s.txt", path.c_str(), binName.c_str()) );
 
 
-         datacard << std::endl << std::endl;
-         datacard << "bin  " << binName<< std::endl;
-         datacard << "observation  " << this_data->GetBinContent(iBin) << std::endl;
-         datacard << "-------------" << std::endl;
-         datacard << std::endl << std::endl;
+        float sig = this_signal->GetBinContent(iBin);
 
-         // sig qcd zinv llep
-         datacard << "bin \t" << binName << "\t" << binName << "\t" << binName << "\t" << binName << std::endl;
-         datacard << "process \t ";
-         if( this_signal!=0 )
-           datacard << signals[isig]->getName();
-         else
-           datacard << "sig ";
-         datacard << " \t qcd \t zinv \t llep" << std::endl;
-         datacard << "process \t 0 \t 1 \t 2 \t 3" << std::endl;
-         datacard << "rate \t ";
-         if( this_signal!=0 )
-           datacard << this_signal->GetBinContent(iBin);
-         else
-           datacard << "XXX";
-         datacard << " \t " << this_qcd->GetBinContent(iBin) << " \t " << this_zinv->GetBinContent(iBin) << " \t " << this_llep->GetBinContent(iBin) << std::endl;
-         datacard << "-------------" << std::endl;
+        std::string sedCommand( Form("sed 's/XXX/%f/g' %s > %s", sig, templateDatacard.c_str(), newDatacard.c_str()) );
+        system( sedCommand.c_str() );
 
-         datacard << "syst_sig    lnN    " << 1.+err_sig_corr << " - - -" << std::endl;
-
-
-
-
-
-         // QCD SYSTEMATICS:
-
-         if( this_qcd->GetBinContent(iBin)>0. ) {
-           datacard << this_qcd->GetName() << "_bin_" << iBin << " lnN - " << 1.+err_qcd_uncorr << " - -" << std::endl;
-         }
-
-
-
-         // Z INVISIBLE SYSTEMATICS:
-
-         if( this_zinv->GetBinContent(iBin)>0. ) {
-
-           if( iR->nBJetsMin()<2 ) { // 0 and 1 btag
-
-             // correlated:
-             datacard << "syst_zinv_ratio lnN \t - - " << 1.+err_zinv_corr << " -" << std::endl;
-
-           }
-
-           // uncorrelated:
-           if( this_zinv->GetBinContent(iBin)>0. ) {
-             float thisError_zinv_uncorr = 1. + this_zinv->GetBinError(iBin)/this_zinv->GetBinContent(iBin);
-             datacard << this_zinv->GetName() << "_bin_" << iBin << " lnN  - - " << thisError_zinv_uncorr << " -" << std::endl; // this is 1/sqrt(k*N)
-           }
-
-
-         } // if zinv
-
-
-
-
-         // LOST LEPTON SYSTEMATICS:
-
-         if( this_llep->GetBinContent(iBin)>0. ) {
-
-           // uncorrelated:
-           datacard << this_llep->GetName() << "_bin_" << iBin << " lnN - - - " << 1.+err_llep_uncorr << std::endl;
-
-           // correlated within the SR (stat-like):
-           float llep_stat_err = (N_llep_CR>0) ? 1./sqrt((float)N_llep_CR) : 0.;
-           float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
-           llep_tot_err+=1.;
-           datacard << "syst_llep_corr_" << iR->getName() << "  lnN   - - - " << llep_tot_err << std::endl;
-
-         }
-
-
-         datacard.close();
-
-         if( isig==-1 )
-           std::cout << "-> Created template datacard: " << datacardName << std::endl;
 
       } // for bins
 
     } // for regions
 
-
-    if( isig>=0 )
-      std::cout << "-> Created datacards in " << path << std::endl;
+    std::cout << "-> Created datacards in " << path << std::endl;
        
-
   } // for signals
+
+
 
   return 0;
 
 } 
+
+
+
 
 
 

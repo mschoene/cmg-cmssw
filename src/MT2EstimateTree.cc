@@ -87,13 +87,54 @@ void MT2EstimateTree::addVar( MT2Analysis<MT2EstimateTree>* analysis, const std:
 }
 
 
+//void MT2EstimateTree::addVarFloat( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name ) {
+//
+//
+//  for( std::set<MT2EstimateTree*>::iterator iD=analysis->data.begin(); iD!=analysis->data.end(); ++iD ) {
+//
+//    float* x = new float();
+//    (*iD)->extraVars[name] = (size_t)x;
+//
+//    (*iD)->tree->Branch( name.c_str(), x, Form("%s/F", name.c_str()) );
+//
+//  }
+//
+//}
+
+
+
+//void MT2EstimateTree::addVarInt( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name ) {
+//
+//
+//  for( std::set<MT2EstimateTree*>::iterator iD=analysis->data.begin(); iD!=analysis->data.end(); ++iD ) {
+//
+//    int* x = new int();
+//    (*iD)->extraVars[name] = (size_t)x;
+//
+//    (*iD)->tree->Branch( name.c_str(), x, Form("%s/I", name.c_str()) );
+//
+//  }
+//
+//}
+
+
 
 void MT2EstimateTree::assignVar( const std::string& name, float value ) {
 
-  float* x = extraVars[name];
+  //&(extraVars[name]) = value;
+  float* x = (float*)extraVars[name];
   *x = value;
 
 }
+
+
+
+//void MT2EstimateTree::assignVar( const std::string& name, int value ) {
+//
+//  int* x = (int*)extraVars[name];
+//  *x = value;
+//
+//}
 
 
 
