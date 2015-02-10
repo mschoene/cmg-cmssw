@@ -21,11 +21,10 @@ MT2HTRegion::MT2HTRegion( const std::string& name ) {
 
   // this constructor parses the name
   // the name has to be passed in the format:
-  // HT[htMin]to[htMax]_met[metMin]
+  // HT[htMin]to[htMax]
   // where :
-  //   - htMin, htMax and metMin have to be integers
+  //   - htMin and htMax have to be integers
   //   - htMax is allowed to be "Inf"
-  //   - if metMax is omitted it is assumed to be 0
 
 
   std::stringstream ss(name);
@@ -36,7 +35,7 @@ MT2HTRegion::MT2HTRegion( const std::string& name ) {
   }
 
 
-  if( parts.size()!=1 && parts.size()!=2 ) {
+  if( parts.size()!=1 ) {
     std::cout << "[MT2HTRegion]::MT2HTRegion ERROR! Unrecognized MT2HTRegion name: " << name << std::endl;
     exit(455);
   }
@@ -55,9 +54,10 @@ MT2HTRegion::MT2HTRegion( const std::string& name ) {
 
   this->htMin  = htMin;
   this->htMax  = htMax;
-  this->metMin = (htMin<999.) ? 200. : 30.;
 
 }
+
+
 
 
 
@@ -65,7 +65,6 @@ MT2HTRegion::MT2HTRegion( const MT2HTRegion& rhs ) {
 
   htMin = rhs.htMin;
   htMax = rhs.htMax;
-  metMin = rhs.metMin;
   
 }
 
@@ -75,9 +74,19 @@ MT2HTRegion::MT2HTRegion( float ahtMin, float ahtMax ) {
 
   htMin = ahtMin;
   htMax = ahtMax;
-  metMin = (htMin<999.) ? 200. : 30.;
 
 }
+
+
+
+float MT2HTRegion::metMin() const {
+
+  float metMin = (htMin<999.) ? 200. : 30.;
+  return metMin;
+
+}
+
+
 
 
 std::string MT2HTRegion::getName() const {
@@ -114,14 +123,14 @@ std::string MT2HTRegion::getNiceName() const {
 
 bool MT2HTRegion::operator==( const MT2HTRegion& rhs ) const {
 
-  return ( htMin==rhs.htMin && htMax==rhs.htMax && metMin==rhs.metMin ); 
+  return ( htMin==rhs.htMin && htMax==rhs.htMax ); 
 
 }
 
 
 bool MT2HTRegion::operator!=( const MT2HTRegion& rhs ) const {
 
-  return ( htMin!=rhs.htMin || htMax!=rhs.htMax || metMin!=rhs.metMin ); 
+  return ( htMin!=rhs.htMin || htMax!=rhs.htMax ); 
 
 }
 
@@ -140,7 +149,6 @@ bool MT2HTRegion::isIncluded( MT2HTRegion* htRegion ) const {
 
   if( htMin < htRegion->htMin ) returnBool = false;
   if( htMax > htRegion->htMax && htRegion->htMax>=0. ) returnBool = false;
-  if( metMin < htRegion->metMin && htRegion->metMin>0. ) returnBool = false;
 
   return returnBool;
 
@@ -428,6 +436,42 @@ bool MT2SignalRegion::isIncluded( MT2SignalRegion* sigRegion ) const {
 //
 ////////////////////////////////////////////////////////
 
+
+
+MT2Region::MT2Region( const std::string& regionName ) {
+
+  // this constructor parses the name
+  // the name has to be passed in the format:
+  // [htRegionName]_[signalRegionName]
+
+  std::stringstream ss(regionName);
+  std::vector<std::string> parts;
+  std::string item;
+  while(std::getline(ss, item, '_')) {
+    parts.push_back(item);
+  }
+
+
+  if( parts.size()==0 ) {
+    std::cout << "[MT2Region]::MT2Region ERROR! Unrecognized MT2Region name: " << regionName << std::endl;
+    exit(459);
+  }
+
+
+  std::string htRegionName = parts[0];
+  std::string signalRegionName = "";
+  for( unsigned i=1; i<parts.size(); ++i ) {
+    if( i==1 ) signalRegionName = parts[i] + "_";
+    else if( i==parts.size()-1 ) signalRegionName += parts[i];
+    else signalRegionName = signalRegionName + parts[i] + "_";
+  }
+
+  htRegion_ = new MT2HTRegion( htRegionName );
+  sigRegion_ = new MT2SignalRegion( signalRegionName );
+
+}
+
+  
 
 
 
