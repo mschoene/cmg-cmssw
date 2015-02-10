@@ -74,8 +74,22 @@ TStyle* MT2DrawTools::setStyle() {
   style->SetNdivisions(510, "XYZ");
   style->SetPadTickX(1); // To get tick marks on the opposite side of the frame
   style->SetPadTickY(1);
+  // for histograms:
+  style->SetHistLineColor(0);
+
   style->cd();
   return style;
+
+}
+
+
+
+TPaveText* MT2DrawTools::getLabelTop( float lumi ) {
+
+  char text[300];
+  sprintf( text, "CMS Preliminary, %.1f fb^{-1} at #sqrt{s} = 13 TeV", lumi );
+  std::string text_str(text);
+  return getLabelTop(text_str);
 
 }
 

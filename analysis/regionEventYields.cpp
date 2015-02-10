@@ -3,9 +3,10 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include <cmath>
 
 
-#include "TTreeFormula.h"
+#include "TMath.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "THStack.h"
@@ -21,12 +22,16 @@
 #include "interface/MT2EstimateSyst.h"
 #include "interface/MT2DrawTools.h"
 
+#include "TRandom3.h"
+
+
 #define mt2_cxx
 #include "interface/mt2.h"
 
 
 
 bool dummyAnalysis = true;
+double lumi = 5.; // in fb-1
 
 
 
@@ -38,19 +43,22 @@ class MT2Config {
 
   std::string regionsSet()    const { return regionsSet_; };
   std::string mcSamples()     const { return mcSamples_; };
+  std::string sigSamples()     const { return sigSamples_; };
   std::string dataSamples()   const { return dataSamples_; };
   std::string lostLeptonTag() const { return lostLeptonTag_; };
   std::string qcdTag()        const { return qcdTag_; };
   std::string zinvTag()       const { return zinvTag_; };
 
   bool useMC() {
-    return mcSamples_!="";
+    bool useEstimates = lostLeptonTag_!="" && qcdTag_!="" && zinvTag_!="";
+    return !useEstimates;
   }
 
  private:
 
   std::string regionsSet_;
   std::string mcSamples_;
+  std::string sigSamples_;
   std::string dataSamples_;
   std::string lostLeptonTag_;
   std::string qcdTag_;
@@ -62,7 +70,8 @@ class MT2Config {
 
 
 
-MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet );
+void randomizePoisson( MT2Analysis<MT2EstimateSyst>* data );
+MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet, float lumi=1. );
 MT2Analysis<MT2EstimateSyst>* mergeYields( std::vector< MT2Analysis<MT2EstimateSyst> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max=-1, const std::string& legendName="" );
 
 std::vector<TH1D*> getYieldHistos( const std::string& prefix, MT2Analysis<MT2EstimateSyst>* EventYield_tot, MT2Analysis<MT2EstimateSyst>* EventYield_bg, std::ofstream& logfile );
@@ -76,17 +85,29 @@ int main( int argc, char* argv[] ) {
 
 
   if( argc!=2 ) {
-    std::cout << "USAGE: ./regionEventYields_postBabyTrees [configFileName]" << std::endl;
+    std::cout << "USAGE: ./regionEventYields [configFileName]" << std::endl;
     std::cout << "Exiting." << std::endl;
     exit(11);
   }
+
+
 
 
   std::string configFileName(argv[1]);
 
 
   std::string outputdir = "EventYields_" + configFileName;
-  if( dummyAnalysis ) outputdir += "_dummy";
+  if( dummyAnalysis ) {
+    double intpart;
+    double fracpart = modf(lumi, &intpart);
+    std::string suffix;
+    if( fracpart>0. )
+      suffix = std::string( Form("_dummy_%.0fp%.0ffb", intpart, 10.*fracpart ) );
+    else
+      suffix = std::string( Form("_dummy_%.0ffb", intpart ) );
+    outputdir += suffix;
+  }
+    
   system(Form("mkdir -p %s", outputdir.c_str()));
 
   MT2Config cfg("cfgs/" + configFileName + ".txt");
@@ -106,7 +127,7 @@ int main( int argc, char* argv[] ) {
     std::cout << std::endl << std::endl;
     std::cout << "-> Loading samples from file: " << samplesFileName << std::endl;
 
-    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName);
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1, 999); // not interested in signal here (see later)
     if( fSamples.size()==0 ) {
       std::cout << "There must be an error: samples is empty!" << std::endl;
       exit(1209);
@@ -115,24 +136,24 @@ int main( int argc, char* argv[] ) {
 
     
     std::vector< MT2Analysis<MT2EstimateSyst>* > EventYield;
-    for( unsigned i=0; i<fSamples.size(); ++i )
-      EventYield.push_back( computeYield( fSamples[i], cfg.regionsSet() ) );
+    for( unsigned i=0; i<fSamples.size(); ++i ) 
+      EventYield.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
     
-
-    system( "rm tmp.root" );
 
 
     std::cout << "-> Done looping on samples. Start merging." << std::endl;
 
     MT2Analysis<MT2EstimateSyst>* EventYield_top   = mergeYields( EventYield, cfg.regionsSet(), "Top", 300, 499 );
     MT2Analysis<MT2EstimateSyst>* EventYield_qcd   = mergeYields( EventYield, cfg.regionsSet(), "QCD", 100, 199 );
-    MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, cfg.regionsSet(), "WJets", 500, 599, "W + Jets" );
-    MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, cfg.regionsSet(), "DY_VV", 600, 899, "Other" );
+    MT2Analysis<MT2EstimateSyst>* EventYield_wjets = mergeYields( EventYield, cfg.regionsSet(), "WJets", 500, 599, "W+jets" );
+    MT2Analysis<MT2EstimateSyst>* EventYield_zjets = mergeYields( EventYield, cfg.regionsSet(), "ZJets", 600, 699, "Z+jets" );
+    //MT2Analysis<MT2EstimateSyst>* EventYield_other = mergeYields( EventYield, cfg.regionsSet(), "Diboson", 700, 899, "Other" );
 
-    bgYields.push_back( EventYield_top );
     bgYields.push_back( EventYield_qcd );
     bgYields.push_back( EventYield_wjets );
-    bgYields.push_back( EventYield_other );
+    bgYields.push_back( EventYield_zjets );
+    bgYields.push_back( EventYield_top );
+    //bgYields.push_back( EventYield_other );
 
   } else { // use data driven BG estimates
 
@@ -148,13 +169,60 @@ int main( int argc, char* argv[] ) {
 
   }
 
+  // load signal samples, if any
+  std::vector< MT2Analysis<MT2EstimateSyst>* > signals;
+  if( cfg.mcSamples()!="" ) {
+
+    std::string samplesFileName = "../samples/samples_" + cfg.mcSamples() + ".dat";
+    std::cout << std::endl << std::endl;
+    std::cout << "-> Loading signal samples from file: " << samplesFileName << std::endl;
+
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1000); // only signal (id>=1000)
 
 
-  MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( "data", cfg.regionsSet() );
+    if( fSamples.size()==0 ) {
 
+      std::cout << "No signal samples found, skipping." << std::endl;
+
+    } else {
+    
+      for( unsigned i=0; i<fSamples.size(); ++i ) 
+        signals.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
+    
+    } // if samples != 0
+
+  } // if mc samples
+
+  else if ( cfg.sigSamples()!="" ){
+
+    std::string samplesFileName = "../samples/samples_" + cfg.sigSamples() + ".dat";
+    std::cout << std::endl << std::endl;
+    std::cout << "-> Loading signal samples from file: " << samplesFileName << std::endl;
+
+    std::vector<MT2Sample> fSamples = MT2Sample::loadSamples(samplesFileName, 1000); // only signal (id>=1000)
+
+    if( fSamples.size()==0 ) {
+
+      std::cout << "No signal samples found, skipping." << std::endl;
+
+    } else {
+
+      for( unsigned i=0; i<fSamples.size(); ++i )
+        signals.push_back( computeYield( fSamples[i], cfg.regionsSet(), lumi ) );
+
+    } // if samples != 0
+    
+  } // if sig samples
+  
+
+  //MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( "data", cfg.regionsSet() );
+  MT2Analysis<MT2EstimateSyst>* data = new MT2Analysis<MT2EstimateSyst>( *(bgYields[0]) );
+  data->setName("data");
+ 
   if( dummyAnalysis ) { // use same as MC
 
-    for( unsigned i=0; i<bgYields.size(); ++i ) *data += *(bgYields[i]);
+    for( unsigned i=1; i < bgYields.size(); ++i ) (*data) += *(bgYields[i]);
+    randomizePoisson( data );
 
   } else {
 
@@ -176,127 +244,48 @@ int main( int argc, char* argv[] ) {
 
   drawYields( outputdir, data, bgYields );
 
-  return 0;
 
-}
-
-
-/*
-  //if( EventYield_allMC!=0  ) EventYield_allMC ->writeToFile( outputdir + "/yield_allMC.root"  ); 
-  //if( EventYield_topW!=0   ) EventYield_topW  ->writeToFile( outputdir + "/yield_topW.root"   ); 
-  //if( EventYield_bg!=0     ) EventYield_bg    ->writeToFile( outputdir + "/yield_bg.root"     ); 
-  //if( EventYield_data!=0   ) EventYield_data  ->writeToFile( outputdir + "/yield_data.root"   ); 
-  //if( EventYield_signal!=0 ) EventYield_signal->writeToFile( outputdir + "/yield_signal.root" ); 
-  if( EventYield_qcd!=0 ) EventYield_qcd->writeToFile( outputdir + "/yield_qcd.root" );
-
-  TFile* outfile = TFile::Open(Form("%s/EventYields_%s.root", outputdir.c_str(), sampleName.c_str()), "recreate");
-  outfile->cd();
-  
-  std::ofstream logfile;
-  logfile.open(Form("%s/EventYields_%s.txt", outputdir.c_str(), sampleName.c_str()));
-  
-
-
-  // For data yield:
-  //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_data", "", HTRegions, signalRegions, EventYield_data, EventYield_allMC, logfile );
-  
-  // For topW yield:
-  //std::vector<TH1D*> vh1_data = getYieldHistos( "EventYield_topW", "", HTRegions, signalRegions, EventYield_topW, EventYield_bg, logfile );
-  
-  // For qcd yield
-  std::vector<TH1D*> vh1_qcd = getYieldHistos( "EventYield_qcd", EventYield_qcd, 0, logfile ); 
-
-  // For signal yield:
-  //std::vector<TH1D*> vh1_signal = getYieldHistos( "EventYield_signal", EventYield_signal, 0, logfile ); 
-
-  // For all SM yield:
-  ////std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_MC", "", HTRegions, signalRegions, EventYield_allMC, EventYield_bg, logfile );
-  //std::vector<TH1D*> vh1_mc   = getYieldHistos( "EventYield_WJets", "", HTRegions, signalRegions, EventYield_wjets, EventYield_bg, logfile );
-
-  ////std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_allMC );
-  //std::vector<TH1D*> vh1_sim  = getSimTruthYieldHistos( "SimulationTruthEventYield", "", HTRegions, signalRegions, EventYield_signal );
- 
-
-  for( unsigned i=0; i<EventYield_qcd->getHTRegions().size(); ++i ) {
-
-    //vh1_signal[i]->Write();
-    vh1_qcd[i]->Write();
-
-    //vh1_data[i]->Write();
-    //
-    //vh1_mc  [i]->Write();
-    //
-    //vh1_sim [i]->Write();
- 
-  }
-
-
-  outfile->Close();
-
-
+  // save MT2Analyses:
+  data->writeToFile(outputdir + "/analyses.root");
+  for( unsigned i=0; i<bgYields.size(); ++i )
+    bgYields[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
+  for( unsigned i=0; i<signals.size(); ++i )
+    signals[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
 
   return 0;
 
 }
-*/
 
 
 
-MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet ) {
+
+
+MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::string& regionsSet, float lumi ) {
 
 
   std::cout << std::endl << std::endl;
   std::cout << "-> Starting computation for sample: " << sample.name << std::endl;
 
   TFile* file = TFile::Open(sample.file.c_str());
+  std::cout << "-> Getting mt2 tree from file: " << sample.file << std::endl;
+
   TTree* tree = (TTree*)file->Get("mt2");
   
 
-  std::ostringstream preselectionStream;
-  preselectionStream << " " 
-                     << "(nTaus20==0 && nMuons10==0 && nElectrons10==0)" << " && "
-                     << "(nVert > 0)"                      << " && "
-                     << "(nJet40 > 1)"                     << " && "
-                     << "(jet_pt[1] > 100)"                << " && "
-                     << "(ht > 450)"                       << " && "
-                     << "((ht < 750 && met_pt > 200) || (ht > 750 && met_pt > 30))" << " && "
-                     << "(deltaPhiMin > 0.3)"              << " && " 
-                     << "(diffMetMht < 70)"                << "&&"
-                     << "(mt2 > 50)" ;
-
-  
-
-  TString preselection = preselectionStream.str().c_str();
-  TString cuts = preselection;
-
-  TFile* tmpFile = TFile::Open("tmp.root", "recreate");
-  tmpFile->cd();
-
-  std::cout << "-> Skimming tree by applying preselection." << std::endl;
-  TTree* tree_reduced = tree->CopyTree(cuts);
-
   MT2Tree myTree;
-  myTree.Init(tree_reduced);
+  myTree.loadGenStuff = false;
+  myTree.Init(tree);
 
-    
-
-  bool isData = false;
-
-  // global sample weight:
-  ////Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents*sample.PU_avg_weight);
-  //Double_t weight = sample.xsection * sample.kfact * sample.lumi / (sample.nevents);
-  //cout << endl << "Weight " << weight <<endl; 
 
 
   std::cout << "-> Setting up MT2Analysis with name: " << sample.sname << std::endl;
   MT2Analysis<MT2EstimateSyst>* analysis = new MT2Analysis<MT2EstimateSyst>( sample.sname, regionsSet, sample.id );
 
-  
+  bool isData = sample.id<100 && sample.id>0;
 
-  int nentries = tree_reduced->GetEntries();
 
-  //ofstream ofs("events.log");
 
+  int nentries = tree->GetEntries();
 
   for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
@@ -304,20 +293,34 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
 
     myTree.GetEntry(iEntry);
 
+    if( myTree.nMuons10 > 0) continue;
+    if( myTree.nElectrons10 > 0 ) continue;
+    if( myTree.nPFLep5LowMT > 0) continue;
+    if( myTree.nPFHad10LowMT > 0) continue;
+  
+    if( myTree.deltaPhiMin<0.3 ) continue;
+    if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
+
+    if( myTree.nVert==0 ) continue;
+    if( myTree.nJet40<2 ) continue;
+    if( myTree.njet<2 ) continue;
+    if( myTree.jet_pt[1]<100. ) continue;
+
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
     float mt2  = myTree.mt2;
+    float minMTBmet = myTree.minMTBMet;
     int njets  = myTree.nJet40;
     int nbjets = myTree.nBJet40;
 
-    Double_t weight = myTree.evt_scale1fb; 
+
+    Double_t weight = myTree.evt_scale1fb*lumi;
 
     float fullweight_btagUp = weight;
     float fullweight_btagDown = weight;
 
 
-
-    MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met );
+    MT2EstimateSyst* thisEstimate = analysis->get( ht, njets, nbjets, met, minMTBmet, mt2 );
     if( thisEstimate==0 ) continue;
 
     if( isData ) {
@@ -340,10 +343,6 @@ MT2Analysis<MT2EstimateSyst>* computeYield( const MT2Sample& sample, const std::
   analysis->finalize();
   
   delete tree;
-  delete tree_reduced;
-
-  tmpFile->Close();
-  delete tmpFile;
 
   file->Close();
   delete file;
@@ -393,15 +392,16 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
   MT2DrawTools::setStyle();
 
   std::vector<int> colors;
-  if( bgYields.size()==3 ) {
+  if( bgYields.size()==3 ) { // estimates
     colors.push_back(402); 
     colors.push_back(430); 
     colors.push_back(418); 
-  } else {
-    colors.push_back(401); 
-    colors.push_back(417); 
-    colors.push_back(419); 
-    colors.push_back(855); 
+  } else { // mc
+    colors.push_back(401); // qcd
+    colors.push_back(417); // w+jets
+    colors.push_back(419); // z+jets
+    colors.push_back(855); // top
+    //colors.push_back(); // other
   }
 
 
@@ -414,9 +414,10 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
     for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
 
-      std::string fullPath = outputdir + "/" + iHT->getName() + "/" + iSR->getName();
-      std::string mkdircommand = "mkdir -p " + fullPath;
-      system( mkdircommand.c_str() );
+      std::string fullPath = outputdir;
+      //std::string fullPath = outputdir + "/" + iHT->getName() + "/" + iSR->getName();
+      //std::string mkdircommand = "mkdir -p " + fullPath;
+      //system( mkdircommand.c_str() );
 
   
       MT2Region thisRegion( (*iHT), (*iSR) );
@@ -431,13 +432,30 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       TGraphAsymmErrors* gr_data = MT2DrawTools::getPoissonGraph(h1_data);
       gr_data->SetMarkerStyle(20);
       gr_data->SetMarkerSize(1.6);
+
+
+      THStack bgStack("bgStack", "");
+      for( unsigned i=0; i<bgYields.size(); ++i ) { // reverse ordered stack is prettier
+        int index = bgYields.size() - i - 1;
+        TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
+        h1_bg->SetFillColor( colors[index] );
+        h1_bg->SetLineColor( kBlack );
+        bgStack.Add(h1_bg);
+      }
   
+
       TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
       c1->cd();
 
       float xMin = h1_data->GetXaxis()->GetXmin();
       float xMax = h1_data->GetXaxis()->GetXmax();
-      float yMax = h1_data->GetMaximum()*1.5;
+      float yMax1 = h1_data->GetMaximum()*1.5;
+      float yMax2 = 1.5*(h1_data->GetMaximum() + sqrt(h1_data->GetMaximum()));
+      float yMax3 = 1.5*(bgStack.GetMaximum());
+      float yMax = (yMax1>yMax2) ? yMax1 : yMax2;
+      if( yMax3 > yMax ) yMax = yMax3;
+      //float yMax = TMath::Max( h1_data->GetMaximum()*1.5, (h1_data->GetMaximum() + h1_data->GetBinError(h1_data->GetMaximumBin()))*1.2);
+      //float yMax = h1_data->GetMaximum()*1.5;
   
       TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax );
       h2_axes->SetXTitle("M_{T2} [GeV]");
@@ -445,25 +463,26 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
 
       h2_axes->Draw();
      
-      THStack bgStack("bgStack", "");
-      for( unsigned i=0; i<bgYields.size(); ++i ) {
-        TH1D* h1_bg = bgYields[i]->get(thisRegion)->yield;
-        h1_bg->SetFillColor( colors[i] );
-        bgStack.Add(h1_bg);
+
+
+      std::vector<std::string> niceNames = thisRegion.getNiceNames();
+
+      for( unsigned i=0; i<niceNames.size(); ++i ) {
+
+        float yMax = 0.9-(float)i*0.05;
+        float yMin = yMax - 0.05;
+        TPaveText* regionText = new TPaveText( 0.18, yMin, 0.55, yMax, "brNDC" );
+        regionText->SetTextSize(0.035);
+        regionText->SetTextFont(42);
+        regionText->SetFillColor(0);
+        regionText->SetTextAlign(11);
+        regionText->AddText( niceNames[i].c_str() );
+        regionText->Draw("same");
+    
       }
-
-
-      std::pair<std::string, std::string> legendNames = thisRegion.getNiceNames();
-
-      TPaveText* regionText = new TPaveText( 0.18, 0.8, 0.55, 0.9, "brNDC" );
-      regionText->SetTextSize(0.035);
-      regionText->SetTextFont(42);
-      regionText->SetFillColor(0);
-      regionText->AddText( Form("#splitline{%s}{%s}", legendNames.first.c_str(), legendNames.second.c_str()) );
-      regionText->Draw("same");
       
 
-      TLegend* legend = new TLegend( 0.6, 0.9-(bgYields.size()+1)*0.06, 0.93, 0.9 );
+      TLegend* legend = new TLegend( 0.7, 0.9-(bgYields.size()+1)*0.06, 0.93, 0.9 );
       legend->SetTextSize(0.038);
       legend->SetTextFont(42);
       legend->SetFillColor(0);
@@ -472,10 +491,9 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       else
         legend->AddEntry( gr_data, "Data", "P" );
       histoFile->cd();
-      for( unsigned i=0; i<bgYields.size(); ++i ) {  // reverse order in legend is prettier
-        int index = bgYields.size() - i - 1;
-        TH1D* h1_bg = bgYields[index]->get(thisRegion)->yield;
-        legend->AddEntry( h1_bg, bgYields[index]->fullName.c_str(), "F" );
+      for( unsigned i=0; i<bgYields.size(); ++i ) {  
+        TH1D* h1_bg = bgYields[i]->get(thisRegion)->yield;
+        legend->AddEntry( h1_bg, bgYields[i]->getFullName().c_str(), "F" );
         h1_bg->Write();
       }
 
@@ -485,13 +503,14 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       bgStack.Draw("histo same");
       gr_data->Draw("p same");
 
-      TPaveText* labelTop = MT2DrawTools::getLabelTop();
+      TPaveText* labelTop = MT2DrawTools::getLabelTop(lumi);
       labelTop->Draw("same");
 
       gPad->RedrawAxis();
 
       c1->SaveAs( Form("%s/mt2_%s.eps", fullPath.c_str(), thisRegion.getName().c_str()) );
       c1->SaveAs( Form("%s/mt2_%s.png", fullPath.c_str(), thisRegion.getName().c_str()) );
+      c1->SaveAs( Form("%s/mt2_%s.pdf", fullPath.c_str(), thisRegion.getName().c_str()) );
 
       delete c1;
       delete h2_axes;
@@ -501,10 +520,6 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
   } // for HT regions
 
 
-  // save also MT2Analyses:
-  data->writeToFile(outputdir + "/analyses.root");
-  for( unsigned i=0; i<bgYields.size(); ++i )
-    bgYields[i]->writeToFile(outputdir + "/analyses.root", "UPDATE");
   //std::string analysesDir = outputdir + "/analyses";
   //std::string mkdir_command2 = "mkdir -p " + analysesDir;
   //system(mkdir_command2.c_str());
@@ -708,6 +723,7 @@ MT2Config::MT2Config( const std::string& configFileName ) {
 
   regionsSet_ = "";
   mcSamples_ = "";
+  sigSamples_ = "";
   dataSamples_ = "";
   lostLeptonTag_ = "";
   qcdTag_ = "";
@@ -734,6 +750,8 @@ MT2Config::MT2Config( const std::string& configFileName ) {
       regionsSet_ = std::string(StringValue);
     else if( name=="mcSamples" )
       mcSamples_ = std::string(StringValue);
+    else if( name=="sigSamples" )
+      sigSamples_ = std::string(StringValue);
     else if( name=="dataSamples" )
       dataSamples_ = std::string(StringValue);
     else if( name=="lostLeptonTag" )
@@ -760,6 +778,41 @@ MT2Config::MT2Config( const std::string& configFileName ) {
     exit(337);
   }
 
+  if( mcSamples_!="" && sigSamples_!="" ) {
+    std::cout << "[MT2Config] ERROR! Config file must have either a mcSamples line OR (exclusive OR) a sigSamples line together with BG estimate tags." << std::endl;
+    exit(339);
+  }
+
   std::cout << std::endl;
      
+}
+
+
+
+void randomizePoisson( MT2Analysis<MT2EstimateSyst>* data ) {
+
+  TRandom3 rand(13);
+
+
+  std::set<MT2HTRegion> HTRegions = data->getHTRegions();
+  std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
+
+  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
+    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+
+      MT2Region thisRegion( (*iHT), (*iSR) );
+
+      TH1D* h1_data = data->get(thisRegion)->yield;
+
+      for( unsigned ibin=1; ibin<h1_data->GetXaxis()->GetNbins()+1; ++ibin ) {
+
+        int poisson_data = rand.Poisson(h1_data->GetBinContent(ibin));
+        h1_data->SetBinContent(ibin, poisson_data);
+        h1_data->SetBinError(ibin, 0.);
+
+      }  // for bins
+
+    }// for signal regions
+  }// for HT regions
+
 }

@@ -22,14 +22,16 @@ hadd("/mmasciov/CSA14_production/XXX/", "_PU_S14_POSTLS170", "/scratch/mmasciov/
 
 using namespace std;
 
-int hadd(string inputPath = "/mmasciov/CSA14_production/27Nov2014/",
-	 string outputPath = "/scratch/mmasciov/endNovember/ToPostProcess/",
+int hadd(string inputPath = "/mmasciov/CSA14v2_production/06Feb2015_csa14v2/",
+	 string outputPath = "/scratch/mmasciov/CSA14v2/ToPostProcess/",
 	 string fileExtension = "_PU_S14_POSTLS170_babytree.root"){
   
   int start_s=clock();
 
 
   system(Form("ls /pnfs/psi.ch/cms/trivcat/store/user/%s > listOfSamples_hadd.txt", inputPath.c_str()));
+
+  std::cout << "Starting..." << std:: endl;
   
   ifstream haddSampleIN("listOfSamples_hadd.txt");
   char haddBuffer[300];
@@ -37,7 +39,7 @@ int hadd(string inputPath = "/mmasciov/CSA14_production/27Nov2014/",
   int sampleCounter(0);
   while( haddSampleIN.getline(haddBuffer, 300, '\n') ) {
 
-    if (haddBuffer[0] == '\n' || haddBuffer[0] == ' ' || haddBuffer[0] == '\0' || strlen(haddBuffer)==1 /*)*/ || strlen(haddBuffer) < 18)
+    if (haddBuffer[0] == '\n' || haddBuffer[0] == ' ' || haddBuffer[0] == '\0' || strlen(haddBuffer)==1 ) /*|| strlen(haddBuffer) < 18)*/
       continue;
 
     ++sampleCounter;

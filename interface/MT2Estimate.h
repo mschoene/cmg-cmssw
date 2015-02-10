@@ -59,14 +59,19 @@ class MT2Estimate {
   MT2Estimate operator+( const MT2Estimate& rhs ) const;
   MT2Estimate operator/( const MT2Estimate& rhs ) const;
   MT2Estimate operator*( const MT2Estimate& rhs ) const;
-  MT2Estimate operator+=( const MT2Estimate& rhs ) const;
-  MT2Estimate operator/=( const MT2Estimate& rhs ) const;
-  MT2Estimate operator*=( const MT2Estimate& rhs ) const;
+  const MT2Estimate& operator+=( const MT2Estimate& rhs );
+  const MT2Estimate& operator/=( const MT2Estimate& rhs );
+  const MT2Estimate& operator*=( const MT2Estimate& rhs );
 
   MT2Estimate operator/ ( float k ) const;
   MT2Estimate operator* ( float k ) const;
-  MT2Estimate operator/=( float k ) const;
-  MT2Estimate operator*=( float k ) const;
+  const MT2Estimate& operator/=( float k );
+  const MT2Estimate& operator*=( float k );
+
+
+  virtual void finalize() {
+    return this->addOverflow();
+  }
 
   virtual void addOverflow();
   void addOverflowSingleHisto( TH1D* yield );
@@ -76,12 +81,12 @@ class MT2Estimate {
   }
 
   virtual void getShit( TFile* file, const std::string& path );
-
-
+  
+  virtual void print(const std::string& ofs);
+  
  private:
   
   std::string name;
-
 
 };
 

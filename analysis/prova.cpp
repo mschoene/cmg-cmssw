@@ -13,13 +13,13 @@ int main() {
   // "pippo" is a name that will figure in the histogram names
   // "8TeV" is the name of a given signal region set (for now i've implemented the one used at 8 tev and the recent proposal by mario - called "13TeV")
   // 702 is an optional argument: it's the id of the sample (so 702 in this case is DYJetsToLL_M-50_HT-100to200)
-  MT2Analysis<MT2EstimateSyst> *analysis = new MT2Analysis<MT2EstimateSyst>("pippo", "8TeV", 702);
+  MT2Analysis<MT2EstimateSyst> *analysis = new MT2Analysis<MT2EstimateSyst>("pippo", "13TeV_CSA14", 702);
   // ^ the above command creates the whole HT x SR structure, and instantiates one MT2EstimateSyst per region
 
-  float ht = 1000.;
-  float met = 200.;
-  int njets = 4;
-  int nbjets = 1;
+  float ht = 500.;
+  float met = 300.;
+  int njets = 2;
+  int nbjets = 0;
   float mt2 = 305.;
 
   float weight = 1.;
@@ -45,7 +45,7 @@ int main() {
   analysis->writeToFile("prova.root");
   // ^ the above will call the method write() for all objects, so again make sure it's implemented
 
-  MT2Analysis<MT2EstimateSyst> *analysis2 = new MT2Analysis<MT2EstimateSyst>("pippo2", "8TeV", 702);
+  MT2Analysis<MT2EstimateSyst> *analysis2 = new MT2Analysis<MT2EstimateSyst>("pippo2", "13TeV_CSA14", 702);
   *analysis2 = *analysis;
 
   analysis2->writeToFile("prova2.root");
