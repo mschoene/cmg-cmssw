@@ -1,10 +1,13 @@
+#include <sstream>
 #include <fstream>
 #include <cmath>
+#include <iomanip> 
 
 #include "TFile.h"
 #include "TH1D.h"
 #include "TList.h"
 #include "TObject.h"
+#include "TString.h"
 
 #include "interface/MT2Analysis.h"
 #include "interface/MT2Estimate.h"
@@ -15,6 +18,7 @@
 void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float err_uncorr );
 void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysis, const std::string& name="stat" );
 MT2Analysis<MT2Estimate>* get( const std::string& name, std::vector< MT2Analysis<MT2Estimate>* > analyses, const std::string& name1, const std::string& name2="", const std::string& name3="", const std::string& name4="" );
+std::string getSimpleSignalName( const std::string& longName );
 
 
 
@@ -107,7 +111,10 @@ int main( int argc, char* argv[] ) {
      TH1D* this_llepCR = llepCR->get(*iR)->yield;
 
      float N_llep_CR = this_llepCR->Integral();
+     std::string llepCR_name = iR->getName();
      if( iR->mtCut()!="" ) { 
+       std::string choppedName = llepCR_name.substr(0, llepCR_name.size()-5);
+       llepCR_name = choppedName;
        if( iR->mtCut()=="loMT" ) {
          N_llep_CR += llepCR->get(MT2Region(iR->htMin(), iR->htMax(), iR->nJetsMin(), iR->nJetsMax(), iR->nBJetsMin(), iR->nBJetsMax(), "hiMT"))->yield->Integral();
        } else {
@@ -136,7 +143,8 @@ int main( int argc, char* argv[] ) {
        datacard << std::endl << std::endl;
 
 
-       datacard << std::endl << std::endl;
+       datacard << std::fixed;
+       datacard << std::setprecision(3) << std::endl << std::endl;
        datacard << "bin  " << binName<< std::endl;
        datacard << "observation  " << this_data->GetBinContent(iBin) << std::endl;
        datacard << "-------------" << std::endl;
@@ -190,7 +198,7 @@ int main( int argc, char* argv[] ) {
          float llep_stat_err = (N_llep_CR>0) ? 1./sqrt((float)N_llep_CR) : 0.;
          float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
          llep_tot_err+=1.;
-         datacard << "llep_CRstat_" << iR->getName() << "  lnN   - - " << llep_tot_err << " -" << std::endl;
+         datacard << "llep_CRstat_" << llepCR_name << "  lnN   - - " << llep_tot_err << " -" << std::endl;
 
          // uncorrelated:
          datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
@@ -225,7 +233,8 @@ int main( int argc, char* argv[] ) {
 
   for( unsigned  isig=0; isig<signals.size(); ++isig ) { 
 
-    std::string path = dir + "/datacards_" + signals[isig]->getName();
+    std::string sigName = getSimpleSignalName( signals[isig]->getName() );
+    std::string path = dir + "/datacards_" + sigName;
     system(Form("mkdir -p %s", path.c_str()));
 
 
@@ -243,12 +252,12 @@ int main( int argc, char* argv[] ) {
 
         std::string templateDatacard( Form("%s/datacard_%s.txt", path_templ.c_str(), binName.c_str()) );
 
-        std::string newDatacard( Form("%s/datacard_%s.txt", path.c_str(), binName.c_str()) );
+        std::string newDatacard( Form("%s/datacard_%s_%s.txt", path.c_str(), binName.c_str(), sigName.c_str()) );
 
 
         float sig = this_signal->GetBinContent(iBin);
 
-        std::string sedCommand( Form("sed 's/XXX/%f/g' %s > %s", sig, templateDatacard.c_str(), newDatacard.c_str()) );
+        std::string sedCommand( Form("sed 's/XXX/%.3f/g' %s > %s", sig, templateDatacard.c_str(), newDatacard.c_str()) );
         system( sedCommand.c_str() );
 
 
@@ -395,4 +404,38 @@ void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysi
 
 }
 
+
+
+
+
+std::string getSimpleSignalName( const std::string& longName ) {
+
+  TString longName_tstr(longName);
+
+  longName_tstr.ReplaceAll( "_", " " );
+  longName_tstr.ReplaceAll( "mStop", " " );
+  longName_tstr.ReplaceAll( "mGl", " " );
+  longName_tstr.ReplaceAll( "mLSP", " " );
+
+  std::istringstream iss(longName_tstr.Data());
+  std::vector<std::string> parts;
+  do {
+    std::string sub;
+    iss >> sub;
+    parts.push_back(sub);
+  } while (iss);
+
+  // parts should be:
+  // [0]: SMS
+  // [1]: model
+  // [2]: 2J
+  // [3]: parent mass
+  // [4]: lsp mass
+
+
+  std::string simpleName = parts[1] + "_" + parts[3] + "_" + parts[4];
+
+  return simpleName;
+
+}
 
