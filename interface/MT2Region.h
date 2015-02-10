@@ -25,7 +25,7 @@ class MT2HTRegion {
 
   float htMin;
   float htMax;
-  float metMin;
+  float metMin() const;
 
 
   bool operator==( const MT2HTRegion& rhs ) const;
@@ -100,7 +100,10 @@ class MT2Region {
     sigRegion_ = new MT2SignalRegion(sigRegion);
   }
 
-  MT2Region( float htMin, float htMax, int njmin, int njmax, int nbmin, int nbmax, const std::string& mtCut="" ) {
+
+  MT2Region( const std::string& regionName );
+
+  MT2Region( float htMin, float htMax=-1, int njmin=-1, int njmax=-1, int nbmin=-1, int nbmax=-1, const std::string& mtCut="" ) {
     htRegion_ = new MT2HTRegion( htMin, htMax );
     sigRegion_ = new MT2SignalRegion( njmin, njmax, nbmin, nbmax, mtCut );
   }
@@ -128,7 +131,7 @@ class MT2Region {
 
   float htMin()   const { return htRegion_->htMin; };
   float htMax()   const { return htRegion_->htMax; };
-  float metMin()  const { return htRegion_->metMin; };
+  float metMin()  const { return htRegion_->metMin(); };
   int nJetsMin()  const { return sigRegion_->nJetsMin; };
   int nJetsMax()  const { return sigRegion_->nJetsMax; };
   int nBJetsMin() const { return sigRegion_->nBJetsMin; };
