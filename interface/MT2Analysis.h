@@ -285,6 +285,59 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     regions_.insert(MT2Region(1000., -1, 7, -1, 3,  -1, "loMT"));
     regions_.insert(MT2Region(1000., -1, 7, -1, 3,  -1, "hiMT"));
 
+  } else if( regionsSet=="13TeV_PHYS14_hiJHT_noMT" ){
+    
+    regions_.insert(MT2Region(450., 575., 2, 3, 0,  0));
+    regions_.insert(MT2Region(575., 1000., 2, 3, 0,  0));
+    regions_.insert(MT2Region(1000., -1, 2, 3, 0,  0));
+
+    regions_.insert(MT2Region(450., 575., 4, 6, 0,  0));
+    regions_.insert(MT2Region(575., 1000., 4, 6, 0,  0));
+    regions_.insert(MT2Region(1000., -1, 4, 6, 0,  0));
+
+    regions_.insert(MT2Region(450., 575., 7, 8, 0,  0));
+    regions_.insert(MT2Region(575., 1000., 7, 8, 0,  0));
+    regions_.insert(MT2Region(1000., -1, 7, 8, 0,  0));
+    
+    regions_.insert(MT2Region(450., -1, 9, -1, 0,  0));
+
+    regions_.insert(MT2Region(450., 575., 2, 3, 1,  1));
+    regions_.insert(MT2Region(575., 1000., 2, 3, 1,  1));
+    regions_.insert(MT2Region(1000., -1, 2, 3, 1,  1));
+
+    regions_.insert(MT2Region(450., 575., 4, 6, 1,  1));
+    regions_.insert(MT2Region(575., 1000., 4, 6, 1,  1));
+    regions_.insert(MT2Region(1000., -1, 4, 6, 1,  1));
+
+    regions_.insert(MT2Region(450., 575., 7, 8, 1,  1));
+    regions_.insert(MT2Region(575., 1000., 7, 8, 1,  1));
+    regions_.insert(MT2Region(1000., -1, 7, 8, 1,  1));
+
+    regions_.insert(MT2Region(450., -1, 9, -1, 1,  1));
+
+    regions_.insert(MT2Region(450., 575., 2, 3, 2,  2 ));
+    regions_.insert(MT2Region(575., 1000., 2, 3, 2,  2 ));
+    regions_.insert(MT2Region(1000., -1, 2, 3, 2,  2 ));
+
+    regions_.insert(MT2Region(450., 575., 4, 6, 2, 2 ));
+    regions_.insert(MT2Region(575., 1000., 4, 6, 2, 2 ));
+    regions_.insert(MT2Region(1000., -1, 4, 6, 2, 2 ));
+
+    regions_.insert(MT2Region(450., 575., 7, 8, 2,  2 ));
+    regions_.insert(MT2Region(575., 1000., 7, 8, 2,  2 ));
+    regions_.insert(MT2Region(1000., -1, 7, 8, 2,  2 ));
+
+    regions_.insert(MT2Region(450., -1, 9, -1, 2,  2 ));
+        
+    regions_.insert(MT2Region(450., 575., 2,  6, 3,  -1 ));
+    regions_.insert(MT2Region(450., 575., 7, -1, 3,  -1 ));
+
+    regions_.insert(MT2Region(575., 1000., 2,  6, 3,  -1 ));
+    regions_.insert(MT2Region(575., 1000., 7, -1, 3,  -1 ));
+
+    regions_.insert(MT2Region(1000., -1, 2,  6, 3,  -1 ));
+    regions_.insert(MT2Region(1000., -1, 7, -1, 3,  -1 ));
+
   } else if( regionsSet=="13TeV_CSA14_noMT" ) {
 
     std::set<MT2HTRegion> htRegions;
