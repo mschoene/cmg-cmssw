@@ -66,16 +66,16 @@ int main( int argc, char* argv[] ) {
   std::string outputdir = "EventYields_" + sampleName;
   system(Form("mkdir -p %s", outputdir.c_str()));
 
-  std::string regionsSet = "13TeV_CSA14_noMT"; 
+  std::string regionsSet = "13TeV_PHYS14"; 
 
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
   
-  MT2Analysis<MT2EstimateSyst>* lostLeptonEstimate = new MT2Analysis<MT2EstimateSyst> ( "Signal", regionsSet );  
+  MT2Analysis<MT2EstimateSyst>* lostLeptonEstimate = new MT2Analysis<MT2EstimateSyst> ( "llep", regionsSet );  
   for( unsigned i=0; i < fSamples.size(); ++i )
     (*lostLeptonEstimate) += ( computeYield( fSamples[i], regionsSet, lumi ) );
   
-  lostLeptonEstimate->writeToFile("SMS_T1qqqq_1400_100_CR_phys14.root");
+  lostLeptonEstimate->writeToFile("llep_newSR_phys14.root");
 
   return 0;
   
