@@ -89,7 +89,14 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     }
 
     std::string file(fileName);
-    system(Form("ls %s%s*.root > inputFILE.txt", inputPath.c_str(), file.c_str()));
+    TString wildcard;
+    if (inputPath.find("/pnfs")==std::string::npos)
+      wildcard = TString::Format("%s%s*.root", inputPath.c_str(), file.c_str());
+    else // mind the directory structure in the SE 
+      wildcard = TString::Format("%s%s*/*.root", inputPath.c_str(), file.c_str());
+
+    system(Form("ls %s > inputFILE.txt", wildcard.Data()));
+      
     
     ifstream inputFILE("inputFILE.txt");
     if(!inputFILE) {
@@ -118,16 +125,24 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
       std::cout << "single input file: " << inputFile << std::endl;
     }
     else{ // in case of more than one file use wildcard
-      inputFile = TString::Format("%s%s*.root", inputPath.c_str(), file.c_str()).Data();
+      if (inputPath.find("/pnfs")==std::string::npos) // if not in SE use directly wildcar
+	inputFile = wildcard.Data();
+      else {// double wildcard does not work in SE. dataset name in directory not in filename
+	std::size_t len = inputFile.rfind("/");
+	inputFile = inputFile.substr(0,len)+"/*.root";
+      }
       std::cout << "multiple input files: " << inputFile << std::endl;
     }
-    
+
     std::string outputFileName(inputBuffer);    
     std::size_t outlength = outputFileName.find(inputPath);
     outputFileName.erase(outlength, inputPath.length());
     std::string extension = ".root";
     std::size_t extensionlength = outputFileName.find(".root");
     outputFileName.erase(extensionlength, extension.length());
+    
+    if (inputPath.find("/pnfs")!=std::string::npos) // in SE output name is input dir
+      outputFileName.erase(outputFileName.find("/"), outputFileName.length());
 
     std::string outputFile = outputPath + outputFileName + fileExtension;
     std::cout << inputFile << std::endl;
@@ -150,7 +165,7 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
   int stop_s=clock();
   std::cout << std::endl << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;
 
-  //system(Form("rm -f inputFILE.txt"));
+  system(Form("rm -f inputFILE.txt"));
   
   return 0;
 }
@@ -179,7 +194,8 @@ int postProcessing(string inputFile,
   // }
 
   TChain *c = new TChain(treeName.c_str());
-  int chainReturn = c->Add(inputFile.c_str());
+  TString dcap = inputFile.find("pnfs")!=std::string::npos ? "dcap://t3se01.psi.ch:22125/" : "";
+  int chainReturn = c->Add(dcap + inputFile.c_str());
   if (chainReturn < 1) {
     cout << "File does not exist!" << endl;
     return 1;
