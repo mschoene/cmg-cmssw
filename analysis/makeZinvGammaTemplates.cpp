@@ -86,7 +86,7 @@ int main( int argc, char* argv[] ) {
   std::string templateFileName = "gammaTemplates_" + samplesFileName + "_" + regionsSet + ".root";
   templatesPrompt->writeToFile(templateFileName);
   templatesFake->addToFile(templateFileName);
-  templatesPrompt_qcd->writeToFile(templateFileName);
+  templatesPrompt_qcd->addToFile(templateFileName);
 
 
   return 0;

@@ -123,14 +123,16 @@ std::string MT2HTRegion::getNiceName() const {
 
 bool MT2HTRegion::operator==( const MT2HTRegion& rhs ) const {
 
-  return ( htMin==rhs.htMin && htMax==rhs.htMax ); 
+  //return ( htMin==rhs.htMin && htMax==rhs.htMax ); 
+  return (this->getName()==rhs.getName());
 
 }
 
 
 bool MT2HTRegion::operator!=( const MT2HTRegion& rhs ) const {
 
-  return ( htMin!=rhs.htMin || htMax!=rhs.htMax ); 
+  //return ( htMin!=rhs.htMin || htMax!=rhs.htMax ); 
+  return (this->getName()!=rhs.getName());
 
 }
 
@@ -333,14 +335,16 @@ std::string MT2SignalRegion::getNiceJetName( const std::string& pedix, int nmin,
 
 bool MT2SignalRegion::operator==( const MT2SignalRegion& rhs ) const {
 
-  return ( nJetsMin==rhs.nJetsMin && nJetsMax==rhs.nJetsMax && nBJetsMin==rhs.nBJetsMin && nBJetsMax==rhs.nBJetsMax && mtCut==rhs.mtCut );
+  //return ( nJetsMin==rhs.nJetsMin && nJetsMax==rhs.nJetsMax && nBJetsMin==rhs.nBJetsMin && nBJetsMax==rhs.nBJetsMax && mtCut==rhs.mtCut );
+  return (this->getName()==rhs.getName());
  
 }
 
 
 bool MT2SignalRegion::operator!=( const MT2SignalRegion& rhs ) const {
 
-  return ( nJetsMin!=rhs.nJetsMin || nJetsMax!=rhs.nJetsMax || nBJetsMin!=rhs.nBJetsMin || nBJetsMax!=rhs.nBJetsMax || mtCut!=rhs.mtCut );
+  //return ( nJetsMin!=rhs.nJetsMin || nJetsMax!=rhs.nJetsMax || nBJetsMin!=rhs.nBJetsMin || nBJetsMax!=rhs.nBJetsMax || mtCut!=rhs.mtCut );
+  return (this->getName()!=rhs.getName());
  
 }
 
