@@ -17,6 +17,7 @@ run("samples_50ns_miniaod.txt", "treeProducerSusyFullHad", "/scratch/mmasciov/To
 #include <cstdlib>
 #include "TFile.h"
 #include "TTree.h"
+#include "TChain.h"
 #include "TBranch.h"
 #include "TString.h"
 
@@ -88,7 +89,14 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     }
 
     std::string file(fileName);
-    system(Form("ls %s%s*.root > inputFILE.txt", inputPath.c_str(), file.c_str()));
+    TString wildcard;
+    if (inputPath.find("/pnfs")==std::string::npos)
+      wildcard = TString::Format("%s%s*.root", inputPath.c_str(), file.c_str());
+    else // mind the directory structure in the SE 
+      wildcard = TString::Format("%s%s*/*.root", inputPath.c_str(), file.c_str());
+
+    system(Form("ls %s > inputFILE.txt", wildcard.Data()));
+      
     
     ifstream inputFILE("inputFILE.txt");
     if(!inputFILE) {
@@ -108,8 +116,23 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
       continue;
     
     }
-    
+
     std::string inputFile(inputBuffer);
+
+    char unused[512];
+    inputFILE.getline(unused, 512, '\n'); 
+    if (unused[0] == '\0' || strlen(unused)==1){      
+      std::cout << "single input file: " << inputFile << std::endl;
+    }
+    else{ // in case of more than one file use wildcard
+      if (inputPath.find("/pnfs")==std::string::npos) // if not in SE use directly wildcar
+	inputFile = wildcard.Data();
+      else {// double wildcard does not work in SE. dataset name in directory not in filename
+	std::size_t len = inputFile.rfind("/");
+	inputFile = inputFile.substr(0,len)+"/*.root";
+      }
+      std::cout << "multiple input files: " << inputFile << std::endl;
+    }
 
     std::string outputFileName(inputBuffer);    
     std::size_t outlength = outputFileName.find(inputPath);
@@ -117,6 +140,9 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     std::string extension = ".root";
     std::size_t extensionlength = outputFileName.find(".root");
     outputFileName.erase(extensionlength, extension.length());
+    
+    if (inputPath.find("/pnfs")!=std::string::npos) // in SE output name is input dir
+      outputFileName.erase(outputFileName.find("/"), outputFileName.length());
 
     std::string outputFile = outputPath + outputFileName + fileExtension;
     std::cout << inputFile << std::endl;
@@ -155,18 +181,25 @@ int postProcessing(string inputFile,
   
   cout << "Processing File " << inputFile << endl;
 
-  TFile *f = TFile::Open(inputFile.c_str(), "READ");
-  if (! f || f->IsZombie()) {
+  // TFile *f = TFile::Open(inputFile.c_str(), "READ");
+  // if (! f || f->IsZombie()) {
+  //   cout << "File does not exist!" << endl;
+  //   return 1;
+  // }
+  
+  // TTree* t = (TTree*)f->Get(treeName.c_str());
+  // if (! t || t->IsZombie()) {
+  //   cout << "Tree does not exist!" << endl;
+  //   return 2;
+  // }
+
+  TChain *c = new TChain(treeName.c_str());
+  TString dcap = inputFile.find("pnfs")!=std::string::npos ? "dcap://t3se01.psi.ch:22125/" : "";
+  int chainReturn = c->Add(dcap + inputFile.c_str());
+  if (chainReturn < 1) {
     cout << "File does not exist!" << endl;
     return 1;
   }
-  
-  TTree* t = (TTree*)f->Get(treeName.c_str());
-  if (! t || t->IsZombie()) {
-    cout << "Tree does not exist!" << endl;
-    return 2;
-  }
-        
   
   // This line should be uncommented for all the branches that we want to overwrite.
   // If the branch is not in the input tree, we don't need this.
@@ -176,7 +209,8 @@ int postProcessing(string inputFile,
   TFile *out = TFile::Open(outputFile.c_str(), "RECREATE");
   TTree *clone = new TTree("mt2", "post processed baby tree for mt2 analysis");
 
-  clone = t->CloneTree(-1, "fast");
+  //clone = t->CloneTree(-1, "fast");
+  clone = c->CloneTree(-1, "fast");
   clone->SetName("mt2");
 
   /*
@@ -189,7 +223,8 @@ int postProcessing(string inputFile,
   //-------------------------------------------------------------
 
   //Calculate scaling factor and put variables into tree 
-  int events = t->GetEntries();
+  //int events = t->GetEntries();
+  int events = clone->GetEntries();
   float scale1fb = xsec*kfactor*1000*filter/(Float_t)events;
  
   /*
@@ -209,8 +244,7 @@ int postProcessing(string inputFile,
   TBranch* b5 = clone->Branch("evt_nEvts", &events, "evt_nEvts/I");
   TBranch* b6 = clone->Branch("evt_id", &id, "evt_id/I");
 
-  Int_t nentries = t->GetEntries();
-  for(Int_t i = 0; i < nentries; i++) {
+  for(Int_t i = 0; i < events; i++) {
     b1->Fill();
     b2->Fill();
     b3->Fill();
@@ -220,9 +254,10 @@ int postProcessing(string inputFile,
   }
   //-------------------------------------------------------------
 
-  delete t;
-  f->Close();
-  
+  // delete t;
+  // f->Close();
+  delete c;
+
   //out->cd();
   clone->Write();
   delete clone;
