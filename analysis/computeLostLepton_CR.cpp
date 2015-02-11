@@ -75,7 +75,7 @@ int main( int argc, char* argv[] ) {
   for( unsigned i=0; i < fSamples.size(); ++i )
     (*lostLeptonEstimate) += ( computeYield( fSamples[i], regionsSet, lumi ) );
   
-  lostLeptonEstimate->writeToFile("llep_newSR_phys14.root");
+  lostLeptonEstimate->writeToFile("llep_NEWSR_phys14.root");
 
   return 0;
   
