@@ -31,7 +31,7 @@
 
 
 bool dummyAnalysis = true;
-double lumi = 5.; // in fb-1
+double lumi = 4.; // in fb-1
 
 
 
