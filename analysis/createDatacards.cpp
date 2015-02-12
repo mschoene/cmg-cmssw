@@ -70,7 +70,7 @@ int main( int argc, char* argv[] ) {
   if( useMC_zinv )
     zinv = MT2Analysis<MT2Estimate>::readFromFile( mc_fileName, "ZJets");
   else
-    zinv = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_PHYS14_4fb/MT2ZinvEstimate.root", "ZinvEstimate");
+    zinv = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14_4fb/MT2ZinvEstimate.root", "ZinvEstimate");
   zinv->setName("zinv");
   zinv->addToFile( mc_fileName, true );
 
@@ -81,13 +81,15 @@ int main( int argc, char* argv[] ) {
     MT2Analysis<MT2Estimate>* top   = MT2Analysis<MT2Estimate>::readFromFile( mc_fileName, "Top");
     llep = new MT2Analysis<MT2Estimate>( (*wjets) + (*top) );
   } else {
-    llep = MT2Analysis<MT2Estimate>::readFromFile( "llep_newSR_phys14.root" );
+    llep = MT2Analysis<MT2Estimate>::readFromFile( "llep_CR_PHYS14_MTbins.root" );
+    //llep = MT2Analysis<MT2Estimate>::readFromFile( "llep_newSR_phys14.root" );
   }
   llep->setName( "llep" );
   llep->addToFile( mc_fileName, true );
 
 
-  MT2Analysis<MT2Estimate>* llepCR = MT2Analysis<MT2Estimate>::readFromFile( "llep_newSR_phys14.root" );
+  //MT2Analysis<MT2Estimate>* llepCR = MT2Analysis<MT2Estimate>::readFromFile( "llep_CR_PHYS14_MTbins.root" );
+  MT2Analysis<MT2Estimate>* llepCR = llep;
 
 
   std::set<MT2Region> regions = data->getRegions();
@@ -128,7 +130,7 @@ int main( int argc, char* argv[] ) {
 
        //std::string binName( Form("%s_bin%d", iR->getName().c_str(), iBin) );
        float mt2Min = this_data->GetBinLowEdge( iBin );
-       float mt2Max = (iBin==this_data->GetNbinsX()) ?  this_data->GetBinLowEdge( iBin+1 ) : -1.;
+       float mt2Max = (iBin==this_data->GetNbinsX()) ?  -1. : this_data->GetBinLowEdge( iBin+1 );
 
        std::string binName;
        if( mt2Max>=0. )
@@ -257,24 +259,28 @@ int main( int argc, char* argv[] ) {
       for( unsigned iBin=1; iBin<this_signal->GetNbinsX()+1; ++iBin ) {
 
         float mt2Min = this_signal->GetBinLowEdge( iBin );
-        float mt2Max = this_signal->GetBinLowEdge( iBin+1 );
+        float mt2Max = (iBin==this_signal->GetNbinsX()) ?  -1. : this_signal->GetBinLowEdge( iBin+1 );
 
-	if( this_signal->GetBinContent(iBin) < 1e-3 );
-	else{
+      if( this_signal->GetBinContent(iBin) < 1e-3 );
+      else{
 
-	  std::string binName( Form("%s_m%.0fto%.0f", iR->getName().c_str(), mt2Min, mt2Max) );
-	  
-	  std::string templateDatacard( Form("%s/datacard_%s.txt", path_templ.c_str(), binName.c_str()) );
-	  
-	  std::string newDatacard( Form("%s/datacard_%s_%s.txt", path.c_str(), binName.c_str(), sigName.c_str()) );
-	  
-	  
-	  float sig = this_signal->GetBinContent(iBin);
-	  
-	  std::string sedCommand( Form("sed 's/XXX/%.3f/g' %s > %s", sig, templateDatacard.c_str(), newDatacard.c_str()) );
-	  system( sedCommand.c_str() );
+        std::string binName;
+        if( mt2Max>=0. )
+          binName = std::string( Form("%s_m%.0fto%.0f", iR->getName().c_str(), mt2Min, mt2Max) );
+        else
+          binName = std::string( Form("%s_m%.0ftoInf", iR->getName().c_str(), mt2Min) );
+        
+        std::string templateDatacard( Form("%s/datacard_%s.txt", path_templ.c_str(), binName.c_str()) );
+        
+        std::string newDatacard( Form("%s/datacard_%s_%s.txt", path.c_str(), binName.c_str(), sigName.c_str()) );
+        
+        
+        float sig = this_signal->GetBinContent(iBin);
+        
+        std::string sedCommand( Form("sed 's/XXX/%.3f/g' %s > %s", sig, templateDatacard.c_str(), newDatacard.c_str()) );
+        system( sedCommand.c_str() );
 
-	}
+      }
 
       } // for bins
 
