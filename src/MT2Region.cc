@@ -252,7 +252,7 @@ MT2SignalRegion::MT2SignalRegion(int njmin, int njmax, int nbmin, int nbmax, con
   nJetsMax = njmax;
   nBJetsMin = nbmin;
   nBJetsMax = nbmax;
-  if( nJetsMin<nBJetsMin ) nJetsMin = nBJetsMin;
+  //if( nJetsMin<nBJetsMin ) nJetsMin = nBJetsMin;
 
   mtCut = mtcut;
 
