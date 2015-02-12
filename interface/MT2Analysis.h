@@ -177,10 +177,10 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
     signalRegions.insert(MT2SignalRegion(4, -1, 1,  1)); 
     signalRegions.insert(MT2SignalRegion(2,  3, 2,  2, "loMT" ));
     signalRegions.insert(MT2SignalRegion(4, -1, 2,  2, "loMT" ));
-    signalRegions.insert(MT2SignalRegion(3, -1, 3, -1, "loMT" ));
+    signalRegions.insert(MT2SignalRegion(2, -1, 3, -1, "loMT" ));
     signalRegions.insert(MT2SignalRegion(2,  3, 2,  2, "hiMT" ));
     signalRegions.insert(MT2SignalRegion(4, -1, 2,  2, "hiMT" ));
-    signalRegions.insert(MT2SignalRegion(3, -1, 3, -1, "hiMT" ));
+    signalRegions.insert(MT2SignalRegion(2, -1, 3, -1, "hiMT" ));
 
     regions_ = multiplyHTandSignal( htRegions, signalRegions );
 
