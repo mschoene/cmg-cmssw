@@ -16,10 +16,13 @@ run("samples_50ns_miniaod.txt", "treeProducerSusyFullHad", "/scratch/mmasciov/To
 #include <fstream>
 #include <cstdlib>
 #include "TFile.h"
+#include "TFileMerger.h"
 #include "TTree.h"
 #include "TChain.h"
+#include "TChainElement.h"
 #include "TBranch.h"
 #include "TString.h"
+#include "TH1F.h"
 
 using namespace std;
 
@@ -200,13 +203,25 @@ int postProcessing(string inputFile,
     cout << "File does not exist!" << endl;
     return 1;
   }
+
+  // merge (add) Count histograms from tchain files
+  TFileMerger *merger = new TFileMerger(kFALSE);
+  TObjArray *fileElements = c->GetListOfFiles();
+  TIter next(fileElements);
+  TChainElement *chEl=0;
+  while (( chEl=(TChainElement*)next() ))
+    merger->AddFile(chEl->GetTitle());
+  merger->OutputFile(outputFile.c_str(), "RECREATE");
+  merger->SetNotrees(kTRUE);
+  merger->Merge();
+  delete merger;
   
   // This line should be uncommented for all the branches that we want to overwrite.
   // If the branch is not in the input tree, we don't need this.
   //
   //t->SetBranchStatus("scale1fb", 0);
 
-  TFile *out = TFile::Open(outputFile.c_str(), "RECREATE");
+  TFile *out = TFile::Open(outputFile.c_str(), "UPDATE");
   TTree *clone = new TTree("mt2", "post processed baby tree for mt2 analysis");
 
   //clone = t->CloneTree(-1, "fast");
@@ -227,6 +242,17 @@ int postProcessing(string inputFile,
   int events = clone->GetEntries();
   float scale1fb = xsec*kfactor*1000*filter/(Float_t)events;
  
+  // get Nevents from Count histogram
+  float count = ((TH1F*)out->Get("Count"))->GetBinContent(1);
+  if (count < events) // this should not happen
+    cout << "ERROR: histogram count has less events than tree" << endl
+	 << "count: "  << count << endl
+	 << "events: "  << events << endl;
+  else if (count > events) // this can happen
+    cout << "WARNING: histogram count has more events than tree" << endl
+	 << "count: "  << count << endl
+	 << "events: "  << events << endl;
+    
   /*
   if(isdata){
 	scale1fb = 1.0;
