@@ -76,6 +76,8 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
 
     std::string dataset(datasetName);
     std::size_t length = dataset.find("_Tune");
+    if (length==std::string::npos) // if "_Tune" doesn't exist try "_13TeV" (some QCD samples)
+      length = dataset.find("_13TeV");
 
     char fileName[512];
     std::size_t nameLength = dataset.copy(fileName, length, 0);
@@ -84,7 +86,7 @@ int run(string sampleFileName="samples_50ns_miniaod.txt",
     for (int c = 0; c <= nameLength; ++c) {
       
       if (fileName[c] == '-' || fileName[c] == '_')
-	fileName[c] = '*';
+	fileName[c] = '?';
       
       if (fileName[c]=='\0')
 	break;
@@ -240,10 +242,10 @@ int postProcessing(string inputFile,
   //Calculate scaling factor and put variables into tree 
   //int events = t->GetEntries();
   int events = clone->GetEntries();
-  float scale1fb = xsec*kfactor*1000*filter/(Float_t)events;
- 
   // get Nevents from Count histogram
-  float count = ((TH1F*)out->Get("Count"))->GetBinContent(1);
+  int count = (int)((TH1F*)out->Get("Count"))->GetBinContent(1);
+  float scale1fb = xsec*kfactor*1000*filter/(Float_t)count;
+ 
   if (count < events) // this should not happen
     cout << "ERROR: histogram count has less events than tree" << endl
 	 << "count: "  << count << endl
@@ -262,12 +264,12 @@ int postProcessing(string inputFile,
 	cout << "scale1fb: " << scale1fb << endl; 
   }
   */
-
+  
   TBranch* b1 = clone->Branch("evt_scale1fb", &scale1fb, "evt_scale1fb/F");
   TBranch* b2 = clone->Branch("evt_xsec", &xsec, "evt_xsec/F");
   TBranch* b3 = clone->Branch("evt_kfactor", &kfactor, "evt_kfactor/F");
   TBranch* b4 = clone->Branch("evt_filter", &filter, "evt_filter/F");
-  TBranch* b5 = clone->Branch("evt_nEvts", &events, "evt_nEvts/I");
+  TBranch* b5 = clone->Branch("evt_nEvts", &count, "evt_nEvts/I");
   TBranch* b6 = clone->Branch("evt_id", &id, "evt_id/I");
 
   for(Int_t i = 0; i < events; i++) {
