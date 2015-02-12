@@ -128,9 +128,14 @@ int main( int argc, char* argv[] ) {
 
        //std::string binName( Form("%s_bin%d", iR->getName().c_str(), iBin) );
        float mt2Min = this_data->GetBinLowEdge( iBin );
-       float mt2Max = this_data->GetBinLowEdge( iBin+1 );
+       float mt2Max = (iBin==this_data->GetNbinsX()) ?  this_data->GetBinLowEdge( iBin+1 ) : -1.;
 
-       std::string binName( Form("%s_m%.0fto%.0f", iR->getName().c_str(), mt2Min, mt2Max) );
+       std::string binName;
+       if( mt2Max>=0. )
+         binName = std::string( Form("%s_m%.0fto%.0f", iR->getName().c_str(), mt2Min, mt2Max) );
+       else
+         binName = std::string( Form("%s_m%.0ftoInf", iR->getName().c_str(), mt2Min) );
+
 
        std::string datacardName( Form("%s/datacard_%s.txt", path_templ.c_str(), binName.c_str()) );
        ofstream datacard( datacardName.c_str() );

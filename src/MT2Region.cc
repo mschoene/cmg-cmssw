@@ -252,7 +252,7 @@ MT2SignalRegion::MT2SignalRegion(int njmin, int njmax, int nbmin, int nbmax, con
   nJetsMax = njmax;
   nBJetsMin = nbmin;
   nBJetsMax = nbmax;
-  if( nJetsMin<nBJetsMin ) nJetsMin = nBJetsMin;
+  //if( nJetsMin<nBJetsMin ) nJetsMin = nBJetsMin;
 
   mtCut = mtcut;
 
@@ -280,7 +280,7 @@ std::string MT2SignalRegion::getName() const {
   std::string bString = getSingleJetString( "b", nBJetsMin, nBJetsMax );
 
   std::string signal_region = jString + "_" + bString;
-  if( mtCut!="" ) signal_region += "_" + mtCut;
+  if( mtCut!="" ) signal_region = signal_region + "_" + mtCut;
 
   return signal_region;
 
@@ -367,17 +367,11 @@ bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
 
   int  thisNJmax = (nJetsMax>=0) ? nJetsMax : 99999;
   int  rhsNJmax = (rhs.nJetsMax>=0) ? rhs.nJetsMax : 99999;
-  int  thisNBmax = (nBJetsMax>=0) ? nBJetsMax : 99999;
-  int  rhsNBmax = (rhs.nBJetsMax>=0) ? rhs.nBJetsMax : 99999;
 
   bool returnBool;
 
   if( thisNJmax == rhsNJmax ) {
     
-    returnBool = thisNBmax<rhsNBmax;
-
-  } else {
-
     if( nBJetsMin!=rhs.nBJetsMin ) {
 
       returnBool = ( nBJetsMin<rhs.nBJetsMin );
@@ -399,6 +393,10 @@ bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
       }
 
     } //if nbjetsmin
+
+  } else {
+
+    returnBool = thisNJmax<rhsNJmax;
 
   } // if njetsmax
 
