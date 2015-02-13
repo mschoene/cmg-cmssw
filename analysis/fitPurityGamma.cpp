@@ -25,6 +25,7 @@ using namespace RooFit;
 
 
 
+//void fitPurity( const std::string& outputdir, TH1D* purity, RooRealVar* x, std::vector<RooDataSet*> data, std::vector<TH1D*> templPrompt, std::vector<TH1D*> templFake );
 void fitPurity( const std::string& outputdir, TH1D* purity, RooRealVar* x, std::vector<RooDataSet*> data, TH1D* templPrompt, TH1D* templFake );
 void fitSinglePurity( const std::string& outputdir, float& purity, float& purityError, RooRealVar* x, RooDataSet* h1_data, TH1D* h1_templPrompt, TH1D* h1_templFake );
 
@@ -57,6 +58,7 @@ int main( int argc, char* argv[] ) {
   TH1::AddDirectory(kFALSE);
 
 
+  //MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_inclusive/data.root", "gammaCR" );
   MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/data.root", "gammaCR" );
 
   MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
@@ -101,6 +103,7 @@ int main( int argc, char* argv[] ) {
 
 
 
+//void fitPurity( const std::string& outputdir, TH1D* h1_purity, RooRealVar* x, std::vector<RooDataSet*> data, std::vector<TH1D*> templPrompt, std::vector<TH1D*> templFake ) {
 void fitPurity( const std::string& outputdir, TH1D* h1_purity, RooRealVar* x, std::vector<RooDataSet*> data, TH1D* templPrompt, TH1D* templFake ) {
 
 
@@ -125,9 +128,6 @@ void fitPurity( const std::string& outputdir, TH1D* h1_purity, RooRealVar* x, st
 void fitSinglePurity( const std::string& outputdir, float& purity, float& purityError, RooRealVar* x, RooDataSet* data, TH1D* h1_templPrompt, TH1D* h1_templFake ) {
 
 
-  // Declare observable x
-  //RooRealVar x("x", "x", h1_templPrompt->GetXaxis()->GetXmin(), templPrompt->GetXaxis()->GetXmax() );
-
   RooDataHist templPrompt("templPrompt", "", *x, h1_templPrompt);
   RooDataHist templFake  ("templFake"  , "", *x, h1_templFake  );
 
@@ -141,13 +141,17 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
 
   //RooDataSet *data = model.generate(x,500);
 
-  model.fitTo(*data); 
+  //RooDataSet* wdata = new RooDataSet(data->GetName(),data->GetTitle(),data,*data->get(),0,"w");
+  model.fitTo(*data);
+  //model.fitTo(*wdata, SumW2Error(kTRUE)); 
+  //model.fitTo(*data, SumW2Error(kTRUE)); 
 
   purity = sigFrac.getVal();
   purityError = sigFrac.getError();
 
   RooPlot* xframe = x->frame();
   data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(), h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
+  //data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(), h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
   model.plotOn(xframe);
 
   // Overlay the background component of model with a dashed line
@@ -163,6 +167,7 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
 
   delete c1;
   delete xframe;
+  //delete wdata;
   //std::cout << "-> Fitted signal fraction: " << sigFrac.getVal() << " +- " << sigFrac.getError() << std::endl;
 
   return;
