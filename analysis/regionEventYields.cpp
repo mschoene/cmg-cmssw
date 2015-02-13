@@ -345,6 +345,10 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
       thisEstimate->assignVar( "qgl1", -1. );
       thisEstimate->assignVar( "qgl2", -1. );
       thisEstimate->assignVar( "qgl3", -1. );
+      thisEstimate->assignVar( "mcFlavour0", 0 );
+      thisEstimate->assignVar( "mcFlavour1", 0 );
+      thisEstimate->assignVar( "mcFlavour2", 0 );
+      thisEstimate->assignVar( "mcFlavour3", 0 );
 
       float qglProd = 1.;
       float qglAve = 0.;
@@ -353,6 +357,7 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
       if( njets>0 ) {
         float qgl0 = myTree.jet_qgl[0];
         thisEstimate->assignVar( "qgl0", qgl0 );
+        thisEstimate->assignVar( "mcFlavour0", myTree.jet_mcFlavour[0] );
         qglProd *= qgl0;
         qglAve += qgl0;
         denom++;
@@ -361,6 +366,7 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
       if( njets>1 ) {
         float qgl1 = myTree.jet_qgl[1];
         thisEstimate->assignVar( "qgl1", qgl1 );
+        thisEstimate->assignVar( "mcFlavour1", myTree.jet_mcFlavour[1] );
         qglProd *= qgl1;
         qglAve += qgl1;
         denom++;
@@ -369,6 +375,7 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
       if( njets>2 ) {
         float qgl2 = myTree.jet_qgl[2];
         thisEstimate->assignVar( "qgl2", qgl2 );
+        thisEstimate->assignVar( "mcFlavour2", myTree.jet_mcFlavour[2] );
         qglProd *= qgl2;
         qglAve += qgl2;
         denom++;
@@ -377,6 +384,7 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
       if( njets>3 ) {
         float qgl3 = myTree.jet_qgl[3];
         thisEstimate->assignVar( "qgl3", qgl3 );
+        thisEstimate->assignVar( "mcFlavour3", myTree.jet_mcFlavour[3] );
         qglProd *= qgl3;
         qglAve += qgl3;
         denom++;
