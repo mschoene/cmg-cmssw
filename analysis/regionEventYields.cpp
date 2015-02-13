@@ -14,6 +14,7 @@
 #include "TLegend.h"
 #include "TPaveText.h"
 #include "TGraphAsymmErrors.h"
+#include "TLorentzVector.h"
 
 
 #include "interface/MT2Sample.h"
@@ -75,6 +76,7 @@ class MT2Config {
 void randomizePoisson( MT2Analysis<MT2EstimateTree>* data );
 MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Config& cfg, float lumi=1. );
 MT2Analysis<MT2EstimateTree>* mergeYields( std::vector< MT2Analysis<MT2EstimateTree> *> EventYield, const std::string& regionsSet, const std::string& name, int id_min, int id_max=-1, const std::string& legendName="" );
+int matchPartonToJet( int index, MT2Tree* myTree );
 
 
 void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateTree>* data, std::vector<MT2Analysis<MT2EstimateTree>* > bgYields );
@@ -276,7 +278,11 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
   
 
   MT2Tree myTree;
-  myTree.loadGenStuff = false;
+  if( cfg.additionalStuff()=="qgVars" ) {
+     myTree.loadGenStuff = true;
+  } else {
+    myTree.loadGenStuff = false;
+  }
   myTree.Init(tree);
 
 
@@ -285,10 +291,10 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
   MT2Analysis<MT2EstimateTree>* analysis = new MT2Analysis<MT2EstimateTree>( sample.sname, regionsSet, sample.id );
 
   if( cfg.additionalStuff()=="qgVars" ) {
-    MT2EstimateTree::addVar( analysis, "mcFlavour0" );
-    MT2EstimateTree::addVar( analysis, "mcFlavour1" );
-    MT2EstimateTree::addVar( analysis, "mcFlavour2" );
-    MT2EstimateTree::addVar( analysis, "mcFlavour3" );
+    MT2EstimateTree::addVar( analysis, "partId0" );
+    MT2EstimateTree::addVar( analysis, "partId1" );
+    MT2EstimateTree::addVar( analysis, "partId2" );
+    MT2EstimateTree::addVar( analysis, "partId3" );
     MT2EstimateTree::addVar( analysis, "qgl0" );
     MT2EstimateTree::addVar( analysis, "qgl1" );
     MT2EstimateTree::addVar( analysis, "qgl2" );
@@ -345,49 +351,67 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
       thisEstimate->assignVar( "qgl1", -1. );
       thisEstimate->assignVar( "qgl2", -1. );
       thisEstimate->assignVar( "qgl3", -1. );
-      thisEstimate->assignVar( "mcFlavour0", 0 );
-      thisEstimate->assignVar( "mcFlavour1", 0 );
-      thisEstimate->assignVar( "mcFlavour2", 0 );
-      thisEstimate->assignVar( "mcFlavour3", 0 );
+      thisEstimate->assignVar( "partId0", 0 );
+      thisEstimate->assignVar( "partId1", 0 );
+      thisEstimate->assignVar( "partId2", 0 );
+      thisEstimate->assignVar( "partId3", 0 );
 
       float qglProd = 1.;
       float qglAve = 0.;
       int denom = 0;
 
+
       if( njets>0 ) {
+
         float qgl0 = myTree.jet_qgl[0];
         thisEstimate->assignVar( "qgl0", qgl0 );
-        thisEstimate->assignVar( "mcFlavour0", myTree.jet_mcFlavour[0] );
         qglProd *= qgl0;
         qglAve += qgl0;
         denom++;
+        thisEstimate->assignVar( "partId0", matchPartonToJet( 0, &myTree ) );
+        //thisEstimate->assignVar( "partId0", myTree.jet_mcFlavour[0] );
+
       }
 
+
       if( njets>1 ) {
+
         float qgl1 = myTree.jet_qgl[1];
         thisEstimate->assignVar( "qgl1", qgl1 );
-        thisEstimate->assignVar( "mcFlavour1", myTree.jet_mcFlavour[1] );
         qglProd *= qgl1;
         qglAve += qgl1;
         denom++;
+
+        thisEstimate->assignVar( "partId1", matchPartonToJet( 1, &myTree ) );
+        //thisEstimate->assignVar( "partId1", myTree.jet_mcFlavour[1] );
+
       }
         
       if( njets>2 ) {
+
         float qgl2 = myTree.jet_qgl[2];
         thisEstimate->assignVar( "qgl2", qgl2 );
-        thisEstimate->assignVar( "mcFlavour2", myTree.jet_mcFlavour[2] );
         qglProd *= qgl2;
         qglAve += qgl2;
         denom++;
+
+        thisEstimate->assignVar( "partId2", matchPartonToJet( 2, &myTree ) );
+        //thisEstimate->assignVar( "partId2", myTree.jet_mcFlavour[2] );
+
       }
         
+
       if( njets>3 ) {
+
         float qgl3 = myTree.jet_qgl[3];
         thisEstimate->assignVar( "qgl3", qgl3 );
-        thisEstimate->assignVar( "mcFlavour3", myTree.jet_mcFlavour[3] );
         qglProd *= qgl3;
         qglAve += qgl3;
         denom++;
+
+        thisEstimate->assignVar( "partId3", matchPartonToJet( 3, &myTree ) );
+        //thisEstimate->assignVar( "partId3", myTree.jet_mcFlavour[3] );
+
       }
 
       qglAve /= (float)denom;
@@ -403,6 +427,7 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
       thisEstimate->fillTree(myTree, weight );
 
     }
+
 
 
     thisEstimate->yield->Fill(mt2, weight );
@@ -696,5 +721,35 @@ void randomizePoisson( MT2Analysis<MT2EstimateTree>* data ) {
 
 //    }// for signal regions
 //  }// for HT regions
+
+}
+
+
+
+int matchPartonToJet( int index, MT2Tree* myTree ) {
+
+  float deltaRMin = 0.3; // at least 0.3
+  int foundId = 0;
+
+  TLorentzVector jet;
+  jet.SetPtEtaPhiM( myTree->jet_pt[index], myTree->jet_eta[index], myTree->jet_phi[index], myTree->jet_mass[index] );
+
+
+  for( unsigned i=0; i<myTree->ngenPart; ++i ) {
+
+    if( myTree->genPart_status[i]!=23 ) continue;
+    if( !(myTree->genPart_pdgId[i]==21 || abs(myTree->genPart_pdgId[i]<6)) ) continue;
+
+    TLorentzVector thisPart;
+    thisPart.SetPtEtaPhiM( myTree->genPart_pt[i], myTree->genPart_eta[i], myTree->genPart_phi[i], myTree->genPart_mass[i] );
+
+    float thisDeltaR = jet.DeltaR(thisPart);
+    if( thisDeltaR<deltaRMin ) {
+      deltaRMin = thisDeltaR;
+      foundId = myTree->genPart_pdgId[i];
+    }
+  }
+
+  return foundId;
 
 }
