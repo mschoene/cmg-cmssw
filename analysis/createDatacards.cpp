@@ -13,12 +13,15 @@
 #include "interface/MT2Estimate.h"
 
 
+bool use_gamma = true;
+
 
 
 void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float err_uncorr );
 void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysis, const std::string& name="stat" );
 MT2Analysis<MT2Estimate>* get( const std::string& name, std::vector< MT2Analysis<MT2Estimate>* > analyses, const std::string& name1, const std::string& name2="", const std::string& name3="", const std::string& name4="" );
 std::string getSimpleSignalName( const std::string& longName );
+std::string gammaConvention( float yieldSR, int yieldCR, int position, const std::string& corrName, const std::string& uncorrName="", float testAlpha=1. );
 
 
 
@@ -43,6 +46,7 @@ int main( int argc, char* argv[] ) {
   float err_qcd_uncorr  = 1.0; // 100% of QCD MC yield
   float err_llep_corr   = 0.;
   float err_llep_uncorr = 0.075;
+  float err_llep_lepEff = 0.15;
   float err_zinv_corr   = 0.2; // 20% on Z/gamma ratio
   float err_zinv_uncorr = -1.; // will take histogram bin error
   float err_sig_corr    = 0.1;
@@ -67,10 +71,15 @@ int main( int argc, char* argv[] ) {
   ////*llep += *wjets;
   
   MT2Analysis<MT2Estimate>* zinv;
+  MT2Analysis<MT2Estimate>* zinvCR;
+  MT2Analysis<MT2Estimate>* zinv_ratio;
   if( useMC_zinv )
     zinv = MT2Analysis<MT2Estimate>::readFromFile( mc_fileName, "ZJets");
-  else
-    zinv = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14_4fb/MT2ZinvEstimate.root", "ZinvEstimate");
+  else {
+    zinv       = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14_4fb/MT2ZinvEstimate.root", "ZinvEstimate");
+    zinvCR     = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14_4fb/mc.root", "gammaJet");
+    zinv_ratio = MT2Analysis<MT2Estimate>::readFromFile( "ZinvEstimateFromGamma_CSA14_Zinv_13TeV_CSA14_4fb/mc.root", "ZgammaRatio");
+  }
   zinv->setName("zinv");
   zinv->addToFile( mc_fileName, true );
 
@@ -111,6 +120,8 @@ int main( int argc, char* argv[] ) {
      TH1D* this_zinv = zinv->get(*iR)->yield;
      TH1D* this_llep = llep->get(*iR)->yield;
      TH1D* this_llepCR = llepCR->get(*iR)->yield;
+     TH1D* this_zinvCR     = (use_gamma) ? zinvCR->get(*iR)->yield : 0;
+     TH1D* this_zinv_ratio = (use_gamma) ? zinv_ratio->get(*iR)->yield : 0;
 
      float N_llep_CR = this_llepCR->Integral();
      std::string llepCR_name = iR->getName();
@@ -157,13 +168,25 @@ int main( int argc, char* argv[] ) {
        datacard << "-------------" << std::endl;
        datacard << std::endl << std::endl;
 
-       //if(this_zinv->GetBinContent(iBin) < 1e-3) this_zinv->SetBinContent(iBin, 1e-3);
-       //if(this_llep->GetBinContent(iBin) < 1e-3) this_llep->SetBinContent(iBin, 1e-3);
-       //if(this_qcd->GetBinContent(iBin) < 1e-3) this_qcd->SetBinContent(iBin, 1e-3);
 
-       float yield_llep = (this_llep->GetBinContent(iBin)<0.001) ? 0.01 : this_llep->GetBinContent(iBin);
-       float yield_qcd  = (this_qcd->GetBinContent(iBin) <0.001) ? 0.01 : this_qcd->GetBinContent(iBin);
-       float yield_zinv = (this_zinv->GetBinContent(iBin)<0.001) ? 0.01 : this_zinv->GetBinContent(iBin);
+       float yield_llep = this_llep->GetBinContent(iBin);
+       float yield_qcd  = this_qcd->GetBinContent(iBin);
+       float yield_zinv = this_zinv->GetBinContent(iBin);
+
+       if( use_gamma ) {
+             
+         if( yield_llep<0.001 && yield_zinv<0.001 && yield_qcd<0.001 ) {
+           yield_qcd  = 0.01;
+         }
+
+       } else {
+ 
+         if( yield_zinv<0.001 ) yield_zinv = 0.01;
+         if( yield_qcd <0.001 ) yield_qcd  = 0.01;
+         if( yield_llep<0.001 ) yield_llep = 0.01;
+
+       }
+
 
 
        // sig qcd zinv llep
@@ -183,7 +206,7 @@ int main( int argc, char* argv[] ) {
 
        // Z INVISIBLE SYSTEMATICS:
 
-       if( yield_zinv>0. ) {
+       if( yield_zinv>0. || use_gamma ) {
 
          if( iR->nBJetsMin()<2 ) { // 0 and 1 btag
 
@@ -193,12 +216,28 @@ int main( int argc, char* argv[] ) {
          }
 
          // uncorrelated:
-         if( this_zinv->GetBinContent(iBin)>0. ) {
-           float thisError_zinv_uncorr = 1. + this_zinv->GetBinError(iBin)/this_zinv->GetBinContent(iBin);
+         float thisError_zinv_uncorr = 1. + this_zinv->GetBinError(iBin)/this_zinv->GetBinContent(iBin);
+         if( !use_gamma ) {
+
            std::string iname = (iR->nBJetsMin()<2) ? "CRstat" : "MC";
            datacard << "zinv_" << iname << "_" << binName << " lnN - " << thisError_zinv_uncorr << " - -" << std::endl;
-         }
 
+         } else {
+
+           if( iR->nBJetsMin()>=2 ) {
+
+             datacard << "zinv_MC_" << binName << " lnN - " << thisError_zinv_uncorr << " - -" << std::endl;
+
+           } else {
+
+             float alphaErr = 1. + this_zinv_ratio->GetBinError(iBin)/this_zinv_ratio->GetBinContent(iBin); 
+             int Ngamma = (int)(this_zinvCR->GetBinContent(iBin));
+             datacard << "zinv_alphaErr_" << binName << " lnN  - " << alphaErr << " - -" << std::endl;
+             datacard << "zinv_CRstat_" << gammaConvention( yield_zinv, Ngamma, 1, binName ) << std::endl;
+
+           }
+
+         } // if use gamma
 
        } // if zinv
 
@@ -207,13 +246,37 @@ int main( int argc, char* argv[] ) {
 
        // LOST LEPTON SYSTEMATICS:
 
-       if( yield_llep>0. ) {
+       if( yield_llep>0. || use_gamma ) {
 
          // correlated within the SR (stat-like):
          float llep_stat_err = (N_llep_CR>0) ? 1./sqrt((float)N_llep_CR) : 0.;
-         float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + 0.15*0.15 );
+         float llep_tot_err = sqrt( llep_stat_err*llep_stat_err + err_llep_lepEff*err_llep_lepEff );
          llep_tot_err+=1.;
-         datacard << "llep_CRstat_" << llepCR_name << "  lnN   - - " << llep_tot_err << " -" << std::endl;
+
+
+         if( !use_gamma ) {
+
+           datacard << "llep_CRstat_" << llepCR_name << "  lnN   - - " << llep_tot_err << " -" << std::endl;
+
+         } else {
+
+           datacard << "llep_lepEff_" << llepCR_name << "  lnN - - " << 1.+err_llep_lepEff << " -" << std::endl;
+
+           datacard << "llep_CRstat_" << gammaConvention( yield_llep, N_llep_CR, 2, llepCR_name, binName ) << std::endl;
+
+           //float testAlpha = 1.;
+           //if( N_llep_CR==0 && yield_llep==0. ) {
+           //  datacard << "llep_CRstat_" << llepCR_name << "  gmN " << N_llep_CR << "   - - " << testAlpha << " -" << std::endl;
+           //} else if( N_llep_CR==0 && yield_llep>0. ) {
+           //  datacard << "llep_CRstat_" << llepCR_name << "  lnN  - - 2.000 -" << std::endl;
+           //} else if( N_llep_CR!=0 && yield_llep==0. ) {
+           //  datacard << "llep_CRstat_" << binName << "  gmN 0    - - " << testAlpha << std::endl;
+           //} else {
+           //  float alpha = yield_llep/((float)N_llep_CR);
+           //  datacard << "llep_CRstat_" << llepCR_name << "  gmN " << N_llep_CR << "    - - " << alpha << std::endl;
+           //}
+           
+         }
 
          // uncorrelated:
          datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
@@ -462,3 +525,47 @@ std::string getSimpleSignalName( const std::string& longName ) {
 
 }
 
+
+
+
+std::string gammaConvention( float yieldSR, int yieldCR, int position, const std::string& corrName, const std::string& uncorrName, float testAlpha ) {
+  
+  std::string use_uncorrName(uncorrName);
+  if( uncorrName=="" ) 
+    use_uncorrName = corrName;
+
+  std::stringstream line;
+  line << std::fixed;
+  line << std::setprecision(3);
+
+  int precision = 3;
+  float syst = -1.;
+  if( yieldCR==0 && yieldSR==0. ) {
+    line << "llep_CRstat_" << corrName << "  gmN " << yieldCR << "   ";
+    syst = testAlpha;
+  } else if( yieldCR==0 && yieldSR>0. ) {
+    line << "llep_CRstat_" << corrName << "  lnN  ";
+    syst = 2.;
+  } else if( yieldCR!=0 && yieldSR==0. ) {
+    line << "llep_CRstat_" << use_uncorrName << "  gmN 0  ";
+    syst = testAlpha;
+  } else {
+    float alpha = yieldSR/((float)yieldCR);
+    line << "llep_CRstat_" << corrName << "  gmN " << yieldCR << "   ";
+    syst = alpha;
+    precision = 5;
+  }
+  line << std::setprecision(precision);
+
+  for( unsigned i=0; i<position; ++i )
+    line << " - ";
+
+  line << syst;
+
+  for( unsigned i=position+1; i<4; ++i )
+    line << " - ";
+
+  std::string line_str = line.str();
+  return line_str;
+
+}
