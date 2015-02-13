@@ -5,13 +5,15 @@
 #include <fstream>
 #include <cmath>
 
+#include "TRandom3.h"
+
 
 
 
 
 MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2Region& aregion ) : MT2Estimate( aname, aregion ) {
 
-  int nbins = 25;
+  int nbins = 50;
   float xmax = 1.;
 
   // this histo will be used to create histogram templates:
@@ -19,6 +21,7 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2R
   iso->Sumw2();
 
   x_ = new RooRealVar( "x", "", 0., xmax );
+  w_ = new RooRealVar( "w", "", 0., 1000. );
 
   int nbins_mt2;
   double *bins_mt2;
@@ -27,7 +30,9 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2R
 
   for( unsigned i=0; i<nbins_mt2; ++i ) {
 
-    RooDataSet* isoDataset = new RooDataSet( this->getHistoName(Form("iso_bin%d", i)).c_str(), "", *x_ );
+    RooDataSet* isoDataset = new RooDataSet( this->getHistoName(Form("iso_bin%d", i)).c_str(), "", RooArgSet(*x_,*w_), w_->GetName() );
+  //DataSet = new RooDataSet("dataset", "A dataset", *ArgSet, "weight");
+  //RooDataSet *data   = new RooDataSet("data", "data", RooArgSet(*y,*weight));
     iso_bins.push_back(isoDataset);
 
     TH1D* this_iso_hist = new TH1D( this->getHistoName(Form("iso_bin%d_hist", i)).c_str() , "", nbins, 0., xmax);
@@ -98,7 +103,8 @@ void MT2EstimateZinvGamma::fillIso( float iso, float weight, float mt2 ) {
     foundBin-=1; // want first bin to be 0 (fuck you root)
     if( foundBin>=0 ) {
       x_->setVal(iso);
-      iso_bins[foundBin]->add( *x_, weight );
+      w_->setVal(weight);
+      iso_bins[foundBin]->add( RooArgList(*x_, *w_), weight );
       iso_bins_hist[foundBin]->Fill( iso, weight );
     }
   }
@@ -106,6 +112,40 @@ void MT2EstimateZinvGamma::fillIso( float iso, float weight, float mt2 ) {
 }
  
  
+void MT2EstimateZinvGamma::fakeDatasetsFromHistos(int seed) {
+
+  TRandom3 rand(seed);
+
+  for( unsigned i=0; i<iso_bins_hist.size(); ++i ) {
+
+    RooDataSet* newdataset = new RooDataSet( this->getHistoName(Form("iso_bin%d", i)).c_str(), "", RooArgSet(*x_,*w_), w_->GetName() );
+
+    for( unsigned ibin=1; ibin<iso_bins_hist[i]->GetNbinsX()+1; ++ibin ) {
+
+      float isoValue = iso_bins_hist[i]->GetBinLowEdge(ibin);
+      //float isoValue = iso_bins_hist[i]->GetBinCenter(ibin);
+
+      //int entries = (int)iso_bins_hist[i]->GetBinContent(ibin);
+      int entries = rand.Poisson( iso_bins_hist[i]->GetBinContent(ibin) );
+
+      for( unsigned ientry=0; ientry<entries; ++ientry ) {
+
+        x_->setVal(isoValue);
+        w_->setVal(1.);
+
+        newdataset->add( RooArgList(*x_, *w_), 1. );
+
+      } // for entries
+
+    } // for bins
+
+    iso_bins[i] = new RooDataSet( *newdataset );
+
+  } // for histos
+
+}
+    
+
 
 
 void MT2EstimateZinvGamma::finalize() {
