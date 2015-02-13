@@ -16,6 +16,10 @@
 bool use_gamma = true;
 
 
+int round(float d) {
+  return (int)(floor(d + 0.5));
+}
+
 
 void writeToTemplateFile( TFile* file, MT2Analysis<MT2Estimate>* analysis, float err_uncorr );
 void writeToTemplateFile_poisson( TFile* file, MT2Analysis<MT2Estimate>* analysis, const std::string& name="stat" );
@@ -139,7 +143,6 @@ int main( int argc, char* argv[] ) {
 
      for( unsigned iBin=1; iBin<this_data->GetNbinsX()+1; ++iBin ) {
 
-       //std::string binName( Form("%s_bin%d", iR->getName().c_str(), iBin) );
        float mt2Min = this_data->GetBinLowEdge( iBin );
        float mt2Max = (iBin==this_data->GetNbinsX()) ?  -1. : this_data->GetBinLowEdge( iBin+1 );
 
@@ -175,6 +178,9 @@ int main( int argc, char* argv[] ) {
 
        if( use_gamma ) {
              
+         if( yield_zinv<0.001 ) yield_zinv = 0.;
+         if( yield_qcd <0.001 ) yield_qcd  = 0.;
+         if( yield_llep<0.001 ) yield_llep = 0.;
          if( yield_llep<0.001 && yield_zinv<0.001 && yield_qcd<0.001 ) {
            yield_qcd  = 0.01;
          }
@@ -226,14 +232,17 @@ int main( int argc, char* argv[] ) {
 
            if( iR->nBJetsMin()>=2 ) {
 
-             datacard << "zinv_MC_" << binName << " lnN - " << thisError_zinv_uncorr << " - -" << std::endl;
+             if( yield_zinv>0. )
+               datacard << "zinv_MC_" << binName << " lnN - " << thisError_zinv_uncorr << " - -" << std::endl;
 
            } else {
 
-             float alphaErr = 1. + this_zinv_ratio->GetBinError(iBin)/this_zinv_ratio->GetBinContent(iBin); 
-             int Ngamma = (int)(this_zinvCR->GetBinContent(iBin));
-             datacard << "zinv_alphaErr_" << binName << " lnN  - " << alphaErr << " - -" << std::endl;
+             int Ngamma = round(this_zinvCR->GetBinContent(iBin));
              datacard << "zinv_CRstat_" << gammaConvention( yield_zinv, Ngamma, 1, binName ) << std::endl;
+             if(  yield_zinv>0. ) {
+               float alphaErr = 1. + this_zinv_ratio->GetBinError(iBin)/this_zinv_ratio->GetBinContent(iBin); 
+               datacard << "zinv_alphaErr_" << binName << " lnN  - " << alphaErr << " - -" << std::endl;
+             }
 
            }
 
@@ -257,29 +266,20 @@ int main( int argc, char* argv[] ) {
          if( !use_gamma ) {
 
            datacard << "llep_CRstat_" << llepCR_name << "  lnN   - - " << llep_tot_err << " -" << std::endl;
+           datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
 
          } else {
 
-           datacard << "llep_lepEff_" << llepCR_name << "  lnN - - " << 1.+err_llep_lepEff << " -" << std::endl;
+           datacard << "llep_lepEff_" << llepCR_name << "  lnN  - - " << 1.+err_llep_lepEff << " -" << std::endl;
+           datacard << "llep_CRstat_" << gammaConvention( yield_llep, round(N_llep_CR), 2, llepCR_name, binName ) << std::endl;
+           if( yield_llep>0. ) {
+             datacard << "llep_MCstat_" << binName << " lnN  - - " << this_llep->GetBinError(iBin)/this_llep->GetBinContent(iBin) << " -" << std::endl;
+             datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
+           }
 
-           datacard << "llep_CRstat_" << gammaConvention( yield_llep, N_llep_CR, 2, llepCR_name, binName ) << std::endl;
-
-           //float testAlpha = 1.;
-           //if( N_llep_CR==0 && yield_llep==0. ) {
-           //  datacard << "llep_CRstat_" << llepCR_name << "  gmN " << N_llep_CR << "   - - " << testAlpha << " -" << std::endl;
-           //} else if( N_llep_CR==0 && yield_llep>0. ) {
-           //  datacard << "llep_CRstat_" << llepCR_name << "  lnN  - - 2.000 -" << std::endl;
-           //} else if( N_llep_CR!=0 && yield_llep==0. ) {
-           //  datacard << "llep_CRstat_" << binName << "  gmN 0    - - " << testAlpha << std::endl;
-           //} else {
-           //  float alpha = yield_llep/((float)N_llep_CR);
-           //  datacard << "llep_CRstat_" << llepCR_name << "  gmN " << N_llep_CR << "    - - " << alpha << std::endl;
-           //}
-           
          }
+           
 
-         // uncorrelated:
-         datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
 
        }
 
