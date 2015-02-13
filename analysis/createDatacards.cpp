@@ -88,8 +88,8 @@ int main( int argc, char* argv[] ) {
   llep->addToFile( mc_fileName, true );
 
 
-  //MT2Analysis<MT2Estimate>* llepCR = MT2Analysis<MT2Estimate>::readFromFile( "llep_CSA14sr_phys14.root" );
-  MT2Analysis<MT2Estimate>* llepCR = llep;
+  MT2Analysis<MT2Estimate>* llepCR = MT2Analysis<MT2Estimate>::readFromFile( "llep_CSA14sr_phys14.root" );
+  //MT2Analysis<MT2Estimate>* llepCR = llep;
 
 
   std::set<MT2Region> regions = data->getRegions();
