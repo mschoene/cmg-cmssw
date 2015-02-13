@@ -314,7 +314,8 @@ std::string MT2SignalRegion::getNiceName() const {
   std::string niceName_j = getNiceJetName( "j", nJetsMin,  nJetsMax  );
   std::string niceName_b = getNiceJetName( "b", nBJetsMin,  nBJetsMax  );
 
-  std::string niceName = niceName_j + ",  " + niceName_b;
+  std::string niceName = niceName_j;
+  if( niceName!="" && niceName_b!="" ) niceName += ",  " + niceName_b;
 
   if( mtCut=="loMT"  ) niceName += " (low M_{T})";
   else if( mtCut=="hiMT" ) niceName += " (high M_{T})";
@@ -325,6 +326,8 @@ std::string MT2SignalRegion::getNiceName() const {
 
 
 std::string MT2SignalRegion::getNiceJetName( const std::string& pedix, int nmin, int nmax ) const {
+
+  if( nmin==-1 && nmax==-1 ) return std::string("");
 
   char n[500];
   if( nmax==nmin )
