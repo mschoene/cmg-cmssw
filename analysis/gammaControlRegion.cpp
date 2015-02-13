@@ -48,8 +48,8 @@ int main( int argc, char* argv[] ) {
   
 
 
-  //std::string regionsSet = "13TeV_onlyHT";
   std::string regionsSet = "13TeV_CSA14";
+  //std::string regionsSet = "13TeV_onlyHT";
   //std::string regionsSet = "13TeV_inclusive";
   //std::string regionsSet = "13TeV_ZinvGammaPurity";
 
@@ -177,7 +177,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     }
     if( found_pt<100. ) continue;
 
-    float mcMatchId = myTree.gamma_mcMatchId[0];
+    int mcMatchId = myTree.gamma_mcMatchId[0];
     if( selectID>0 && mcMatchId==0 ) continue;
     //if( selectID>=0 && selectID!=mcMatchId ) continue;
 
@@ -216,23 +216,24 @@ void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data ) {
   TRandom3 rand(13);
 
 
-  std::set<MT2HTRegion> HTRegions = data->getHTRegions();
-  std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
+  std::set<MT2Region> regions = data->getRegions();
 
-  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
-    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+  for( std::set<MT2Region>::iterator iR = regions.begin(); iR!=regions.end(); ++iR ) {
 
-      MT2Region thisRegion( (*iHT), (*iSR) );
+    MT2Region thisRegion( (*iR) );
 
-      randomizeSingleHisto(rand, data->get(thisRegion)->yield);
-      randomizeSingleHisto(rand, data->get(thisRegion)->iso);
+    randomizeSingleHisto(rand, data->get(thisRegion)->yield);
+    randomizeSingleHisto(rand, data->get(thisRegion)->iso);
 
-      for( unsigned i=0; i < data->get(thisRegion)->iso_bins_hist.size(); ++i ) {
-        randomizeSingleHisto(rand, data->get(thisRegion)->iso_bins_hist[i]);
-      }
+    for( unsigned i=0; i < data->get(thisRegion)->iso_bins_hist.size(); ++i ) {
+      randomizeSingleHisto(rand, data->get(thisRegion)->iso_bins_hist[i]);
+    }
 
-    }// for signal regions
-  }// for HT regions
+    data->get( thisRegion)->fakeDatasetsFromHistos();
+
+  }// for regions
+
+
 
 }
 
@@ -249,3 +250,4 @@ void randomizeSingleHisto( TRandom3 rand, TH1D* histo ) {
   }  // for bins
 
 }
+

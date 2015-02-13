@@ -81,14 +81,14 @@ int main( int argc, char* argv[] ) {
     MT2Analysis<MT2Estimate>* top   = MT2Analysis<MT2Estimate>::readFromFile( mc_fileName, "Top");
     llep = new MT2Analysis<MT2Estimate>( (*wjets) + (*top) );
   } else {
-    llep = MT2Analysis<MT2Estimate>::readFromFile( "llep_CR_PHYS14_MTbins.root" );
+    llep = MT2Analysis<MT2Estimate>::readFromFile( "llep_CSA14sr_phys14.root" );
     //llep = MT2Analysis<MT2Estimate>::readFromFile( "llep_newSR_phys14.root" );
   }
   llep->setName( "llep" );
   llep->addToFile( mc_fileName, true );
 
 
-  //MT2Analysis<MT2Estimate>* llepCR = MT2Analysis<MT2Estimate>::readFromFile( "llep_CR_PHYS14_MTbins.root" );
+  //MT2Analysis<MT2Estimate>* llepCR = MT2Analysis<MT2Estimate>::readFromFile( "llep_CSA14sr_phys14.root" );
   MT2Analysis<MT2Estimate>* llepCR = llep;
 
 
@@ -161,15 +161,17 @@ int main( int argc, char* argv[] ) {
        //if(this_llep->GetBinContent(iBin) < 1e-3) this_llep->SetBinContent(iBin, 1e-3);
        //if(this_qcd->GetBinContent(iBin) < 1e-3) this_qcd->SetBinContent(iBin, 1e-3);
 
-       if(this_llep->GetBinContent(iBin) < 1e-3 && this_zinv->GetBinContent(iBin) < 1e-3 && this_zinv->GetBinContent(iBin) < 1e-3) this_llep->SetBinContent(iBin, 1e-3);
+       float yield_llep = (this_llep->GetBinContent(iBin)<0.001) ? 0.01 : this_llep->GetBinContent(iBin);
+       float yield_qcd  = (this_qcd->GetBinContent(iBin) <0.001) ? 0.01 : this_qcd->GetBinContent(iBin);
+       float yield_zinv = (this_zinv->GetBinContent(iBin)<0.001) ? 0.01 : this_zinv->GetBinContent(iBin);
+
 
        // sig qcd zinv llep
        datacard << "bin \t" << binName << "\t" << binName << "\t" << binName << "\t" << binName << std::endl;
        datacard << "process \t sig \t zinv \t llep \t qcd" << std::endl;
        datacard << "process \t 0 \t 1 \t 2 \t 3" << std::endl;
-       datacard << "rate \t ";
-         datacard << "XXX";
-       datacard << " \t " << this_zinv->GetBinContent(iBin) << " \t " << this_llep->GetBinContent(iBin) << " \t " << this_qcd->GetBinContent(iBin) << std::endl;
+       datacard << "rate \t XXX";
+       datacard << " \t " << yield_zinv << " \t " << yield_llep << " \t " << yield_qcd << std::endl;
        datacard << "-------------" << std::endl;
 
        datacard << "sig_syst    lnN    " << 1.+err_sig_corr << " - - -" << std::endl;
@@ -181,7 +183,7 @@ int main( int argc, char* argv[] ) {
 
        // Z INVISIBLE SYSTEMATICS:
 
-       if( this_zinv->GetBinContent(iBin)>0. ) {
+       if( yield_zinv>0. ) {
 
          if( iR->nBJetsMin()<2 ) { // 0 and 1 btag
 
@@ -205,7 +207,7 @@ int main( int argc, char* argv[] ) {
 
        // LOST LEPTON SYSTEMATICS:
 
-       if( this_llep->GetBinContent(iBin)>0. ) {
+       if( yield_llep>0. ) {
 
          // correlated within the SR (stat-like):
          float llep_stat_err = (N_llep_CR>0) ? 1./sqrt((float)N_llep_CR) : 0.;
@@ -222,7 +224,7 @@ int main( int argc, char* argv[] ) {
 
        // QCD SYSTEMATICS:
 
-       if( this_qcd->GetBinContent(iBin)>0. ) {
+       if( yield_qcd>0. ) {
          datacard << "qcd_syst_" << binName << " lnN - - - " << 1.+err_qcd_uncorr << std::endl;
        }
 

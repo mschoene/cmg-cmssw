@@ -47,28 +47,28 @@ int main( int argc, char* argv[] ) {
   
 
   std::vector<MT2Region> r_lowHT_vs_njet;
-  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 200., 2,  3, 0, 0 ) );
-  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 200., 4, -1, 0, 0 ) );
-  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 200., 2,  3, 1, 1 ) );
-  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 200., 4, -1, 1, 1 ) );
+  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 2,  3, 0, 0 ) );
+  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 4, -1, 0, 0 ) );
+  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 2,  3, 1, 1 ) );
+  r_lowHT_vs_njet.push_back( MT2Region( 450., 575., 4, -1, 1, 1 ) );
 
   compareRegions( outputdir, r_lowHT_vs_njet, templatesPrompt, true  );
   compareRegions( outputdir, r_lowHT_vs_njet, templatesFake , false );
 
   std::vector<MT2Region> r_medHT_vs_njet;
-  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 2,  3, 0, 0 ) );
-  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 4, -1, 0, 0 ) );
-  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 2,  3, 1, 1 ) );
-  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 200., 4, -1, 1, 1 ) );
+  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 2,  3, 0, 0 ) );
+  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 4, -1, 0, 0 ) );
+  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 2,  3, 1, 1 ) );
+  r_medHT_vs_njet.push_back( MT2Region( 575., 1000., 4, -1, 1, 1 ) );
 
   compareRegions( outputdir, r_medHT_vs_njet, templatesPrompt, true );
   compareRegions( outputdir, r_medHT_vs_njet, templatesFake, false );
 
   std::vector<MT2Region> r_highHT_vs_njet;
-  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 2,  3, 0, 0 ) );
-  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 4, -1, 0, 0 ) );
-  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 2,  3, 1, 1 ) );
-  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 4, -1, 1, 1 ) );
+  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 2,  3, 0, 0 ) );
+  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 4, -1, 0, 0 ) );
+  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 2,  3, 1, 1 ) );
+  r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 4, -1, 1, 1 ) );
 
   compareRegions( outputdir, r_highHT_vs_njet, templatesPrompt, true );
   compareRegions( outputdir, r_highHT_vs_njet, templatesFake, false );
@@ -92,9 +92,9 @@ int main( int argc, char* argv[] ) {
 
   std::vector<MT2Region> r_vsHT;
   //r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 2, -1, 0, 0 ) );
-  r_vsHT.push_back( MT2Region( 450., 575. , 200., 2, 3, 0, 0 ) );
-  r_vsHT.push_back( MT2Region( 575., 1000., 200., 2, 3, 0, 0 ) );
-  r_vsHT.push_back( MT2Region( 1000., -1. ,  30., 2, 3, 0, 0 ) );
+  r_vsHT.push_back( MT2Region( 450., 575. , 2, 3, 0, 0 ) );
+  r_vsHT.push_back( MT2Region( 575., 1000., 2, 3, 0, 0 ) );
+  r_vsHT.push_back( MT2Region( 1000., -1. , 2, 3, 0, 0 ) );
 
   compareRegions( outputdir, r_vsHT, templatesPrompt, true );
   compareRegions( outputdir, r_vsHT, templatesFake , false );
@@ -103,9 +103,9 @@ int main( int argc, char* argv[] ) {
 
   std::vector<MT2Region> r_vsHT2;
   //r_highHT_vs_njet.push_back( MT2Region( 1000., -1., 30., 2, -1, 0, 0 ) );
-  r_vsHT2.push_back( MT2Region( 450., 575. , 200., 4, -1, 0, 0 ) );
-  r_vsHT2.push_back( MT2Region( 575., 1000., 200., 4, -1, 0, 0 ) );
-  r_vsHT2.push_back( MT2Region( 1000., -1. ,  30., 4, -1, 0, 0 ) );
+  r_vsHT2.push_back( MT2Region( 450., 575. , 4, -1, 0, 0 ) );
+  r_vsHT2.push_back( MT2Region( 575., 1000., 4, -1, 0, 0 ) );
+  r_vsHT2.push_back( MT2Region( 1000., -1. , 4, -1, 0, 0 ) );
 
   compareRegions( outputdir, r_vsHT2, templatesPrompt, true );
   compareRegions( outputdir, r_vsHT2, templatesFake , false );
@@ -148,17 +148,21 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
   c1_log->SetLogy();
 
-  float xMax = 1.2;
+  float xMax = 1.;
   //float xMax = (isPrompt) ? 8. : 50.;
 
   TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., 0.85 );
-  h2_axes->SetXTitle( "Photon Charged Isolation [GeV]" );
+  h2_axes->SetXTitle( "Photon Relative Charged Isolation" );
   h2_axes->SetYTitle( "Normalized to Unity" );
   c1->cd();
   h2_axes->Draw("");
+
+
+  float yMax_log = (isPrompt) ? 5. : 50.;
+  float yMin_log = (isPrompt) ? 0.0001 : 0.001;
   
-  TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, 0., xMax, 10, 0.0001, 5. );
-  h2_axes_log->SetXTitle( "Photon Charged Isolation [GeV]" );
+  TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, 0., xMax, 10, yMin_log, yMax_log );
+  h2_axes_log->SetXTitle( "Photon Relative Charged Isolation" );
   h2_axes_log->SetYTitle( "Normalized to Unity" );
   c1_log->cd();
   h2_axes_log->Draw("");

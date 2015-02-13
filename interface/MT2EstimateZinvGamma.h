@@ -24,11 +24,14 @@ class MT2EstimateZinvGamma : public MT2Estimate {
 
   // this will be used to fill RooDataSets:
   RooRealVar* x_; // iso var
+  RooRealVar* w_; // weight var
 
   // for each bin of mt2:
   std::vector<RooDataSet*> iso_bins;
   std::vector<TH1D*> iso_bins_hist;
 
+
+  void fakeDatasetsFromHistos( int seed=0 );
 
   const MT2EstimateZinvGamma& operator=( const MT2EstimateZinvGamma& rhs );
   MT2EstimateZinvGamma operator+( const MT2EstimateZinvGamma& rhs ) const;

@@ -45,12 +45,14 @@ int main() {
   std::string outputdir = "PurityFitPlots";
   system( Form("mkdir -p %s", outputdir.c_str() ));
 
+  //MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_inclusive/purityMC.root" );
   MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/purityMC.root" );
 
   std::vector< PurityFit > fits;
-  fits.push_back( PurityFit( "Full Templates", "13TeV_CSA14"   , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_CSA14/purityFit_CSA14_Zinv_13TeV_CSA14.root"      ), 20, 46 ));
-  fits.push_back( PurityFit( "HT Templates"  , "13TeV_onlyHT"  , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyHT/purityFit_CSA14_Zinv_13TeV_onlyHT.root"    ), 21, 29 ));
-  fits.push_back( PurityFit( "Jet Templates" , "13TeV_onlyJet" , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyJets/purityFit_CSA14_Zinv_13TeV_onlyJets.root"), 24, 38 ));
+  fits.push_back( PurityFit( "All Bins", "13TeV_CSA14"   , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_CSA14/purityFit_CSA14_Zinv_13TeV_CSA14.root"      ), 20, 46 ));
+  fits.push_back( PurityFit( "HT Bins"  , "13TeV_onlyHT"  , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyHT/purityFit_CSA14_Zinv_13TeV_onlyHT.root"    ), 21, 29 ));
+  fits.push_back( PurityFit( "Jet Bins" , "13TeV_onlyJet" , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_onlyJets/purityFit_CSA14_Zinv_13TeV_onlyJets.root"), 24, 38 ));
+  fits.push_back( PurityFit( "Inclusive" , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_CSA14_Zinv_13TeV_inclusive/purityFit_CSA14_Zinv_13TeV_inclusive.root"), 25, kBlack ));
 
 
   std::set<MT2Region> regions = purityMC->getRegions();
@@ -67,14 +69,19 @@ int main() {
     thisPurityMC->SetLineColor( kBlack );
     thisPurityMC->SetLineWidth( 2 );
 
-    TH2D* axes = new TH2D( "axes", "", 10, thisPurityMC->GetXaxis()->GetXmin(), thisPurityMC->GetXaxis()->GetXmax(), 10, 0., 1. );
+    TH2D* axes = new TH2D( "axes", "", 10, thisPurityMC->GetXaxis()->GetXmin(), thisPurityMC->GetXaxis()->GetXmax(), 10, 0., 1.0001 );
     axes->SetXTitle( "M_{T2} [GeV]");
     axes->SetYTitle( "Photon Purity" );
     axes->Draw("");
 
+    TPaveText* labelTop = MT2DrawTools::getLabelTop();
+    labelTop->Draw("same");
+
+
     thisPurityMC->Draw("same");
 
-    TLegend* legend = new TLegend( 0.175, 0.2, 0.65, 0.2+0.06*(fits.size()+1.) );
+    //TLegend* legend = new TLegend( 0.175, 0.2, 0.65, 0.2+0.06*(fits.size()+1.) );
+    TLegend* legend = new TLegend( 0.65, 0.2, 0.9, 0.2+0.06*(fits.size()+1.) );
     legend->SetTextSize(0.038); 
     legend->SetFillColor(0);
     legend->AddEntry( thisPurityMC, "MC Purity", "L" );
@@ -94,11 +101,9 @@ int main() {
 
     legend->Draw("same");
 
-    TPaveText* labelTop = MT2DrawTools::getLabelTop();
-    labelTop->Draw("same");
-
     std::vector<std::string> regionNames = iR->getNiceNames();
-    TPaveText* labelRegion = new TPaveText( 0.57, 0.2, 0.92, 0.35, "brNDC" );
+    //TPaveText* labelRegion = new TPaveText( 0.57, 0.2, 0.92, 0.35, "brNDC" );
+    TPaveText* labelRegion = new TPaveText( 0.23, 0.2, 0.48, 0.35, "brNDC" );
     labelRegion->SetTextSize(0.034); 
     labelRegion->SetFillColor(0);
     for( unsigned i=0; i<regionNames.size(); ++i ) labelRegion->AddText( regionNames[i].c_str() );
