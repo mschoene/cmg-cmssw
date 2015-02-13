@@ -405,14 +405,17 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
   }
 
 
-  std::set<MT2HTRegion> HTRegions = data->getHTRegions();
-  std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
+  //std::set<MT2HTRegion> HTRegions = data->getHTRegions();
+  //std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
 
+  std::set<MT2Region> MT2Regions = data->getRegions();
   
-  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
-
-
-    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+  for( std::set<MT2Region>::iterator iMT2 = MT2Regions.begin(); iMT2!=MT2Regions.end(); ++iMT2 ) {
+  
+  //for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
+  //
+  //
+  //  for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
 
       std::string fullPath = outputdir;
       //std::string fullPath = outputdir + "/" + iHT->getName() + "/" + iSR->getName();
@@ -420,7 +423,7 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       //system( mkdircommand.c_str() );
 
   
-      MT2Region thisRegion( (*iHT), (*iSR) );
+      MT2Region thisRegion( (*iMT2) );
 
 
       TH1D* h1_data = data->get(thisRegion)->yield;
@@ -515,9 +518,10 @@ void drawYields( const std::string& outputdir, MT2Analysis<MT2EstimateSyst>* dat
       delete c1;
       delete h2_axes;
 
-    }  // for signal regions
-
-  } // for HT regions
+  }// for MT2 regions
+  //  }  // for signal regions
+  //
+  //} // for HT regions
 
 
   //std::string analysesDir = outputdir + "/analyses";
@@ -794,25 +798,31 @@ void randomizePoisson( MT2Analysis<MT2EstimateSyst>* data ) {
   TRandom3 rand(13);
 
 
-  std::set<MT2HTRegion> HTRegions = data->getHTRegions();
-  std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
+//  std::set<MT2HTRegion> HTRegions = data->getHTRegions();
+//  std::set<MT2SignalRegion> signalRegions = data->getSignalRegions();
 
-  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
-    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
+  std::set<MT2Region> MT2Regions = data->getRegions();
 
-      MT2Region thisRegion( (*iHT), (*iSR) );
+//  for( std::set<MT2HTRegion>::iterator iHT = HTRegions.begin(); iHT!=HTRegions.end(); ++iHT ) {
+//    for( std::set<MT2SignalRegion>::iterator iSR = signalRegions.begin(); iSR!=signalRegions.end(); ++iSR ) {
 
-      TH1D* h1_data = data->get(thisRegion)->yield;
+      for( std::set<MT2Region>::iterator iMT2 = MT2Regions.begin(); iMT2!=MT2Regions.end(); ++iMT2 ) {
 
-      for( unsigned ibin=1; ibin<h1_data->GetXaxis()->GetNbins()+1; ++ibin ) {
+	MT2Region thisRegion( (*iMT2) );
+	
+	TH1D* h1_data = data->get(thisRegion)->yield;
 
-        int poisson_data = rand.Poisson(h1_data->GetBinContent(ibin));
-        h1_data->SetBinContent(ibin, poisson_data);
-        h1_data->SetBinError(ibin, 0.);
+	for( unsigned ibin=1; ibin<h1_data->GetXaxis()->GetNbins()+1; ++ibin ) {
 
-      }  // for bins
+	  int poisson_data = rand.Poisson(h1_data->GetBinContent(ibin));
+	  h1_data->SetBinContent(ibin, poisson_data);
+	  h1_data->SetBinError(ibin, 0.);
+	  
+	}  // for bins
 
-    }// for signal regions
-  }// for HT regions
+      }// for MT2 regions
+
+//    }// for signal regions
+//  }// for HT regions
 
 }
