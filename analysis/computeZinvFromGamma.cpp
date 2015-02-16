@@ -11,8 +11,7 @@
 #include "interface/MT2EstimateTree.h"
 
 #define mt2_cxx
-//#include "../interface/mt2.h"
-#include "../interface/mt2_float.h"
+#include "../interface/mt2.h"
 
 
 #include "TCanvas.h"
@@ -243,8 +242,12 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
     if( myTree.ngamma>0 && prefix=="gamma_" ) {
 
+      if( sample.id >=200 && sample.id<299 ) { // GJet
+        if( myTree.gamma_mcMatchId[0]!=22 ) continue;
+        if( myTree.gamma_genIso[0]>5. ) continue;
+      }
       if( myTree.gamma_idCutBased[0]==0 ) continue;
-      //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
+      if( myTree.gamma_chHadIso[0]+myTree.gamma_phIso[0] > 4. ) continue;
 
       TLorentzVector gamma;
       gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
