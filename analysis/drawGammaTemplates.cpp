@@ -20,7 +20,8 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
 int main( int argc, char* argv[] ) {
 
 
-  std::string samples = "CSA14_Zinv";
+  std::string samples = "PHYS14_v2_Zinv";
+  //std::string samples = "CSA14_Zinv";
   if( argc>1 ) {
     std::string samples_tmp(argv[1]); 
     samples = samples_tmp;
@@ -148,10 +149,10 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
   c1_log->SetLogy();
 
-  float xMax = 1.;
+  float xMax = 0.4;
   //float xMax = (isPrompt) ? 8. : 50.;
 
-  TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., 0.85 );
+  TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., 1. );
   h2_axes->SetXTitle( "Photon Relative Charged Isolation" );
   h2_axes->SetYTitle( "Normalized to Unity" );
   c1->cd();
@@ -182,7 +183,9 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
       exit(119);
     }
 
-    TH1D* thisTempl = thisEstimate->iso;
+    TH1D* thisTempl = (TH1D*)(thisEstimate->iso->Clone());
+    if( !isPrompt )
+      thisTempl->Rebin(2);
     thisTempl->SetLineColor(colors[i]);
     thisTempl->SetLineWidth(2);
 
