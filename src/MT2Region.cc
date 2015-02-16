@@ -373,7 +373,7 @@ bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
 
   bool returnBool;
 
-  if( (nBJetsMax > 0 && rhs.nBJetsMax > 0) || (rhs.nBJetsMax < 0 && nBJetsMax < 0) ) {
+  if( (nBJetsMax >= 0 && rhs.nBJetsMax >= 0) || (rhs.nBJetsMax < 0 && nBJetsMax < 0) ) {
 
     if( thisNJmax == rhsNJmax ) {
       
