@@ -1189,16 +1189,17 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
   
   std::set<MT2HTRegion> htRegions = this->getHTRegions();
   std::set<MT2SignalRegion> sigRegions = this->getSignalRegions();
-  
-  //std::vector<MT2SignalRegion> sigRegions_vec(sigRegions.begin(), sigRegions.end());  
-  //std::sort( sigRegions_vec.begin(), sigRegions_vec.end() );
+  std::set<MT2Region> mt2Regions = this->getRegions();
 
-  for ( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) { // loop on ht regions
-   
+  std::string oldName="";
+
+  for( std::set<MT2HTRegion>::iterator iHT=htRegions.begin(); iHT!=htRegions.end(); ++iHT ) {
+    
+    if( iHT->getNiceName() == oldName ) continue;
+    
     std::string htRegionName = iHT->getNiceName();
     ofs_file << htRegionName << std::endl;
 
-    
     for ( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ){
       
       std::string sigRegionName = iSR->getNiceName();
@@ -1208,16 +1209,20 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
     
     ofs_file << std::endl;
 
-    for( std::set<MT2SignalRegion>::iterator iSR=sigRegions.begin(); iSR!=sigRegions.end(); ++iSR ) {
+    for( std::set<MT2Region>::iterator imt2=mt2Regions.begin(); imt2!=mt2Regions.end(); ++imt2 ) {
              	
-      MT2Region thisRegion( *iHT, *iSR );
-      T* thisT = this->get(thisRegion);
+      if( *(imt2->htRegion()) != (*iHT) )
+	continue;
+
+      T* thisT = this->get(*imt2);
       thisT->print( ofs );
 
-    } // for signal regions                                                                                                                                                          
+    } // for mt2 regions                                                                                                                                                          
 
     ofs_file << std::endl << std::endl;
-
+    
+    oldName = iHT->getNiceName();
+ 
   } // for ht regions
 
   std::cout << "-> Printed analysis '" << name << "' to: " << ofs << std::endl;
