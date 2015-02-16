@@ -273,7 +273,7 @@ int main( int argc, char* argv[] ) {
            datacard << "llep_lepEff_" << llepCR_name << "  lnN  - - " << 1.+err_llep_lepEff << " -" << std::endl;
            datacard << "llep_CRstat_" << gammaConvention( yield_llep, round(N_llep_CR), 2, llepCR_name, binName ) << std::endl;
            if( yield_llep>0. ) {
-             datacard << "llep_MCstat_" << binName << " lnN  - - " << this_llep->GetBinError(iBin)/this_llep->GetBinContent(iBin) << " -" << std::endl;
+             datacard << "llep_MCstat_" << binName << " lnN  - - " << 1.+this_llep->GetBinError(iBin)/this_llep->GetBinContent(iBin) << " -" << std::endl;
              datacard << "llep_shape_" << binName << " lnN - - " << 1.+err_llep_uncorr << " - " << std::endl;
            }
 
@@ -541,17 +541,17 @@ std::string gammaConvention( float yieldSR, int yieldCR, int position, const std
   int precision = 3;
   float syst = -1.;
   if( yieldCR==0 && yieldSR==0. ) {
-    line << "llep_CRstat_" << corrName << "  gmN " << yieldCR << "   ";
+    line << corrName << "  gmN " << yieldCR << "   ";
     syst = testAlpha;
   } else if( yieldCR==0 && yieldSR>0. ) {
-    line << "llep_CRstat_" << corrName << "  lnN  ";
+    line << use_uncorrName << "  lnN  ";
     syst = 2.;
   } else if( yieldCR!=0 && yieldSR==0. ) {
-    line << "llep_CRstat_" << use_uncorrName << "  gmN 0  ";
+    line << corrName << "  gmN 0  ";
     syst = testAlpha;
   } else {
     float alpha = yieldSR/((float)yieldCR);
-    line << "llep_CRstat_" << corrName << "  gmN " << yieldCR << "   ";
+    line << corrName << "  gmN " << yieldCR << "   ";
     syst = alpha;
     precision = 5;
   }
