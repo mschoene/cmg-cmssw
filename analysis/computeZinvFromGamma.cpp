@@ -128,6 +128,11 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2Estimate>* ZgammaRatio = new MT2Analysis<MT2Estimate>( "ZgammaRatio", regionsSet );
   (*ZgammaRatio) = (*((MT2Analysis<MT2Estimate>*)Zinv)) / (*((MT2Analysis<MT2Estimate>*)gammaJet));
 
+
+  // write to file before poisson:
+  std::string mcFile = outputdir + "/mc.root";
+  gammaJet->writeToFile( mcFile );
+
   // now that the MC ratio is done, add poisson error to gammajet sample:
   addPoissonError( (MT2Analysis<MT2Estimate>*)gammaJet);
 
@@ -148,8 +153,6 @@ int main( int argc, char* argv[] ) {
   system(Form("mkdir -p %s", outputdirPlots.c_str()));
 
 
-  std::string mcFile = outputdir + "/mc.root";
-  gammaJet->writeToFile( mcFile );
   qcd->addToFile( mcFile );
   Zinv->addToFile( mcFile );
   ZgammaRatio->addToFile( mcFile );
@@ -230,7 +233,10 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
     float ptV = -1.;
 
-    if( myTree.ngamma>0 && prefix=="gamma_" ) {
+
+    if( prefix=="gamma_" ) {
+
+      if( myTree.ngamma==0 ) continue;
 
       if( sample.id >=200 && sample.id<299 ) { // GJet
         if( myTree.gamma_mcMatchId[0]!=22 ) continue;
@@ -292,6 +298,7 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
     thisEstimate->yield->Fill(mt2, weight );
 
     thisEstimate->assignTree( myTree, weight );
+    thisEstimate->assignVars( ht, njets, nbjets, met, mt2 );
     thisEstimate->assignVar( "ptV", ptV );
     thisEstimate->tree->Fill();
  
