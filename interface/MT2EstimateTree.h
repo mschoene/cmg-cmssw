@@ -24,6 +24,7 @@ class MT2EstimateTree : public MT2Estimate {
   static void addVar( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name );
   //static void addVarFloat( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name );
   //static void addVarInt( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name );
+  void assignVars( float aht, int anJets, int anBJets, float amet, float amt2 );
   void assignVar( const std::string& name, float value );
   //void assignVar( const std::string& name, int value );
 

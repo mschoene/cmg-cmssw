@@ -5,7 +5,7 @@
 
 
 #define mt2_cxx
-#include "../interface/mt2_float.h"
+#include "../interface/mt2.h"
 
 
 #include "TLorentzVector.h"
@@ -41,7 +41,8 @@ int main( int argc, char* argv[] ) {
     regionsSet = regionsSet_tmp;
   }
 
-  std::string samplesFileName = "CSA14_Zinv";
+  std::string samplesFileName = "PHYS14_v2_Zinv";
+  //std::string samplesFileName = "CSA14_Zinv";
 
   std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
   
@@ -64,6 +65,7 @@ int main( int argc, char* argv[] ) {
 
   std::string outputdir = "ZinvGammaPurity_" + samplesFileName + "_" + regionsSet;
   system(Form("mkdir -p %s", outputdir.c_str()));
+
 
   
   MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt", regionsSet );

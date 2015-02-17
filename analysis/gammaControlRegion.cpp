@@ -5,7 +5,7 @@
 
 
 #define mt2_cxx
-#include "../interface/mt2_float.h"
+#include "../interface/mt2.h"
 
 
 #include "TLorentzVector.h"
@@ -27,7 +27,8 @@ void randomizeSingleHisto( TRandom3 rand, TH1D* histo );
 int main( int argc, char* argv[] ) {
 
 
-  std::string samplesFileName = "CSA14_Zinv";
+  std::string samplesFileName = "PHYS14_v2_Zinv";
+  //std::string samplesFileName = "CSA14_Zinv";
   if( argc>1 ) {
     std::string samplesFileName_tmp(argv[1]); 
     samplesFileName = samplesFileName_tmp;
@@ -94,7 +95,7 @@ int main( int argc, char* argv[] ) {
   purity->writeToFile( outputdir + "/purityMC.root" );
 
   // emulate data:
-  randomizePoisson(gammaCR);
+  //randomizePoisson(gammaCR);
   gammaCR->writeToFile( outputdir + "/data.root" );
 
 
