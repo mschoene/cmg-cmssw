@@ -27,6 +27,11 @@ float lumi = 4.; // fb-1
 
 
 
+int round(float d) {
+  return (int)(floor(d + 0.5));
+}
+
+
 MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prefix="" );
 void addPoissonError( MT2Analysis<MT2Estimate>* analysis );
 MT2Analysis<MT2Estimate>* combineDataAndMC( MT2Analysis<MT2Estimate>* data, MT2Analysis<MT2Estimate>* mc );
@@ -43,7 +48,8 @@ int main( int argc, char* argv[] ) {
 
 
   //std::string samplesFileName = "CSA14_Zinv_onlyskim";
-  std::string samplesFileName = "CSA14_Zinv";
+  //std::string samplesFileName = "CSA14_Zinv";
+  std::string samplesFileName = "PHYS14_v2_Zinv";
   //std::string samplesFileName = "CSA14_skimprune_Zinv";
   if( argc>1 ) {
     std::string samplesFileName_tmp(argv[1]); 
@@ -55,7 +61,7 @@ int main( int argc, char* argv[] ) {
   std::cout << std::endl << std::endl;
   std::cout << "-> Loading gamma+jet samples" << std::endl;
 
-  std::vector<MT2Sample> samples_gammaJet = MT2Sample::loadSamples(samplesFile, "GJets");
+  std::vector<MT2Sample> samples_gammaJet = MT2Sample::loadSamples(samplesFile, "GJet");
   if( samples_gammaJet.size()==0 ) {
     std::cout << "There must be an error: didn't find any gamma+jet files in " << samplesFile << "!" << std::endl;
     //exit(1209);
@@ -81,8 +87,8 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string regionsSet = "13TeV_inclusive";
-  //std::string regionsSet = "13TeV_CSA14";
+  //std::string regionsSet = "13TeV_inclusive";
+  std::string regionsSet = "13TeV_CSA14";
   //std::string regionsSet = "13TeV_onlyHT";
   //std::string regionsSet = "13TeV_CSA14_noMT";
 
@@ -183,22 +189,6 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
   int nentries = tree->GetEntries();
 
-  //double mt2;
-  //tree->SetBranchAddress( Form("%smt2"   , prefix.c_str()), &mt2 );
-  //double ht;
-  //tree->SetBranchAddress( Form("%sht"    , prefix.c_str()), &ht );
-  //double met;
-  //tree->SetBranchAddress( Form("%smet_pt", prefix.c_str()), &met );
-  //int njets;
-  //tree->SetBranchAddress( Form("%snJet40", prefix.c_str()), &njets );
-  //int nbjets;
-  //tree->SetBranchAddress( Form("%snBJet40", prefix.c_str()), &nbjets );
-  //float deltaPhiMin;
-  //tree->SetBranchAddress( Form("%sdeltaPhiMin", prefix.c_str()), &deltaPhiMin );
-  //double diffMetMht;
-  //tree->SetBranchAddress( Form("%sdiffMetMht", prefix.c_str()), &diffMetMht );
-  //double minMTBMet;
-  //tree->SetBranchAddress( Form("%sminMTBMet", prefix.c_str()), &minMTBMet );
 
   float mt2;
   tree->SetBranchAddress( Form("%smt2"   , prefix.c_str()), &mt2 );
@@ -251,17 +241,28 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
       TLorentzVector gamma;
       gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
-      float found_pt = 0.;
-      int foundjet = 0;
+      int closestJet = -1;
+      float deltaRmin = 0.4;
       for( unsigned i=0; i<myTree.njet; ++i ) {
         TLorentzVector thisjet;
         thisjet.SetPtEtaPhiM( myTree.jet_pt[i], myTree.jet_eta[i], myTree.jet_phi[i], myTree.jet_mass[i] );
-        if( gamma.DeltaR(thisjet)>0.4 ) foundjet++;
-        if( foundjet==2 ) {
-          found_pt = thisjet.Pt();
+        float thisDeltaR = gamma.DeltaR(thisjet);
+        if( thisDeltaR<deltaRmin ) {
+          deltaRmin = thisDeltaR;
+          closestJet = i;
+        }
+      }
+      float found_pt = 0.;
+      int jet_counter = 0;
+      for( unsigned i=0; i<myTree.njet; ++i ) {
+        if( i==closestJet ) continue;
+        jet_counter++;
+        if( jet_counter==2 ) {
+          found_pt = myTree.jet_pt[i];
           break;
         }
       }
+
       if( found_pt<100. ) continue;
 
       ptV = gamma.Pt();
@@ -327,7 +328,7 @@ void addPoissonError( MT2Analysis<MT2Estimate>* analysis ) {
 
       for( unsigned ibin=1; ibin<h1->GetXaxis()->GetNbins()+1; ++ibin ) {
 
-        int nData = (int) h1->GetBinContent(ibin);
+        int nData = (int) round(h1->GetBinContent(ibin));
         h1->SetBinContent(ibin, nData);
         if( nData==0 )
           h1->SetBinError(ibin, 0.);
