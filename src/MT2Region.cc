@@ -362,7 +362,7 @@ bool MT2SignalRegion::operator!=( const MT2SignalRegion& rhs ) const {
   return (this->getName()!=rhs.getName());
  
 }
-
+    
 
 bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
 
@@ -373,38 +373,48 @@ bool MT2SignalRegion::operator<( const MT2SignalRegion& rhs ) const {
 
   bool returnBool;
 
-  if( thisNJmax == rhsNJmax ) {
-    
-    if( nBJetsMin!=rhs.nBJetsMin ) {
+  if( (nBJetsMax >= 0 && rhs.nBJetsMax >= 0) || (rhs.nBJetsMax < 0 && nBJetsMax < 0) ) {
 
-      returnBool = ( nBJetsMin<rhs.nBJetsMin );
-    
+    if( thisNJmax == rhsNJmax ) {
+      
+      if( nBJetsMin!=rhs.nBJetsMin ) {
+	
+	returnBool = ( nBJetsMin<rhs.nBJetsMin );
+	
+      } else {
+	
+	if( mtCut!=rhs.mtCut ) {
+	  
+	  if( mtCut=="loMT" ) {
+	    returnBool = true;
+	  } else {
+	    returnBool = false;
+	  }
+	  
+	} else { // everything is the same
+	  
+	  returnBool = false;
+	  
+	}
+	
+      } //if nbjetsmin
+      
     } else {
-
-      if( mtCut!=rhs.mtCut ) {
-
-        if( mtCut=="loMT" ) {
-          returnBool = true;
-        } else {
-          returnBool = false;
-        }
-
-      } else { // everything is the same
-
-        returnBool = false;
-
-      }
-
-    } //if nbjetsmin
-
-  } else {
-
-    returnBool = thisNJmax<rhsNJmax;
-
-  } // if njetsmax
-
+      
+      returnBool = thisNJmax<rhsNJmax;
+      
+    } // if njetsmax
+    
+  } // if nbjetsmax
+  else {
+    if( nBJetsMax < 0 )
+      returnBool = false;
+    else returnBool = true;
+    
+  }
+  
   return returnBool;
-
+  
 }
 
 
