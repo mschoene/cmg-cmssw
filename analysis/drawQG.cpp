@@ -123,6 +123,8 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
 
   float weight;
   tree->SetBranchAddress( "weight", &weight );
+  float mt2;
+  tree->SetBranchAddress( "mt2", &mt2 );
   int nJets;
   tree->SetBranchAddress( "nJets", &nJets );
   int nBJets;
@@ -179,6 +181,7 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
     tree->GetEntry( iEntry );
 
     if( nBJets>0 ) continue;
+    if( mt2<400. ) continue;
 
     if( nJets>0 ) {
       all0 += weight;
@@ -243,10 +246,11 @@ void drawSingleHisto( const std::string& outputdir, const std::string& saveName,
   c1->cd();
 
   bool drawNormalized = !(saveName=="qFrac");
-  float yMax = (drawNormalized ) ? h1_bg->GetMaximum()*1.5/h1_bg->Integral() : 1.;
+  float yMax = (drawNormalized ) ? h1_sig0->GetMaximum()*1.2/h1_sig0->Integral() : 1.;
 
   TH2D* h2_axes = new TH2D( "axes", "", h1_bg->GetNbinsX(), h1_bg->GetXaxis()->GetXmin(), h1_bg->GetXaxis()->GetXmax(), 10, 0., yMax );
-  if( h1_bg->GetXaxis()->GetBinLabel(1)!="" ) {
+  if( saveName=="qFrac" ) {
+  //if( h1_bg->GetXaxis()->GetBinLabel(1)!="" ) {
     for( unsigned iBinx=1; iBinx< h1_bg->GetNbinsX()+1; ++iBinx ) {
       h2_axes->GetXaxis()->SetBinLabel(iBinx, h1_bg->GetXaxis()->GetBinLabel(iBinx));
     }
