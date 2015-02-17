@@ -11,6 +11,7 @@
 #include "RooAddPdf.h"
 #include "TCanvas.h"
 #include "TAxis.h"
+#include "TH2D.h"
 #include "TH1D.h"
 #include "TRandom3.h"
 #include "RooPlot.h"
@@ -36,7 +37,8 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
 int main( int argc, char* argv[] ) {
 
 
-  std::string samples = "CSA14_Zinv";
+  std::string samples = "PHYS14_v2_Zinv";
+  //std::string samples = "CSA14_Zinv";
 
   if( argc==1 ) {
     std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
@@ -58,9 +60,10 @@ int main( int argc, char* argv[] ) {
   TH1::AddDirectory(kFALSE);
 
 
-  //MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_inclusive/data.root", "gammaCR" );
-  MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/data.root", "gammaCR" );
+  //MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/data.root", "gammaCR" );
+  MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/data.root", "gammaCR" );
 
+  //std::string templateSamples = "CSA14_Zinv";
   MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
   MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesFake" );
 
@@ -128,6 +131,19 @@ void fitPurity( const std::string& outputdir, TH1D* h1_purity, RooRealVar* x, st
 void fitSinglePurity( const std::string& outputdir, float& purity, float& purityError, RooRealVar* x, RooDataSet* data, TH1D* h1_templPrompt, TH1D* h1_templFake ) {
 
 
+  if( data->sumEntries() == 0. ) {
+    purity=-1;
+    purityError=0.;
+    return;
+  }
+
+//TFile* file = TFile::Open("prova.root", "recreate");
+//file->cd();
+//h1_templPrompt->Write();
+//h1_templFake->Write();
+//file->Close();
+//exit(11);
+
   RooDataHist templPrompt("templPrompt", "", *x, h1_templPrompt);
   RooDataHist templFake  ("templFake"  , "", *x, h1_templFake  );
 
@@ -142,15 +158,17 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
   //RooDataSet *data = model.generate(x,500);
 
   //RooDataSet* wdata = new RooDataSet(data->GetName(),data->GetTitle(),data,*data->get(),0,"w");
-  model.fitTo(*data);
-  //model.fitTo(*wdata, SumW2Error(kTRUE)); 
+  //model.fitTo(*data);
+  float xMaxFit = 0.3;
+  x->setRange( "fittingRange", 0., xMaxFit );
+  model.fitTo(*data, SumW2Error(kTRUE), Range("fittingRange")); 
   //model.fitTo(*data, SumW2Error(kTRUE)); 
 
   purity = sigFrac.getVal();
   purityError = sigFrac.getError();
 
   RooPlot* xframe = x->frame();
-  data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(), h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
+  data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(),  h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
   //data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(), h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
   model.plotOn(xframe);
 
@@ -159,8 +177,10 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
 
   TCanvas* c1 = new TCanvas("c1", "", 600, 600);
   gPad->SetLeftMargin(0.15);
+  TH2D* h2_axes = new TH2D("axes", "", 10, 0., xMaxFit, 10, 0., xframe->GetMaximum()*1.2 );
+  h2_axes->Draw();
   xframe->GetYaxis()->SetTitleOffset(1.4); 
-  xframe->Draw();
+  xframe->Draw("same");
 
   c1->SaveAs(Form("%s/purityFit_%s.eps", outputdir.c_str(), data->GetName()));
   c1->SaveAs(Form("%s/purityFit_%s.png", outputdir.c_str(), data->GetName()));
