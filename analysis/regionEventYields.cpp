@@ -327,7 +327,18 @@ MT2Analysis<MT2EstimateTree>* computeYield( const MT2Sample& sample, const MT2Co
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
     if( myTree.njet<2 ) continue;
-    if( myTree.jet_pt[1]<100. ) continue;
+    //if( myTree.jet_pt[1]<100. ) continue;
+
+    float jetCentral_pt[2];
+    int njetsCentral = 0;
+    for(int j=0; j<myTree.njet; ++j){
+      if( fabs( myTree.jet_eta[j] ) < 2.5 ) {
+	jetCentral_pt[njetsCentral] = myTree.jet_pt[j];
+	++njetsCentral;
+      }
+      if( njetsCentral >= 2 ) break;
+    }
+    if (jetCentral_pt[1] < 100. ) continue;
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;

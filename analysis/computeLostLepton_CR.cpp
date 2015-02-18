@@ -66,8 +66,8 @@ int main( int argc, char* argv[] ) {
   std::string outputdir = "EventYields_" + sampleName;
   system(Form("mkdir -p %s", outputdir.c_str()));
 
-  //std::string regionsSet = "13TeV_PHYS14_hiJHT"; 
-  std::string regionsSet = "13TeV_CSA14";
+  std::string regionsSet = "13TeV_PHYS14_hiHT"; 
+  //std::string regionsSet = "13TeV_CSA14";
 
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
@@ -76,7 +76,7 @@ int main( int argc, char* argv[] ) {
   for( unsigned i=0; i < fSamples.size(); ++i )
     (*lostLeptonEstimate) += ( computeYield( fSamples[i], regionsSet, lumi ) );
   
-  lostLeptonEstimate->writeToFile("llep_CSA14sr_phys14.root");
+  lostLeptonEstimate->writeToFile("llep_PHYS14_v2_hiHT.root");
 
   return 0;
   
@@ -114,9 +114,20 @@ MT2Analysis<MT2EstimateSyst> computeYield( const MT2Sample& sample, const std::s
 
     if( myTree.nVert==0 ) continue;
     if( myTree.nJet40<2 ) continue;
-    if( myTree.jet_pt[1]<100. ) continue;
+    //if( myTree.jet_pt[1]<100. ) continue;
     if( myTree.deltaPhiMin<0.3 ) continue;
     if( myTree.diffMetMht>0.5*myTree.met_pt ) continue;
+
+    float jetCentral_pt[2];
+    int njetsCentral = 0;
+    for(int j=0; j<myTree.njet; ++j){
+      if( fabs( myTree.jet_eta[j] ) < 2.5 ) {
+        jetCentral_pt[njetsCentral] = myTree.jet_pt[j];
+        ++njetsCentral;
+      }
+      if( njetsCentral >= 2 ) break;
+    }
+    if (jetCentral_pt[1] < 100. ) continue;
 
     float ht   = myTree.ht;
     float met  = myTree.met_pt;
