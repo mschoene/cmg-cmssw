@@ -194,7 +194,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( found_pt<100. ) continue;
 
-    bool isPrompt = myTree.gamma_mcMatchId[0]>0 && myTree.gamma_genIso[0]<5.;
+    bool isPrompt = ((myTree.gamma_mcMatchId[0]==22 || myTree.gamma_mcMatchId[0]==7) && myTree.gamma_genIso[0]<5.);
     if( onlyPrompt && !isPrompt ) continue;
     //if( selectID>=0 && selectID!=mcMatchId ) continue;
 
