@@ -137,12 +137,6 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
     return;
   }
 
-//TFile* file = TFile::Open("prova.root", "recreate");
-//file->cd();
-//h1_templPrompt->Write();
-//h1_templFake->Write();
-//file->Close();
-//exit(11);
 
   RooDataHist templPrompt("templPrompt", "", *x, h1_templPrompt);
   RooDataHist templFake  ("templFake"  , "", *x, h1_templFake  );
@@ -153,23 +147,18 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
   RooRealVar sigFrac("promptFrac","fraction of prompt",0.9,0.,1.) ;
   RooAddPdf  model("model","", RooArgList(pdfPrompt,pdfFake), sigFrac) ;
 
-  //RooDataHist data  ("data"  , "", x, h1_data  );
 
-  //RooDataSet *data = model.generate(x,500);
-
-  //RooDataSet* wdata = new RooDataSet(data->GetName(),data->GetTitle(),data,*data->get(),0,"w");
-  //model.fitTo(*data);
   float xMaxFit = 0.3;
   x->setRange( "fittingRange", 0., xMaxFit );
   model.fitTo(*data, SumW2Error(kTRUE), Range("fittingRange")); 
-  //model.fitTo(*data, SumW2Error(kTRUE)); 
 
-  purity = sigFrac.getVal();
+  int binMax = h1_templFake->FindBin( xMaxFit );
+  float correctionFactor = h1_templFake->Integral( 1, binMax ) / h1_templFake->Integral();
+  purity = sigFrac.getVal() * correctionFactor;
   purityError = sigFrac.getError();
 
   RooPlot* xframe = x->frame();
   data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(),  h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
-  //data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(), h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
   model.plotOn(xframe);
 
   // Overlay the background component of model with a dashed line
@@ -187,8 +176,6 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
 
   delete c1;
   delete xframe;
-  //delete wdata;
-  //std::cout << "-> Fitted signal fraction: " << sigFrac.getVal() << " +- " << sigFrac.getError() << std::endl;
 
   return;
 

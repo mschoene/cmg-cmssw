@@ -24,12 +24,12 @@ struct QGHistos {
   TH1D* h1_qgl2;
   TH1D* h1_qgl3;
   TH1D* h1_qglAve;
-  TH1D* h1_qglProd_q2;
-  TH1D* h1_qglProd_q3;
-  TH1D* h1_qglProd_q4;
-  TH1D* h1_nq0;
-  TH1D* h1_nq1;
-  TH1D* h1_nq2;
+  TH1D* h1_qglProd_j2;
+  TH1D* h1_qglProd_j3;
+  TH1D* h1_qglProd_j4;
+  TH1D* h1_nq_cut0;
+  TH1D* h1_nq_cut1;
+  TH1D* h1_nq_cut2;
 
 };
 
@@ -37,7 +37,11 @@ struct QGHistos {
 
 void drawCompare( const std::string& outputdir, MT2Analysis<MT2EstimateTree>* bg, std::vector<MT2Analysis<MT2EstimateTree>* > signals );
 QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis );
-void drawSingleHisto( const std::string& outputdir, const std::string& saveName, TH1D* h1_bg, const std::string& bgName, TH1D* h1_sig0, const std::string& sigName0 );
+void drawSingleHisto( const std::string& outputdir, const std::string& saveName, TH1D* h1_bg, const std::string& bgName, 
+                      TH1D* h1_sig0, const std::string& sigName0,
+                      TH1D* h1_sig1=0, const std::string& sigName1="",
+                      TH1D* h1_sig2=0, const std::string& sigName2="",
+                      TH1D* h1_sig3=0, const std::string& sigName3="");
 
 
 
@@ -112,18 +116,18 @@ void drawCompare( const std::string& outputdir, MT2Analysis<MT2EstimateTree>* bg
     vh_sig.push_back( getHistos( signals[i] ) );
 
   
-  drawSingleHisto( outputdir, "qFrac",      vh_bg.h1_qFrac,      bg->getFullName(), vh_sig[0].h1_qFrac,      signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qgl0",       vh_bg.h1_qgl0,       bg->getFullName(), vh_sig[0].h1_qgl0,       signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qgl1",       vh_bg.h1_qgl1,       bg->getFullName(), vh_sig[0].h1_qgl1,       signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qgl2",       vh_bg.h1_qgl2,       bg->getFullName(), vh_sig[0].h1_qgl2,       signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qgl3",       vh_bg.h1_qgl3,       bg->getFullName(), vh_sig[0].h1_qgl3,       signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qglAve",     vh_bg.h1_qglAve,     bg->getFullName(), vh_sig[0].h1_qglAve,     signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qglProd_q2", vh_bg.h1_qglProd_q2, bg->getFullName(), vh_sig[0].h1_qglProd_q2, signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qglProd_q3", vh_bg.h1_qglProd_q3, bg->getFullName(), vh_sig[0].h1_qglProd_q3, signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "qglProd_q4", vh_bg.h1_qglProd_q4, bg->getFullName(), vh_sig[0].h1_qglProd_q4, signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "nq0",        vh_bg.h1_nq0,        bg->getFullName(), vh_sig[0].h1_nq0,        signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "nq1",        vh_bg.h1_nq1,        bg->getFullName(), vh_sig[0].h1_nq1,        signals[0]->getFullName() );  
-  drawSingleHisto( outputdir, "nq2",        vh_bg.h1_nq2,        bg->getFullName(), vh_sig[0].h1_nq2,        signals[0]->getFullName() );  
+  drawSingleHisto( outputdir, "qFrac",      vh_bg.h1_qFrac,      bg->getFullName(), vh_sig[0].h1_qFrac,      signals[0]->getFullName(), vh_sig[1].h1_qFrac,      signals[1]->getFullName(), vh_sig[2].h1_qFrac,      signals[2]->getFullName(), vh_sig[3].h1_qFrac,      signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qgl0",       vh_bg.h1_qgl0,       bg->getFullName(), vh_sig[0].h1_qgl0,       signals[0]->getFullName(), vh_sig[1].h1_qgl0,       signals[1]->getFullName(), vh_sig[2].h1_qgl0,       signals[2]->getFullName(), vh_sig[3].h1_qgl0,       signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qgl1",       vh_bg.h1_qgl1,       bg->getFullName(), vh_sig[0].h1_qgl1,       signals[0]->getFullName(), vh_sig[1].h1_qgl1,       signals[1]->getFullName(), vh_sig[2].h1_qgl1,       signals[2]->getFullName(), vh_sig[3].h1_qgl1,       signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qgl2",       vh_bg.h1_qgl2,       bg->getFullName(), vh_sig[0].h1_qgl2,       signals[0]->getFullName(), vh_sig[1].h1_qgl2,       signals[1]->getFullName(), vh_sig[2].h1_qgl2,       signals[2]->getFullName(), vh_sig[3].h1_qgl2,       signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qgl3",       vh_bg.h1_qgl3,       bg->getFullName(), vh_sig[0].h1_qgl3,       signals[0]->getFullName(), vh_sig[1].h1_qgl3,       signals[1]->getFullName(), vh_sig[2].h1_qgl3,       signals[2]->getFullName(), vh_sig[3].h1_qgl3,       signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qglAve",     vh_bg.h1_qglAve,     bg->getFullName(), vh_sig[0].h1_qglAve,     signals[0]->getFullName(), vh_sig[1].h1_qglAve,     signals[1]->getFullName(), vh_sig[2].h1_qglAve,     signals[2]->getFullName(), vh_sig[3].h1_qglAve,     signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qglProd_j2", vh_bg.h1_qglProd_j2, bg->getFullName(), vh_sig[0].h1_qglProd_j2, signals[0]->getFullName(), vh_sig[1].h1_qglProd_j2, signals[1]->getFullName(), vh_sig[2].h1_qglProd_j2, signals[2]->getFullName(), vh_sig[3].h1_qglProd_j2, signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qglProd_j3", vh_bg.h1_qglProd_j3, bg->getFullName(), vh_sig[0].h1_qglProd_j3, signals[0]->getFullName(), vh_sig[1].h1_qglProd_j3, signals[1]->getFullName(), vh_sig[2].h1_qglProd_j3, signals[2]->getFullName(), vh_sig[3].h1_qglProd_j3, signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qglProd_j4", vh_bg.h1_qglProd_j4, bg->getFullName(), vh_sig[0].h1_qglProd_j4, signals[0]->getFullName(), vh_sig[1].h1_qglProd_j4, signals[1]->getFullName(), vh_sig[2].h1_qglProd_j4, signals[2]->getFullName(), vh_sig[3].h1_qglProd_j4, signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "nq_cut0",        vh_bg.h1_nq_cut0,        bg->getFullName(), vh_sig[0].h1_nq_cut0,        signals[0]->getFullName(), vh_sig[1].h1_nq_cut0,        signals[1]->getFullName(), vh_sig[2].h1_nq_cut0,        signals[2]->getFullName(), vh_sig[3].h1_nq_cut0,        signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "nq_cut1",        vh_bg.h1_nq_cut1,        bg->getFullName(), vh_sig[0].h1_nq_cut1,        signals[0]->getFullName(), vh_sig[1].h1_nq_cut1,        signals[1]->getFullName(), vh_sig[2].h1_nq_cut1,        signals[2]->getFullName(), vh_sig[3].h1_nq_cut1,        signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "nq_cut2",        vh_bg.h1_nq_cut2,        bg->getFullName(), vh_sig[0].h1_nq_cut2,        signals[0]->getFullName(), vh_sig[1].h1_nq_cut2,        signals[1]->getFullName(), vh_sig[2].h1_nq_cut2,        signals[2]->getFullName(), vh_sig[3].h1_nq_cut2,        signals[3]->getFullName() );  
 
 }
 
@@ -170,13 +174,13 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
   histos.h1_qgl1 = new TH1D( Form("qgl1_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
   histos.h1_qgl2 = new TH1D( Form("qgl2_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
   histos.h1_qgl3 = new TH1D( Form("qgl3_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
-  histos.h1_qglProd_q2 = new TH1D( Form("qglProd_q2_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
-  histos.h1_qglProd_q3 = new TH1D( Form("qglProd_q3_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
-  histos.h1_qglProd_q4 = new TH1D( Form("qglProd_q4_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
+  histos.h1_qglProd_j2 = new TH1D( Form("qglProd_j2_%s", analysis->getName().c_str()), "", 50, 0., 0.1 ); //1.0001 );
+  histos.h1_qglProd_j3 = new TH1D( Form("qglProd_j3_%s", analysis->getName().c_str()), "", 50, 0., 0.1 ); //1.0001 );
+  histos.h1_qglProd_j4 = new TH1D( Form("qglProd_j4_%s", analysis->getName().c_str()), "", 50, 0., 0.1 ); //1.0001 );
   histos.h1_qglAve = new TH1D( Form("qglAve_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
-  histos.h1_nq0 = new TH1D( Form("nq0_%s", analysis->getName().c_str()), "", 5, -0.5, 4.5 );
-  histos.h1_nq1 = new TH1D( Form("nq1_%s", analysis->getName().c_str()), "", 5, -0.5, 4.5 );
-  histos.h1_nq2 = new TH1D( Form("nq2_%s", analysis->getName().c_str()), "", 5, -0.5, 4.5 );
+  histos.h1_nq_cut0 = new TH1D( Form("nq_cut0_%s", analysis->getName().c_str()), "", 5, -0.5, 4.5 );
+  histos.h1_nq_cut1 = new TH1D( Form("nq_cut1_%s", analysis->getName().c_str()), "", 5, -0.5, 4.5 );
+  histos.h1_nq_cut2 = new TH1D( Form("nq_cut2_%s", analysis->getName().c_str()), "", 5, -0.5, 4.5 );
   
 
   float quarks0=0.;
@@ -202,7 +206,7 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
     tree->GetEntry( iEntry );
 
     if( nBJets>0 ) continue;
-    if( mt2<400. ) continue;
+    if( mt2<600. ) continue;
 
 
     int nq_cut0 = 0;
@@ -246,18 +250,20 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
     }
 
 
-    histos.h1_nq0->Fill( nq_cut0, weight );
-    histos.h1_nq1->Fill( nq_cut1, weight );
-    histos.h1_nq2->Fill( nq_cut2, weight );
+    if( nJets>3 ) {
+      histos.h1_nq_cut0->Fill( nq_cut0, weight );
+      histos.h1_nq_cut1->Fill( nq_cut1, weight );
+      histos.h1_nq_cut2->Fill( nq_cut2, weight );
+    }
 
     histos.h1_qglAve->Fill( qglAve, weight );
 
     if( nJets==2 ) {
-      histos.h1_qglProd_q2->Fill( qglProd, weight );
+      histos.h1_qglProd_j2->Fill( qglProd, weight );
     } else if( nJets==3 ) {
-      histos.h1_qglProd_q3->Fill( qglProd, weight );
+      histos.h1_qglProd_j3->Fill( qglProd, weight );
     } else if( nJets>=4 ) {
-      histos.h1_qglProd_q4->Fill( qglProd, weight );
+      histos.h1_qglProd_j4->Fill( qglProd, weight );
     }
 
   } // for entries
@@ -281,13 +287,13 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
   histos.h1_qgl3->SetXTitle( "Fourth Jet QGL" );
 
   histos.h1_qglAve->SetXTitle( "Average Jet QGL" );
-  histos.h1_qglProd_q2->SetXTitle( "QGL Product" );
-  histos.h1_qglProd_q3->SetXTitle( "QGL Product" );
-  histos.h1_qglProd_q4->SetXTitle( "QGL Product" );
+  histos.h1_qglProd_j2->SetXTitle( "QGL Product" );
+  histos.h1_qglProd_j3->SetXTitle( "QGL Product" );
+  histos.h1_qglProd_j4->SetXTitle( "QGL Product" );
 
-  histos.h1_nq0->SetXTitle( Form("Jets with QGL > %.1f", qgl_thresh0) );
-  histos.h1_nq1->SetXTitle( Form("Jets with QGL > %.1f", qgl_thresh1) );
-  histos.h1_nq2->SetXTitle( Form("Jets with QGL > %.1f", qgl_thresh2) );
+  histos.h1_nq_cut0->SetXTitle( Form("Jets with QGL > %.1f", qgl_thresh0) );
+  histos.h1_nq_cut1->SetXTitle( Form("Jets with QGL > %.1f", qgl_thresh1) );
+  histos.h1_nq_cut2->SetXTitle( Form("Jets with QGL > %.1f", qgl_thresh2) );
 
   return histos;
 
@@ -295,7 +301,11 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
 
 
 
-void drawSingleHisto( const std::string& outputdir, const std::string& saveName, TH1D* h1_bg, const std::string& bgName, TH1D* h1_sig0, const std::string& sigName0 ) {
+void drawSingleHisto( const std::string& outputdir, const std::string& saveName, TH1D* h1_bg, const std::string& bgName, 
+                      TH1D* h1_sig0, const std::string& sigName0,
+                      TH1D* h1_sig1, const std::string& sigName1,
+                      TH1D* h1_sig2, const std::string& sigName2,
+                      TH1D* h1_sig3, const std::string& sigName3) {
 
 
   TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
@@ -304,7 +314,9 @@ void drawSingleHisto( const std::string& outputdir, const std::string& saveName,
   bool drawNormalized = !(saveName=="qFrac");
   float yMax_bg = h1_bg->GetMaximum()*1.2/h1_bg->Integral();
   float yMax_sig0 = h1_sig0->GetMaximum()*1.2/h1_sig0->Integral();
+  float yMax_sig3 = (h1_sig3!=0) ? h1_sig3->GetMaximum()*1.2/h1_sig3->Integral() : 0.;
   float yMax_histo = (yMax_bg>yMax_sig0) ? yMax_bg : yMax_sig0;
+  yMax_histo = (yMax_sig3>yMax_histo) ? yMax_sig3 : yMax_histo;
   float yMax = (drawNormalized) ? yMax_histo : 1.;
 
   TH2D* h2_axes = new TH2D( "axes", "", h1_bg->GetNbinsX(), h1_bg->GetXaxis()->GetXmin(), h1_bg->GetXaxis()->GetXmax(), 10, 0., yMax );
@@ -324,22 +336,47 @@ void drawSingleHisto( const std::string& outputdir, const std::string& saveName,
   h1_bg->SetFillColor( 29 );
   h1_bg->SetLineColor( kBlack );
 
-  h1_sig0->SetLineColor( kRed+1 );
+  h1_sig0->SetLineColor( kRed );
   h1_sig0->SetLineWidth( 2 );
+
+  if( h1_sig1!=0 ) {
+    h1_sig1->SetLineColor( kRed+1 );
+    h1_sig1->SetLineWidth( 2 );
+  }
+
+  if( h1_sig2!=0 ) {
+    h1_sig2->SetLineColor( kRed+2 );
+    h1_sig2->SetLineWidth( 2 );
+  }
+
+  if( h1_sig3!=0 ) {
+    h1_sig3->SetLineColor( kRed+3 );
+    h1_sig3->SetLineWidth( 2 );
+  }
+
 
   if( drawNormalized ) {
     h1_bg->DrawNormalized("histo same");
     h1_sig0->DrawNormalized("histo same");
+    if( h1_sig1!=0 ) h1_sig1->DrawNormalized("histo same");
+    if( h1_sig2!=0 ) h1_sig2->DrawNormalized("histo same");
+    if( h1_sig3!=0 ) h1_sig3->DrawNormalized("histo same");
   } else {
     h1_bg->Draw("histo same");
     h1_sig0->Draw("histo same");
+    if( h1_sig1!=0 ) h1_sig1->Draw("histo same");
+    if( h1_sig2!=0 ) h1_sig2->Draw("histo same");
+    if( h1_sig3!=0 ) h1_sig3->Draw("histo same");
   }
 
   TLegend* legend = new TLegend( 0.2, 0.65, 0.55, 0.9 );
   legend->SetFillColor(0);
   legend->SetTextSize(0.035);
   legend->AddEntry( h1_bg, bgName.c_str(), "F" );
-  legend->AddEntry( h1_sig0, sigName0.c_str(), "F" );
+  legend->AddEntry( h1_sig0, sigName0.c_str(), "L" );
+  if( h1_sig1 ) legend->AddEntry( h1_sig1, sigName1.c_str(), "L" );
+  if( h1_sig2 ) legend->AddEntry( h1_sig2, sigName2.c_str(), "L" );
+  if( h1_sig3 ) legend->AddEntry( h1_sig3, sigName3.c_str(), "L" );
   legend->Draw("same");
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();

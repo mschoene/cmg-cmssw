@@ -16,7 +16,7 @@ float lumi = 5.; //fb-1
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool prompt );
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt );
 
 
 
@@ -103,7 +103,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool prompt ) {
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt ) {
 
 
   std::cout << std::endl << std::endl;
@@ -156,20 +156,39 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
     
 
+
+
     TLorentzVector gamma;
     gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
-    float found_pt = 0.;
-    int foundjet = 0;
+    int closestJet = -1;
+    float deltaRmin = 0.4;
     for( unsigned i=0; i<myTree.njet; ++i ) {
+      if( fabs(myTree.jet_eta[i])>2.5 ) continue;
+      if( myTree.jet_pt[i]<40. ) continue;
       TLorentzVector thisjet;
       thisjet.SetPtEtaPhiM( myTree.jet_pt[i], myTree.jet_eta[i], myTree.jet_phi[i], myTree.jet_mass[i] );
-      if( gamma.DeltaR(thisjet)>0.4 ) foundjet++;
-      if( foundjet==2 ) {
-        found_pt = thisjet.Pt();
+      float thisDeltaR = gamma.DeltaR(thisjet);
+      if( thisDeltaR<deltaRmin ) {
+        deltaRmin = thisDeltaR;
+        closestJet = i;
+      }
+    }
+    float found_pt = 0.;
+    int jet_counter = 0;
+    for( unsigned i=0; i<myTree.njet; ++i ) {
+      if( i==closestJet ) continue;
+      if( fabs(myTree.jet_eta[i])>2.5 ) continue;
+      if( myTree.jet_pt[i]<40. ) continue;
+      jet_counter++;
+      if( jet_counter==2 ) {
+        found_pt = myTree.jet_pt[i];
         break;
       }
     }
+
     if( found_pt<100. ) continue;
+
+
 
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
@@ -181,24 +200,14 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
     int mcMatchId = myTree.gamma_mcMatchId[0];
+    float genIso = myTree.gamma_genIso[0];
 
-    if( prompt  && !(mcMatchId==22 || mcMatchId==7) ) continue;
-    if( !prompt && mcMatchId!=0  ) continue;
+    bool isPrompt = ((mcMatchId==22 || mcMatchId==7) && genIso<5.);
+    
+    if(  onlyPrompt && !isPrompt ) continue;
+    if( !onlyPrompt &&  isPrompt ) continue;
 
     thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
-
-    //if( myTree.gamma_mcMatchId[0]==22 ) {
-    //  thisEstimate->iso_prompt->Fill(iso, weight );
-    //} else if( myTree.gamma_mcMatchId[0]==0 ) {
-    //  thisEstimate->iso_fake->Fill(iso, weight );
-    //}
-
-    //for( unsigned i=0; i<myTree.ngamma; ++i ) {
-    //  if( myTree.gamma_mcMatchId[i]==22 )
-    //    thisEstimate->iso_prompt->Fill(myTree.gamma_chHadIso[i], weight );
-    //  else if( myTree.gamma_mcMatchId[i]==0 )
-    //    thisEstimate->iso_fake->Fill(myTree.gamma_chHadIso[i], weight );
-    //}
 
     
   } // for entries

@@ -17,7 +17,7 @@ float lumi = 5.; //fb-1
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, int selectID=-1 );
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt=false );
 void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data );
 void randomizeSingleHisto( TRandom3 rand, TH1D* histo );
 
@@ -68,14 +68,14 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2EstimateZinvGamma>* gammaJet = new MT2Analysis<MT2EstimateZinvGamma>( "gammaJet", regionsSet );
   for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
     (*gammaJet) += (computeYield( samples_gammaJet[i], regionsSet ));
-    (*prompt) += (computeYield( samples_gammaJet[i], regionsSet, 22 ));
+    (*prompt) += (computeYield( samples_gammaJet[i], regionsSet, true ));
     //(*fake) += (computeYield( samples_gammaJet[i], regionsSet, 0 ));
   }
 
   MT2Analysis<MT2EstimateZinvGamma>* qcd = new MT2Analysis<MT2EstimateZinvGamma>( "qcd", regionsSet );
   for( unsigned i=0; i<samples_qcd.size(); ++i ) {
     (*qcd) += (computeYield( samples_qcd[i], regionsSet ));
-    (*prompt) += (computeYield( samples_qcd[i], regionsSet, 22 ));
+    (*prompt) += (computeYield( samples_qcd[i], regionsSet, true ));
     //(*fake) += (computeYield( samples_qcd[i], regionsSet, 0 ));
   }
 
@@ -111,7 +111,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, int selectID ) {
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt ) {
 
 
   std::cout << std::endl << std::endl;
@@ -163,23 +163,39 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     if( myTree.gamma_idCutBased[0]==0 ) continue;
     //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
 
+
     TLorentzVector gamma;
     gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
-    float found_pt = 0.;
-    int foundjet = 0;
+    int closestJet = -1;
+    float deltaRmin = 0.4;
     for( unsigned i=0; i<myTree.njet; ++i ) {
+      if( fabs(myTree.jet_eta[i])>2.5 ) continue;
+      if( myTree.jet_pt[i]<40. ) continue;
       TLorentzVector thisjet;
       thisjet.SetPtEtaPhiM( myTree.jet_pt[i], myTree.jet_eta[i], myTree.jet_phi[i], myTree.jet_mass[i] );
-      if( gamma.DeltaR(thisjet)>0.4 ) foundjet++;
-      if( foundjet==2 ) {
-        found_pt = thisjet.Pt();
+      float thisDeltaR = gamma.DeltaR(thisjet);
+      if( thisDeltaR<deltaRmin ) {
+        deltaRmin = thisDeltaR;
+        closestJet = i;
+      }
+    }
+    float found_pt = 0.;
+    int jet_counter = 0;
+    for( unsigned i=0; i<myTree.njet; ++i ) {
+      if( i==closestJet ) continue;
+      if( fabs(myTree.jet_eta[i])>2.5 ) continue;
+      if( myTree.jet_pt[i]<40. ) continue;
+      jet_counter++;
+      if( jet_counter==2 ) {
+        found_pt = myTree.jet_pt[i];
         break;
       }
     }
+
     if( found_pt<100. ) continue;
 
-    int mcMatchId = myTree.gamma_mcMatchId[0];
-    if( selectID>0 && mcMatchId==0 ) continue;
+    bool isPrompt = ((myTree.gamma_mcMatchId[0]==22 || myTree.gamma_mcMatchId[0]==7) && myTree.gamma_genIso[0]<5.);
+    if( onlyPrompt && !isPrompt ) continue;
     //if( selectID>=0 && selectID!=mcMatchId ) continue;
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
