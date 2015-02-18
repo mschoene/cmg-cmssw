@@ -250,6 +250,8 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
       int closestJet = -1;
       float deltaRmin = 0.4;
       for( unsigned i=0; i<myTree.njet; ++i ) {
+        if( fabs(myTree.jet_eta[i])>2.5 ) continue;
+        if( myTree.jet_pt[i]<40. ) continue;
         TLorentzVector thisjet;
         thisjet.SetPtEtaPhiM( myTree.jet_pt[i], myTree.jet_eta[i], myTree.jet_phi[i], myTree.jet_mass[i] );
         float thisDeltaR = gamma.DeltaR(thisjet);
@@ -262,6 +264,8 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
       int jet_counter = 0;
       for( unsigned i=0; i<myTree.njet; ++i ) {
         if( i==closestJet ) continue;
+        if( fabs(myTree.jet_eta[i])>2.5 ) continue;
+        if( myTree.jet_pt[i]<40. ) continue;
         jet_counter++;
         if( jet_counter==2 ) {
           found_pt = myTree.jet_pt[i];
