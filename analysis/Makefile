@@ -94,6 +94,9 @@ drawPurityFits: drawPurityFits.cpp MT2Region.o MT2Estimate.o MT2EstimateZinvGamm
 drawQG: drawQG.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o 
 	$(CC) -Wall $(INCLUDES) -o drawQG drawQG.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o  $(ROOTFLAG) $(EXTRALIBS)
 
+drawGammaControlRegion: drawGammaControlRegion.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o 
+	$(CC) -Wall $(INCLUDES) -o drawGammaControlRegion drawGammaControlRegion.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o  $(ROOTFLAG) $(EXTRALIBS)
+
 fitPurityGamma: fitPurityGamma.cpp  MT2Region.o MT2Estimate.o MT2EstimateZinvGamma.o 
 	$(CC) -Wall $(INCLUDES) -o fitPurityGamma fitPurityGamma.cpp MT2Region.o MT2Estimate.o MT2EstimateZinvGamma.o $(ROOTFLAG) $(EXTRALIBS)
 
@@ -103,6 +106,12 @@ gammaControlRegion: gammaControlRegion.cpp MT2Region.o MT2Sample.o MT2Estimate.o
 
 provaTree: provaTree.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateTree.o
 	$(CC) -Wall $(INCLUDES) -o provaTree provaTree.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateTree.o $(ROOTFLAG) $(EXTRALIBS)
+
+provaRoofit: provaRoofit.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateTree.o
+	$(CC) -Wall $(INCLUDES) -o provaRoofit provaRoofit.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateTree.o $(ROOTFLAG) $(EXTRALIBS)
+
+provaPrint: provaPrint.cpp MT2Region.o MT2Sample.o MT2Estimate.o 
+	$(CC) -Wall $(INCLUDES) -o provaPrint provaPrint.cpp MT2Region.o MT2Sample.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS)
 
 
 
