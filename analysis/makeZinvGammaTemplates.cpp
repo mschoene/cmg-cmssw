@@ -136,6 +136,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( myTree.gamma_ht>1000. && sample.id==204 ) continue; // remove high-weight spikes (remove GJet_400to600 leaking into HT>1000)
 
+    if( myTree.met_pt > 100.) continue;
     if( myTree.gamma_mt2 < 200.) continue;
 
     if( myTree.nMuons10 > 0) continue;

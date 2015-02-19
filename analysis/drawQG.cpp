@@ -23,6 +23,7 @@ struct QGHistos {
   TH1D* h1_qgl1;
   TH1D* h1_qgl2;
   TH1D* h1_qgl3;
+  TH1D* h1_qgl3_hiHT;
   TH1D* h1_qglAve;
   TH1D* h1_qglProd_j2;
   TH1D* h1_qglProd_j3;
@@ -121,6 +122,7 @@ void drawCompare( const std::string& outputdir, MT2Analysis<MT2EstimateTree>* bg
   drawSingleHisto( outputdir, "qgl1",       vh_bg.h1_qgl1,       bg->getFullName(), vh_sig[0].h1_qgl1,       signals[0]->getFullName(), vh_sig[1].h1_qgl1,       signals[1]->getFullName(), vh_sig[2].h1_qgl1,       signals[2]->getFullName(), vh_sig[3].h1_qgl1,       signals[3]->getFullName() );  
   drawSingleHisto( outputdir, "qgl2",       vh_bg.h1_qgl2,       bg->getFullName(), vh_sig[0].h1_qgl2,       signals[0]->getFullName(), vh_sig[1].h1_qgl2,       signals[1]->getFullName(), vh_sig[2].h1_qgl2,       signals[2]->getFullName(), vh_sig[3].h1_qgl2,       signals[3]->getFullName() );  
   drawSingleHisto( outputdir, "qgl3",       vh_bg.h1_qgl3,       bg->getFullName(), vh_sig[0].h1_qgl3,       signals[0]->getFullName(), vh_sig[1].h1_qgl3,       signals[1]->getFullName(), vh_sig[2].h1_qgl3,       signals[2]->getFullName(), vh_sig[3].h1_qgl3,       signals[3]->getFullName() );  
+  drawSingleHisto( outputdir, "qgl3_hiHT",  vh_bg.h1_qgl3_hiHT,  bg->getFullName(), vh_sig[0].h1_qgl3_hiHT,  signals[0]->getFullName(), vh_sig[1].h1_qgl3_hiHT,  signals[1]->getFullName(), vh_sig[2].h1_qgl3_hiHT,  signals[2]->getFullName(), vh_sig[3].h1_qgl3_hiHT,  signals[3]->getFullName() );  
   drawSingleHisto( outputdir, "qglAve",     vh_bg.h1_qglAve,     bg->getFullName(), vh_sig[0].h1_qglAve,     signals[0]->getFullName(), vh_sig[1].h1_qglAve,     signals[1]->getFullName(), vh_sig[2].h1_qglAve,     signals[2]->getFullName(), vh_sig[3].h1_qglAve,     signals[3]->getFullName() );  
   drawSingleHisto( outputdir, "qglProd_j2", vh_bg.h1_qglProd_j2, bg->getFullName(), vh_sig[0].h1_qglProd_j2, signals[0]->getFullName(), vh_sig[1].h1_qglProd_j2, signals[1]->getFullName(), vh_sig[2].h1_qglProd_j2, signals[2]->getFullName(), vh_sig[3].h1_qglProd_j2, signals[3]->getFullName() );  
   drawSingleHisto( outputdir, "qglProd_j3", vh_bg.h1_qglProd_j3, bg->getFullName(), vh_sig[0].h1_qglProd_j3, signals[0]->getFullName(), vh_sig[1].h1_qglProd_j3, signals[1]->getFullName(), vh_sig[2].h1_qglProd_j3, signals[2]->getFullName(), vh_sig[3].h1_qglProd_j3, signals[3]->getFullName() );  
@@ -142,6 +144,8 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
   tree->SetBranchAddress( "weight", &weight );
   float mt2;
   tree->SetBranchAddress( "mt2", &mt2 );
+  float ht;
+  tree->SetBranchAddress( "ht", &ht );
   int nJets;
   tree->SetBranchAddress( "nJets", &nJets );
   int nBJets;
@@ -174,6 +178,7 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
   histos.h1_qgl1 = new TH1D( Form("qgl1_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
   histos.h1_qgl2 = new TH1D( Form("qgl2_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
   histos.h1_qgl3 = new TH1D( Form("qgl3_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
+  histos.h1_qgl3_hiHT = new TH1D( Form("qgl3_hiHT_%s", analysis->getName().c_str()), "", 50, 0., 1.0001 );
   histos.h1_qglProd_j2 = new TH1D( Form("qglProd_j2_%s", analysis->getName().c_str()), "", 50, 0., 0.1 ); //1.0001 );
   histos.h1_qglProd_j3 = new TH1D( Form("qglProd_j3_%s", analysis->getName().c_str()), "", 50, 0., 0.1 ); //1.0001 );
   histos.h1_qglProd_j4 = new TH1D( Form("qglProd_j4_%s", analysis->getName().c_str()), "", 50, 0., 0.1 ); //1.0001 );
@@ -206,7 +211,7 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
     tree->GetEntry( iEntry );
 
     if( nBJets>0 ) continue;
-    if( mt2<600. ) continue;
+    if( mt2<200. ) continue;
 
 
     int nq_cut0 = 0;
@@ -244,6 +249,7 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
       all3 += weight;
       if( fabs(partId3)<4.5 ) quarks3+=weight;
       histos.h1_qgl3->Fill( qgl3, weight );
+      if( ht>1000. ) histos.h1_qgl3_hiHT->Fill( qgl3, weight );
       if( qgl3>qgl_thresh0 ) nq_cut0++;
       if( qgl3>qgl_thresh1 ) nq_cut1++;
       if( qgl3>qgl_thresh2 ) nq_cut2++;
@@ -285,6 +291,7 @@ QGHistos getHistos( MT2Analysis<MT2EstimateTree>* analysis ) {
   histos.h1_qgl1->SetXTitle( "Second Jet QGL" );
   histos.h1_qgl2->SetXTitle( "Third Jet QGL" );
   histos.h1_qgl3->SetXTitle( "Fourth Jet QGL" );
+  histos.h1_qgl3_hiHT->SetXTitle( "Fourth Jet QGL" );
 
   histos.h1_qglAve->SetXTitle( "Average Jet QGL" );
   histos.h1_qglProd_j2->SetXTitle( "QGL Product" );
