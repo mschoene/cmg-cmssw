@@ -49,11 +49,13 @@ class MT2Analysis {
 
   const MT2Analysis& operator=( const MT2Analysis& rhs);
   MT2Analysis operator+( const MT2Analysis& rhs) const;
+  MT2Analysis operator-( const MT2Analysis& rhs) const;
   void add( const MT2Analysis& rhs );
   MT2Analysis operator/( const MT2Analysis& rhs);
   void divide( const MT2Analysis& rhs );
   MT2Analysis operator*( const MT2Analysis& rhs);
   MT2Analysis operator+=( const MT2Analysis& rhs);
+  MT2Analysis operator-=( const MT2Analysis& rhs);
   MT2Analysis operator/=( const MT2Analysis& rhs);
   MT2Analysis operator*=( const MT2Analysis& rhs);
 
@@ -780,7 +782,7 @@ const MT2Analysis<T>& MT2Analysis<T>::operator=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't equate MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator=] ERROR! Can't equate MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -829,6 +831,37 @@ MT2Analysis<T> MT2Analysis<T>::operator+( const MT2Analysis& rhs ) const {
 
 
 template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator-( const MT2Analysis& rhs ) const {
+
+  std::set<MT2Region> regions = rhs.getRegions();
+
+  std::set<T*> newdata;
+
+  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+
+      MT2Region thisRegion(*iR);
+
+      T* t1 = this->get(thisRegion); 
+      T* t2 = rhs.get(thisRegion); 
+      if( t2==0 ) {
+        std::cout << "[MT2Analysis::operator-] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+        exit(111);
+      }
+
+      T* tnew = new T(*t1 - *t2);
+      newdata.insert( tnew ); 
+
+  }
+
+  MT2Analysis<T> result(name, newdata);
+
+  return result;
+
+}
+
+
+
+template<class T> 
 MT2Analysis<T> MT2Analysis<T>::operator+=( const MT2Analysis& rhs ) {
 
   std::set<MT2Region> regions = rhs.getRegions();
@@ -840,11 +873,37 @@ MT2Analysis<T> MT2Analysis<T>::operator+=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator+=] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
     *t1 += *t2;
+
+  }
+
+
+  return *this;
+
+}
+
+
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator-=( const MT2Analysis& rhs ) {
+
+  std::set<MT2Region> regions = rhs.getRegions();
+
+  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+
+    MT2Region thisRegion(*iR);
+
+    T* t1 = this->get(thisRegion); 
+    T* t2 = rhs.get(thisRegion); 
+    if( t2==0 ) {
+      std::cout << "[MT2Analysis::operator-=] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      exit(111);
+    }
+
+    *t1 -= *t2;
 
   }
 
@@ -866,7 +925,7 @@ MT2Analysis<T> MT2Analysis<T>::operator/=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator/= ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -893,7 +952,7 @@ MT2Analysis<T> MT2Analysis<T>::operator*=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator*= ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -978,7 +1037,7 @@ MT2Analysis<T> MT2Analysis<T>::operator/( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator/] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -1021,7 +1080,7 @@ MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator*] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 

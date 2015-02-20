@@ -13,8 +13,19 @@
 
 MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2Region& aregion ) : MT2Estimate( aname, aregion ) {
 
-  int nbins = 50;
-  float xmax = 1.;
+
+  sietaieta = new TH1D( this->getHistoName("sietaieta").c_str(), "", 200, 0., 0.035 );
+  sietaieta->Sumw2();
+
+
+  int nbins = 100;
+  Double_t bins[nbins];
+  bins[0] = 0.;
+  bins[1] = 0.005;
+  bins[2] = 0.01;
+  for( unsigned i=0;
+  bins[0] = 0.;
+  float xmax = 0.5;
 
   // this histo will be used to create histogram templates:
   iso = new TH1D( this->getHistoName("iso").c_str(), "", nbins, 0., xmax);
@@ -49,6 +60,7 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2R
 MT2EstimateZinvGamma::MT2EstimateZinvGamma( const MT2EstimateZinvGamma& rhs ) : MT2Estimate(rhs) {
 
   this->iso = new TH1D(*(rhs.iso));
+  this->sietaieta = new TH1D(*(rhs.sietaieta));
 
   for( unsigned i=0; i<rhs.iso_bins.size(); ++i ) {
     RooDataSet* newDataSet = new RooDataSet( *(rhs.iso_bins[i]) );
@@ -66,6 +78,7 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const MT2EstimateZinvGamma& rhs ) : 
 MT2EstimateZinvGamma::~MT2EstimateZinvGamma() {
 
   delete iso;
+  delete sietaieta;
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) { 
     delete iso_bins[i];
@@ -82,6 +95,7 @@ void MT2EstimateZinvGamma::setName( const std::string& newName ) {
   MT2Estimate::setName(newName);
 
   iso->SetName( this->getHistoName("iso").c_str() );
+  sietaieta->SetName( this->getHistoName("sietaieta").c_str() );
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
     iso_bins[i]->SetName( this->getHistoName(Form("iso_bin%d", i)).c_str() );
@@ -153,6 +167,7 @@ void MT2EstimateZinvGamma::finalize() {
   MT2Estimate::addOverflow();
 
   MT2Estimate::addOverflowSingleHisto( iso );
+  MT2Estimate::addOverflowSingleHisto( sietaieta );
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
     MT2Estimate::addOverflowSingleHisto(iso_bins_hist[i]);
@@ -166,6 +181,7 @@ void MT2EstimateZinvGamma::getShit( TFile* file, const std::string& path ) {
 
   MT2Estimate::getShit(file, path);
   iso = (TH1D*)file->Get(Form("%s/%s", path.c_str(), iso->GetName()));
+  sietaieta = (TH1D*)file->Get(Form("%s/%s", path.c_str(), sietaieta->GetName()));
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
     iso_bins[i] = (RooDataSet*)file->Get(Form("%s/%s", path.c_str(), iso_bins[i]->GetName()));
@@ -189,6 +205,7 @@ void MT2EstimateZinvGamma::write() const {
   MT2Estimate::write();
 
   iso->Write();
+  sietaieta->Write();
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
     iso_bins[i]->Write();
@@ -211,6 +228,8 @@ const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator=( const MT2EstimateZi
 
     this->iso = new TH1D(*(rhs.iso));
 
+    this->sietaieta = new TH1D(*(rhs.sietaieta));
+
     for( unsigned i=0; i<iso_bins.size(); ++i ) {
       this->iso_bins[i] = new RooDataSet( *(rhs.iso_bins[i]) );
       this->iso_bins_hist[i] = new TH1D( *(rhs.iso_bins_hist[i]) );
@@ -231,6 +250,11 @@ const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator=( const MT2EstimateZi
     delete this->iso;
     this->iso = new TH1D(*(rhs.iso));
     this->iso->SetName(oldName_iso.c_str());
+
+    std::string oldName_sietaieta = this->sietaieta->GetName();
+    delete this->sietaieta;
+    this->sietaieta = new TH1D(*(rhs.sietaieta));
+    this->sietaieta->SetName(oldName_sietaieta.c_str());
 
 
     for( unsigned i=0; i<iso_bins.size(); ++i ) {
@@ -267,6 +291,7 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator+( const MT2EstimateZinvGamma
   result.yield->Add(rhs.yield);
 
   result.iso->Add(rhs.iso);
+  result.sietaieta->Add(rhs.sietaieta);
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
 
@@ -281,29 +306,34 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator+( const MT2EstimateZinvGamma
 
 
 
-
-/*
-MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/( const MT2EstimateZinvGamma& rhs ) const{
+MT2EstimateZinvGamma MT2EstimateZinvGamma::operator-( const MT2EstimateZinvGamma& rhs ) const{
 
 
   if( *(this->region) != *(rhs.region) ) {
-    std::cout << "[MT2EstimateZinvGamma::operator/] ERROR! Can't divide MT2EstimateZinvGamma with different MT2Regions!" << std::endl;
+    std::cout << "[MT2EstimateZinvGamma::operator-] ERROR! Can't add MT2EstimateZinvGamma with different MT2Regions!" << std::endl;
     exit(113);
   }
 
-  MT2EstimateZinvGamma result(*this);
-  result.yield->Divide(rhs.yield);
+  std::cout << "[MT2EstimateZinvGamma::operator-] CAREFUL!! RooDataSets will not be subtracted but appended!!" << std::endl;
 
-  result.iso->Divide(rhs.iso);
+  MT2EstimateZinvGamma result(*this);
+  result.yield->Add(rhs.yield, -1.);
+
+  result.iso->Add(rhs.iso, -1.);
+  result.sietaieta->Add(rhs.sietaieta, -1.);
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
-    result.iso_bins[i]->Divide(rhs.iso_bins[i]);
+
+    result.iso_bins[i]->append( *(rhs.iso_bins[i]) ); // should put negative weights!
+    result.iso_bins_hist[i]->Add( rhs.iso_bins_hist[i], -1. );
+
   }
   
   return result;
 
 }
-*/
+
+
 
 
 const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator+=( const MT2EstimateZinvGamma& rhs ) {
@@ -311,6 +341,7 @@ const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator+=( const MT2EstimateZ
   this->yield->Add(rhs.yield);
 
   this->iso->Add(rhs.iso);
+  this->sietaieta->Add(rhs.sietaieta);
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
 
@@ -325,19 +356,22 @@ const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator+=( const MT2EstimateZ
 
 
 
-/*
-MT2EstimateZinvGamma MT2EstimateZinvGamma::operator/=( const MT2EstimateZinvGamma& rhs ) const {
 
-  this->yield->Divide(rhs.yield);
+const MT2EstimateZinvGamma& MT2EstimateZinvGamma::operator-=( const MT2EstimateZinvGamma& rhs ) {
 
-  this->iso->Divide(rhs.iso);
+  this->yield->Add(rhs.yield, -1.);
+
+  this->iso->Add(rhs.iso, -1.);
+  this->sietaieta->Add(rhs.sietaieta, -1.);
 
   for( unsigned i=0; i<iso_bins.size(); ++i ) {
-    this->iso_bins[i]->Divide(rhs.iso_bins[i]);
+
+    this->iso_bins[i]->append( *(rhs.iso_bins[i]) );
+    this->iso_bins_hist[i]->Add( rhs.iso_bins_hist[i], -1. );
+
   }
 
   return (*this);
 
 }
-*/
 
