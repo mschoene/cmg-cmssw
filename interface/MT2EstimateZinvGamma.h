@@ -19,6 +19,9 @@ class MT2EstimateZinvGamma : public MT2Estimate {
 
   virtual void setName( const std::string& newName );
  
+  
+  TH1D* sietaieta;
+
   // integrated over mt2:
   TH1D* iso;
 
@@ -35,8 +38,10 @@ class MT2EstimateZinvGamma : public MT2Estimate {
 
   const MT2EstimateZinvGamma& operator=( const MT2EstimateZinvGamma& rhs );
   MT2EstimateZinvGamma operator+( const MT2EstimateZinvGamma& rhs ) const;
+  MT2EstimateZinvGamma operator-( const MT2EstimateZinvGamma& rhs ) const;
   //MT2EstimateZinvGamma operator/( const MT2EstimateZinvGamma& rhs ) const;
   const MT2EstimateZinvGamma& operator+=( const MT2EstimateZinvGamma& rhs );
+  const MT2EstimateZinvGamma& operator-=( const MT2EstimateZinvGamma& rhs );
   //MT2EstimateZinvGamma operator/=( const MT2EstimateZinvGamma& rhs ) const;
 
   //MT2EstimateZinvGamma operator/ ( float k ) const;

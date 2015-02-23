@@ -49,11 +49,13 @@ class MT2Analysis {
 
   const MT2Analysis& operator=( const MT2Analysis& rhs);
   MT2Analysis operator+( const MT2Analysis& rhs) const;
+  MT2Analysis operator-( const MT2Analysis& rhs) const;
   void add( const MT2Analysis& rhs );
   MT2Analysis operator/( const MT2Analysis& rhs);
   void divide( const MT2Analysis& rhs );
   MT2Analysis operator*( const MT2Analysis& rhs);
   MT2Analysis operator+=( const MT2Analysis& rhs);
+  MT2Analysis operator-=( const MT2Analysis& rhs);
   MT2Analysis operator/=( const MT2Analysis& rhs);
   MT2Analysis operator*=( const MT2Analysis& rhs);
 
@@ -144,6 +146,13 @@ MT2Analysis<T>::MT2Analysis( const std::string& aname, const std::string& region
   } else if( regionsSet=="13TeV_inclusive" ) {
 
     regions_.insert(MT2Region( 450. )); // inclusive 450-inf and no jet requirement
+
+  } else if( regionsSet=="13TeV_inclusive_bjets" ) {
+
+    regions_.insert(MT2Region( 450., -1., 2, -1, 0, 0 )); 
+    regions_.insert(MT2Region( 450., -1., 2, -1, 1, 1 )); 
+    regions_.insert(MT2Region( 450., -1., 2, -1, 2, 2 )); 
+    regions_.insert(MT2Region( 450., -1., 2, -1, 3,-1 )); 
 
   } else if( regionsSet=="13TeV" ) {
 
@@ -780,7 +789,7 @@ const MT2Analysis<T>& MT2Analysis<T>::operator=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't equate MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator=] ERROR! Can't equate MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -829,6 +838,37 @@ MT2Analysis<T> MT2Analysis<T>::operator+( const MT2Analysis& rhs ) const {
 
 
 template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator-( const MT2Analysis& rhs ) const {
+
+  std::set<MT2Region> regions = rhs.getRegions();
+
+  std::set<T*> newdata;
+
+  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+
+      MT2Region thisRegion(*iR);
+
+      T* t1 = this->get(thisRegion); 
+      T* t2 = rhs.get(thisRegion); 
+      if( t2==0 ) {
+        std::cout << "[MT2Analysis::operator-] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+        exit(111);
+      }
+
+      T* tnew = new T(*t1 - *t2);
+      newdata.insert( tnew ); 
+
+  }
+
+  MT2Analysis<T> result(name, newdata);
+
+  return result;
+
+}
+
+
+
+template<class T> 
 MT2Analysis<T> MT2Analysis<T>::operator+=( const MT2Analysis& rhs ) {
 
   std::set<MT2Region> regions = rhs.getRegions();
@@ -840,11 +880,37 @@ MT2Analysis<T> MT2Analysis<T>::operator+=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator+=] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
     *t1 += *t2;
+
+  }
+
+
+  return *this;
+
+}
+
+
+template<class T> 
+MT2Analysis<T> MT2Analysis<T>::operator-=( const MT2Analysis& rhs ) {
+
+  std::set<MT2Region> regions = rhs.getRegions();
+
+  for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
+
+    MT2Region thisRegion(*iR);
+
+    T* t1 = this->get(thisRegion); 
+    T* t2 = rhs.get(thisRegion); 
+    if( t2==0 ) {
+      std::cout << "[MT2Analysis::operator-=] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      exit(111);
+    }
+
+    *t1 -= *t2;
 
   }
 
@@ -866,7 +932,7 @@ MT2Analysis<T> MT2Analysis<T>::operator/=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator/= ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -893,7 +959,7 @@ MT2Analysis<T> MT2Analysis<T>::operator*=( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator*= ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -978,7 +1044,7 @@ MT2Analysis<T> MT2Analysis<T>::operator/( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator/] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -1021,7 +1087,7 @@ MT2Analysis<T> MT2Analysis<T>::operator*( const MT2Analysis& rhs ) {
     T* t1 = this->get(thisRegion); 
     T* t2 = rhs.get(thisRegion); 
     if( t2==0 ) {
-      std::cout << "[MT2Analysis::operator+] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
+      std::cout << "[MT2Analysis::operator*] ERROR! Can't add MT2Analysis with different regional structures!" << std::endl;
       exit(111);
     }
 
@@ -1360,7 +1426,8 @@ MT2Analysis<T>* MT2Analysis<T>::readFromFile( const std::string& fileName, const
   MT2Analysis<T>* analysis = *(analyses.begin());
 
   if( analyses.size()>1 ) {
-    std::cout << "[MT2Analysis::readFromFile] WARNING!!! Multiple analyses found, but reading only one ('" << analysis->name << "')" << std::endl;
+    std::cout << "[MT2Analysis::readFromFile] WARNING!!! Multiple analyses found in file: " << fileName << std::endl;
+    std::cout << "[MT2Analysis::readFromFile] but reading only one ('" << analysis->name << "')" << std::endl;
     std::cout << "[MT2Analysis::readFromFile] (if you want to read all of them you should use readAllFromFile)" << std::endl;
   } else {
     std::cout << "[MT2Analysis::readFromFile] Grabbed MT2Analysis '" << analysis->name << "' from file " << fileName << std::endl;

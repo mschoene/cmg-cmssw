@@ -13,6 +13,7 @@
 
 
 float lumi = 5.; //fb-1
+bool useMC = true;
 
 
 
@@ -85,7 +86,11 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string templateFileName = "gammaTemplates_" + samplesFileName + "_" + regionsSet + ".root";
+
+  std::string templateFileName = "gammaTemplates";
+  if( useMC ) templateFileName += "MC";
+  templateFileName = templateFileName + "_" + samplesFileName + "_" + regionsSet + ".root";
+
   templatesPrompt->writeToFile(templateFileName);
   templatesFake->addToFile(templateFileName);
   templatesPrompt_qcd->addToFile(templateFileName);
@@ -153,9 +158,29 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( myTree.ngamma==0 ) continue;
 
-    if( myTree.gamma_idCutBased[0]==0 ) continue;
-    //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
+
+
+
+    bool isPrompt = false;
+
+    if( useMC ) {
+
+      if( myTree.gamma_idCutBased[0]==0 ) continue;
+
+      int mcMatchId = myTree.gamma_mcMatchId[0];
+      float genIso = myTree.gamma_genIso[0];
+      isPrompt = ((mcMatchId==22 || mcMatchId==7) && genIso<5.);
+      if(  onlyPrompt && !isPrompt ) continue;
+      if( !onlyPrompt &&  isPrompt ) continue;
+
+    } else {
+
+      isPrompt = true;
+
+    }
     
+
+
 
 
 
@@ -198,15 +223,9 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     if( thisEstimate==0 ) continue;
 
     thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
+    thisEstimate->sietaieta->Fill(myTree.gamma_sigmaIetaIeta[0], weight );
 
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
-    int mcMatchId = myTree.gamma_mcMatchId[0];
-    float genIso = myTree.gamma_genIso[0];
-
-    bool isPrompt = ((mcMatchId==22 || mcMatchId==7) && genIso<5.);
-    
-    if(  onlyPrompt && !isPrompt ) continue;
-    if( !onlyPrompt &&  isPrompt ) continue;
 
     thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
 

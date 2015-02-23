@@ -13,8 +13,12 @@
 
 
 
+bool useMC = false;
+
 
 void compareRegions( const std::string& outputdir, std::vector<MT2Region> regions, MT2Analysis<MT2EstimateZinvGamma>* templ, bool isPrompt, const std::string& suffix="" );
+void compareSigmaIetaIeta( const std::string& outputdir, TH1D* prompt, TH1D* fake );
+void drawSingleSigmaPlot( const std::string& outputdir, const std::string& label, float xMin, float xMax, TH1D* prompt, TH1D* fake );
 
 
 int main( int argc, char* argv[] ) {
@@ -28,22 +32,21 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string regionsSet = "13TeV_CSA14";
+  std::string regionsSet = "13TeV_inclusive";
+  //std::string regionsSet = "13TeV_CSA14";
 
   MT2DrawTools::setStyle();
 
-  std::string outputdir = "Plots_GammaTemplates_" + samples + "_" + regionsSet;
+  std::string mc_or_not = (useMC) ? "MC" : "";
+
+  std::string outputdir = "Plots_GammaTemplates" + mc_or_not + "_" + samples + "_" + regionsSet;
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
-  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples +  "_" + regionsSet + ".root", "templates");
-  MT2Analysis<MT2EstimateZinvGamma>* templatesFake = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesFake");
+  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates" + mc_or_not + "_" + samples +  "_" + regionsSet + ".root", "templates");
+  MT2Analysis<MT2EstimateZinvGamma>* templatesFake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates" + mc_or_not + "_" + samples + "_" + regionsSet + ".root", "templatesFake");
 
 
-  //std::set<MT2Region> regions = templatesPrompt->getRegions();
-
-  //for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
-  //  drawComparison( outputdir, "gJet_vs_qcd", "Photon Charged Isolation", "GeV", *iR, templatesPrompt, "Prompts in #gamma+Jet", templatesFake, "Prompts in QCD");
-  //}
+  if( regionsSet=="13TeV_inclusive" ) compareSigmaIetaIeta( outputdir, templatesPrompt->get(*(templatesPrompt->getRegions().begin()))->sietaieta, templatesFake->get(*(templatesFake->getRegions().begin()))->sietaieta );
 
   
 
@@ -114,6 +117,109 @@ int main( int argc, char* argv[] ) {
   return 0;
 
 }
+
+
+
+
+void compareSigmaIetaIeta( const std::string& outputdir, TH1D* prompt, TH1D* fake ) {
+
+  drawSingleSigmaPlot( outputdir, "Barrel", 0.007, 0.0125, (TH1D*)prompt->Clone(), (TH1D*)fake->Clone() );
+  drawSingleSigmaPlot( outputdir, "Endcap", 0.0197, 0.035, (TH1D*)prompt->Clone(), (TH1D*)fake->Clone() );
+
+}
+
+
+
+void drawSingleSigmaPlot( const std::string& outputdir, const std::string& label, float xMin, float xMax, TH1D* prompt, TH1D* fake ) {
+
+  int binMin = prompt->FindBin( xMin );
+  int binMax = prompt->FindBin( xMax );
+  int nbins = binMax-binMin;
+
+  TH1D* thisPrompt = new TH1D("thisPrompt", "", nbins, xMin, xMax );
+  TH1D* thisFake = new TH1D("thisFake", "", nbins, xMin, xMax );
+
+  for( unsigned i=0; i<nbins; ++i ) {
+    thisPrompt->SetBinContent( i+1, prompt->GetBinContent( i+binMin ));
+    thisFake->SetBinContent( i+1, fake->GetBinContent( i+binMin ));
+  }
+
+  if( label=="Endcap" ) {
+    thisPrompt->Rebin(4);
+    thisFake  ->Rebin(4);
+  }
+
+
+  TCanvas* c1 = new TCanvas("c1", "", 600, 600);
+  c1->cd();
+
+  float yMax_prompt = thisPrompt->GetMaximum()/thisPrompt->Integral();
+  float yMax_fake = thisFake->GetMaximum()/thisFake->Integral();
+  float yMax = (yMax_prompt>yMax_fake) ? yMax_prompt : yMax_fake;
+  yMax *= 1.2;
+
+  TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax );
+  h2_axes->SetXTitle( "Sigma Ieta Ieta" );
+  h2_axes->SetYTitle( "Normalized to Unity" );
+  h2_axes->Draw();
+
+  thisPrompt->SetFillColor(29);
+  thisPrompt->SetLineColor(kBlack);
+
+  thisFake->SetLineColor(kRed+2);
+  thisFake->SetLineWidth(2);
+
+  thisPrompt->DrawNormalized("histo same");
+  thisFake->DrawNormalized("histo same");
+
+  TLegend* legend = new TLegend( 0.65, 0.7, 0.92, 0.92, label.c_str() );
+  legend->SetFillColor(0);
+  legend->SetTextSize(0.038);
+  legend->AddEntry( thisPrompt, "Prompt", "F" );
+  legend->AddEntry( thisFake, "Fake", "L" );
+  legend->Draw("Same");
+
+  TPaveText* labelTop = MT2DrawTools::getLabelTop();
+  labelTop->Draw("same");
+
+  gPad->RedrawAxis();
+
+  c1->SaveAs( Form("%s/sietaieta_%s.eps", outputdir.c_str(), label.c_str()) );
+  c1->SaveAs( Form("%s/sietaieta_%s.png", outputdir.c_str(), label.c_str()) );
+  c1->SaveAs( Form("%s/sietaieta_%s.pdf", outputdir.c_str(), label.c_str()) );
+
+  c1->Clear();
+  c1->SetLogy();
+
+  c1->cd();
+
+  TH2D* h2_axes_log = new TH2D("axes_log", "", 10, xMin, xMax, 10, 0.0001, 2. );
+  h2_axes_log->SetXTitle( "Sigma Ieta Ieta" );
+  h2_axes_log->SetYTitle( "Normalized to Unity" );
+  h2_axes_log->Draw();
+
+  thisPrompt->DrawNormalized("histo same");
+  thisFake->DrawNormalized("histo same");
+
+  legend->Draw("Same");
+  labelTop->Draw("same");
+
+  gPad->RedrawAxis();
+
+  c1->SaveAs( Form("%s/sietaieta_%s_log.eps", outputdir.c_str(), label.c_str()) );
+  c1->SaveAs( Form("%s/sietaieta_%s_log.png", outputdir.c_str(), label.c_str()) );
+  c1->SaveAs( Form("%s/sietaieta_%s_log.pdf", outputdir.c_str(), label.c_str()) );
+
+
+  delete c1;
+  delete h2_axes;
+  delete h2_axes_log;
+  delete thisPrompt;
+  delete thisFake;
+  
+}
+
+
 
 
 
