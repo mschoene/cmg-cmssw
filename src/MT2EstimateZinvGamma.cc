@@ -18,17 +18,28 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2R
   sietaieta->Sumw2();
 
 
-  int nbins = 100;
+  int nbins = 10;
   Double_t bins[nbins];
   bins[0] = 0.;
   bins[1] = 0.005;
   bins[2] = 0.01;
-  for( unsigned i=0;
-  bins[0] = 0.;
-  float xmax = 0.5;
+  bins[3] = 0.02;
+  bins[4] = 0.05;
+  bins[5] = 0.1;
+  bins[6] = 0.2;
+  bins[7] = 0.3;
+  bins[8] = 0.4;
+  bins[9] = 0.5;
+  //bins[10] = 1.;
+  float xmax = bins[nbins-1];
+
+  //int nbins = 60;
+  //float xmax = 0.3;
+
 
   // this histo will be used to create histogram templates:
-  iso = new TH1D( this->getHistoName("iso").c_str(), "", nbins, 0., xmax);
+  iso = new TH1D( this->getHistoName("iso").c_str(), "", nbins-1, bins );
+  //iso = new TH1D( this->getHistoName("iso").c_str(), "", nbins, 0., xmax );
   iso->Sumw2();
 
   x_ = new RooRealVar( "x", "", 0., xmax );
@@ -42,11 +53,10 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2R
   for( unsigned i=0; i<nbins_mt2; ++i ) {
 
     RooDataSet* isoDataset = new RooDataSet( this->getHistoName(Form("iso_bin%d", i)).c_str(), "", RooArgSet(*x_,*w_), w_->GetName() );
-  //DataSet = new RooDataSet("dataset", "A dataset", *ArgSet, "weight");
-  //RooDataSet *data   = new RooDataSet("data", "data", RooArgSet(*y,*weight));
     iso_bins.push_back(isoDataset);
 
-    TH1D* this_iso_hist = new TH1D( this->getHistoName(Form("iso_bin%d_hist", i)).c_str() , "", nbins, 0., xmax);
+    TH1D* this_iso_hist = new TH1D( this->getHistoName(Form("iso_bin%d_hist", i)).c_str() , "", nbins-1, bins );
+    //TH1D* this_iso_hist = new TH1D( this->getHistoName(Form("iso_bin%d_hist", i)).c_str() , "", nbins, 0., xmax );
     this_iso_hist->Sumw2();
     iso_bins_hist.push_back(this_iso_hist);
 
