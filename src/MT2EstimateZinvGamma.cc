@@ -327,8 +327,8 @@ MT2EstimateZinvGamma MT2EstimateZinvGamma::operator-( const MT2EstimateZinvGamma
   std::cout << "[MT2EstimateZinvGamma::operator-] CAREFUL!! RooDataSets will not be subtracted but appended!!" << std::endl;
 
   MT2EstimateZinvGamma result(*this);
-  result.yield->Add(rhs.yield, -1.);
 
+  result.yield->Add(rhs.yield, -1.);
   result.iso->Add(rhs.iso, -1.);
   result.sietaieta->Add(rhs.sietaieta, -1.);
 
