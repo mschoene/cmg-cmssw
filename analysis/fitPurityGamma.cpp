@@ -61,11 +61,11 @@ int main( int argc, char* argv[] ) {
 
 
   //MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/data.root", "gammaCR" );
-  MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/data.root", "gammaCR" );
+  MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/mc.root", "gammaCR" );
 
   //std::string templateSamples = "CSA14_Zinv";
-  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
-  MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates_" + samples + "_" + regionsSet + ".root", "templatesFake" );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplatesMC_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplatesMC_" + samples + "_" + regionsSet + ".root", "templatesFake" );
 
 
   std::string outputdir = "PurityFits_" + samples + "_" + regionsSet;
@@ -148,7 +148,7 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
   RooAddPdf  model("model","", RooArgList(pdfPrompt,pdfFake), sigFrac) ;
 
 
-  float xMaxFit = 0.3;
+  float xMaxFit = 0.299;
   x->setRange( "fittingRange", 0., xMaxFit );
   model.fitTo(*data, SumW2Error(kTRUE), Range("fittingRange")); 
 
