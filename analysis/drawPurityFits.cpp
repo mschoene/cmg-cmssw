@@ -49,7 +49,7 @@ int main() {
   system( Form("mkdir -p %s", outputdir.c_str() ));
 
   //MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_inclusive/purityMC.root" );
-  MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/purityMC.root" );
+  MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/purityMC.root", "purityMC" );
 
   std::vector< PurityFit > fits;
   fits.push_back( PurityFit( "All Bins"  , "13TeV_CSA14"     , MT2Analysis<MT2Estimate>::readFromFile("PurityFits_" + samples + "_13TeV_CSA14/purityFit_"     + samples + "_13TeV_CSA14.root"    ), 20, kRed+2 ));
