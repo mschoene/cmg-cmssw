@@ -21,6 +21,8 @@ bool dummyData = true;
 MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt );
 void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data );
 void randomizeSingleHisto( TRandom3* rand, TH1D* h1 );
+void removeNegatives( MT2Analysis<MT2EstimateZinvGamma>* data );
+void removeNegativesSingleHisto( TH1D* h1 );
 
 
 
@@ -28,10 +30,10 @@ int main( int argc, char* argv[] ) {
 
 
   std::string regionsSet = "13TeV_inclusive";
-  //if( argc>1 ) {
-  //  std::string regionsSet_tmp(argv[1]); 
-  //  regionsSet = regionsSet_tmp;
-  //}
+  if( argc>1 ) {
+    std::string regionsSet_tmp(argv[1]); 
+    regionsSet = regionsSet_tmp;
+  }
 
   std::string samplesFileName = "PHYS14_v2_Zinv";
 
@@ -67,7 +69,7 @@ int main( int argc, char* argv[] ) {
 
   MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt  = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt", regionsSet );
   (*templatesPrompt) = (*templatesPromptRaw) - (*templatesFake);
-
+  removeNegatives( templatesPrompt );
 
   std::string templateFileName = "gammaTemplatesDummy_" + samplesFileName + "_" + regionsSet + ".root";
 
@@ -120,7 +122,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     if( myTree.gamma_mt2 > 300. ) continue;
     if( myTree.met_pt > 100.) continue;
     //if( myTree.gamma_nJet40 > 4) continue;
-    if( myTree.gamma_nBJet40 > 0) continue;
+    if( myTree.gamma_nBJet40 > 1) continue;
     //if( myTree.gamma_ht>1000. && sample.id==204 ) continue; // remove high-weight spikes (remove GJet_400to600 leaking into HT>1000)
 
 
@@ -221,9 +223,7 @@ void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data ) {
 
   TRandom3 rand(13);
 
-
   std::set<MT2Region> MT2Regions = data->getRegions();
-
 
   for( std::set<MT2Region>::iterator iMT2 = MT2Regions.begin(); iMT2!=MT2Regions.end(); ++iMT2 ) {
 
@@ -249,5 +249,33 @@ void randomizeSingleHisto( TRandom3* rand, TH1D* h1 ) {
     h1->SetBinError(ibin, 0.);
     
   }  // for bins
+
+}
+
+
+void removeNegatives( MT2Analysis<MT2EstimateZinvGamma>* data ) {
+
+  std::set<MT2Region> MT2Regions = data->getRegions();
+
+  for( std::set<MT2Region>::iterator iMT2 = MT2Regions.begin(); iMT2!=MT2Regions.end(); ++iMT2 ) {
+
+    MT2Region thisRegion( (*iMT2) );
+      
+    removeNegativesSingleHisto( data->get(thisRegion)->yield );
+    removeNegativesSingleHisto( data->get(thisRegion)->iso );
+    removeNegativesSingleHisto( data->get(thisRegion)->sietaieta );
+
+  } // for regions
+
+}
+
+
+void removeNegativesSingleHisto( TH1D* h1 ) {
+
+  for( unsigned ibin=1; ibin<h1->GetXaxis()->GetNbins()+1; ++ibin ) {
+
+    if( h1->GetBinContent(ibin)<0. ) h1->SetBinContent( ibin, 0. );
+
+  }
 
 }
