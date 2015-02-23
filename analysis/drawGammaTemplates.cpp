@@ -123,8 +123,8 @@ int main( int argc, char* argv[] ) {
 
 void compareSigmaIetaIeta( const std::string& outputdir, TH1D* prompt, TH1D* fake ) {
 
-  drawSingleSigmaPlot( outputdir, "Barrel", 0.007, 0.015, (TH1D*)prompt->Clone(), (TH1D*)fake->Clone() );
-  drawSingleSigmaPlot( outputdir, "Endcap", 0.020, 0.035, (TH1D*)prompt->Clone(), (TH1D*)fake->Clone() );
+  drawSingleSigmaPlot( outputdir, "Barrel", 0.007, 0.0125, (TH1D*)prompt->Clone(), (TH1D*)fake->Clone() );
+  drawSingleSigmaPlot( outputdir, "Endcap", 0.0197, 0.035, (TH1D*)prompt->Clone(), (TH1D*)fake->Clone() );
 
 }
 
@@ -144,8 +144,10 @@ void drawSingleSigmaPlot( const std::string& outputdir, const std::string& label
     thisFake->SetBinContent( i+1, fake->GetBinContent( i+binMin ));
   }
 
-  //prompt->Rebin(2);
-  //fake->Rebin(2);
+  if( label=="Endcap" ) {
+    thisPrompt->Rebin(4);
+    thisFake  ->Rebin(4);
+  }
 
 
   TCanvas* c1 = new TCanvas("c1", "", 600, 600);
