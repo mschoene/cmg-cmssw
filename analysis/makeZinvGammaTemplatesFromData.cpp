@@ -74,6 +74,7 @@ int main( int argc, char* argv[] ) {
   std::string templateFileName = "gammaTemplatesDummy_" + samplesFileName + "_" + regionsSet + ".root";
 
   templatesPrompt->writeToFile(templateFileName);
+  templatesPromptRaw->addToFile(templateFileName);
   templatesFake->addToFile(templateFileName);
 
   return 0;
@@ -179,7 +180,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     if( fabs( gamma.Eta() )<1.4445 ) {
       isPrompt = sietaieta<0.01;
     } else {
-      isPrompt = sietaieta<0.027;
+      isPrompt = sietaieta<0.03; // POG cut, but 0.027 would be better
     }
     
     if(  onlyPrompt && !isPrompt ) continue;
