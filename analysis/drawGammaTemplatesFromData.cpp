@@ -112,7 +112,7 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
   }
 
   if( histo3!=0 ) {
-    histo3->SetLineColor( kGray+2 );
+    histo3->SetLineColor( 46 );
     histo3->SetLineWidth( 2 );
     histo3->Draw("histo same");
     legend->AddEntry( histo3, name3.c_str(), "L" );
@@ -121,7 +121,7 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
   histo1->Draw("p same" );
   legend->Draw("same");
 
-  TPaveText* labelTop = MT2DrawTools::getLabelTop();
+  TPaveText* labelTop = MT2DrawTools::getLabelTop(4.);
   labelTop->Draw("same");
 
   TPaveText* photonLabel = new TPaveText( 0.2, 0.8, 0.5, 0.9, "brNDC" );
