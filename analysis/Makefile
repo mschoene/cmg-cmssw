@@ -15,7 +15,7 @@ EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -L$(CMSSW_BASE)/lib/slc6_amd64
 
 
 
-all: computeLostLepton computeLostLepton_CR computeLostLepton_BabyTrees inclusivePlots_BabyTrees inclusivePlots_QCD regionOptimization_BabyTrees compareYield printYield printYield_CR fakeQCDestimate createDatacards
+all: computeLostLepton computeLostLepton_CR   printYield printYield_CR fakeQCDestimate createDatacards regionEventYields
 
 computeLostLepton: computeLostLepton.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o MT2DrawTools.o
 	$(CC) -Wall $(INCLUDES) -o computeLostLepton computeLostLepton.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o MT2DrawTools.o $(ROOTFLAG) $(EXTRALIBS) -fpermissive
@@ -26,8 +26,6 @@ computeLostLepton_CR: computeLostLepton_CR.cpp MT2Region.o MT2Sample.o MT2Estima
 computeZinvFromZmumu: computeZinvFromZmumu.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o
 	$(CC) -Wall $(INCLUDES) -o computeZinvFromZmumu computeZinvFromZmumu.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o MT2Estimate.o $(ROOTFLAG) $(EXTRALIBS)
 
-computeLostLepton_BabyTrees: computeLostLepton_BabyTrees.cpp MT2Region.o MT2LostLeptonUtilities.o MT2Sample.o
-	$(CC) -Wall $(INCLUDES) -o computeLostLepton_BabyTrees computeLostLepton_BabyTrees.cpp MT2Region.o MT2LostLeptonUtilities.o MT2Sample.o $(ROOTFLAG) $(EXTRALIBS)
 
 computeZinvFromGamma: computeZinvFromGamma.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateTree.o
 	$(CC) -Wall $(INCLUDES) -o computeZinvFromGamma computeZinvFromGamma.cpp MT2Region.o MT2Sample.o MT2Estimate.o MT2EstimateTree.o $(ROOTFLAG) $(EXTRALIBS)
@@ -40,14 +38,6 @@ createDatacards: createDatacards.cpp MT2Region.o MT2Sample.o MT2EstimateSyst.o M
 
 
 
-inclusivePlots_BabyTrees: inclusivePlots_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o
-	$(CC) -Wall $(INCLUDES) -o inclusivePlots_BabyTrees inclusivePlots_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o $(ROOTFLAG) $(EXTRALIBS)
-
-inclusivePlots_QCD: inclusivePlots_QCD.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o
-	$(CC) -Wall $(INCLUDES) -o inclusivePlots_QCD inclusivePlots_QCD.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o $(ROOTFLAG) $(EXTRALIBS)
-
-regionOptimization_BabyTrees: regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o
-	$(CC) -Wall $(INCLUDES) -o regionOptimization_BabyTrees regionOptimization_BabyTrees.cpp MT2Region.o MT2RegionAnalysisUtilities.o MT2Sample.o $(ROOTFLAG) $(EXTRALIBS)
 
 qgStudies: qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o localQGLikelihoodCalculator.o
 	$(CC) -Wall $(INCLUDES) -o qgStudies qgStudies.cpp localQGLikelihoodCalculator2.o DrawBase.o fitTools.o localQGLikelihoodCalculator.o  $(ROOTFLAG) $(EXTRALIBS)
