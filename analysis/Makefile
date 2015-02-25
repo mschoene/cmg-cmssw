@@ -146,4 +146,4 @@ localQGLikelihoodCalculator.o: $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikeli
 
 
 clean:
-	rm *.o
+	rm *.o computeLostLepton computeLostLepton_CR createDatacards fakeQCDestimate printYield printYield_CR regionEventYields 
