@@ -173,6 +173,9 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
       if(  onlyPrompt && !isPrompt ) continue;
       if( !onlyPrompt &&  isPrompt ) continue;
 
+      // remove prompt photons from QCD (remove double counting):
+      if( sample.id>=100 && sample.id<199 && isPrompt ) continue;
+
     } else {
 
       isPrompt = true;
