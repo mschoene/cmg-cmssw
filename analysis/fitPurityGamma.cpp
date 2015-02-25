@@ -69,7 +69,8 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/mc.root", "gammaCR" );
 
   //std::string templateSamples = "CSA14_Zinv";
-  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplatesMC_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
+  //MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
   MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesFake" );
 
 
