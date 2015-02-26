@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -c -g -fpermissive
+CFLAGS = -Wall -c -g -fpermissive 
 
 ROOFIT_INCLUDE := $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep INCLUDE= | sed 's|INCLUDE=||')
 ROOFIT_LIBDIR := $(shell cd $(CMSSW_BASE); scram tool info roofitcore | grep LIBDIR= | sed 's|LIBDIR=||')
@@ -144,6 +144,7 @@ localQGLikelihoodCalculator.o: $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikeli
 	$(CC) -Wall $(INCLUDES) -c $(CMSSW_BASE)/src/QGDev/qgMiniTuple/localQGLikelihoodCalculator/localQGLikelihoodCalculator.cc $(ROOTFLAG) $(EXTRALIBS)
 
 
-
+# this is a comment
 clean:
 	rm *.o computeLostLepton computeLostLepton_CR createDatacards fakeQCDestimate printYield printYield_CR regionEventYields 
+
