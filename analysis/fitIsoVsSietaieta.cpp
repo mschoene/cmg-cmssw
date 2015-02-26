@@ -24,6 +24,7 @@ bool dummyData = true;
 
 
 MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prompt_fake="all");
+TProfile* fitSingleVariable( const std::string& outputdir, TTree* tree, const std::string& varName, const std::string& axisName, float yMax );
 
 
 
@@ -46,10 +47,6 @@ int main( int argc, char* argv[] ) {
   TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
 
-  std::string outputdir = "ZinvGammaPurityFromData_" + samplesFileName + "_" + regionsSet;
-  system(Form("mkdir -p %s", outputdir.c_str()));
-
-
   
   MT2Analysis<MT2EstimateTree>* templatesFake = new MT2Analysis<MT2EstimateTree>( "templatesFake", regionsSet );
 
@@ -59,7 +56,10 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string outfilename = "IsoFit_" + samplesFileName + "_" + regionsSet + ".root";
+  std::string outputdir = "SigmaFits_" + samplesFileName + "_" + regionsSet;
+  system(Form("mkdir -p %s", outputdir.c_str()));
+
+  std::string outfilename = outputdir + "/fits_" + samplesFileName + "_" + regionsSet + ".root";
   templatesFake->writeToFile(outfilename);
   
   TH1::AddDirectory(kTRUE); // stupid ROOT memory allocation needs this
@@ -69,35 +69,52 @@ int main( int argc, char* argv[] ) {
   MT2DrawTools::setStyle();
 
 
-  TProfile* hp_iso_vs_sigma = new TProfile("iso_vs_sigma", "", 50, 0., 0.02);
-  tree->Project( "iso_vs_sigma", "iso:sietaieta", "", "profile" );
+  TProfile* hp_iso_vs_sigma     = fitSingleVariable( outputdir, tree, "iso", "Photon Relative Charged Isolation", 0.1 );
+  TProfile* hp_ptGamma_vs_sigma = fitSingleVariable( outputdir, tree, "ptGamma", "Photon p_{T} [GeV]", 500. );
+  TProfile* hp_isoAbs_vs_sigma  = fitSingleVariable( outputdir, tree, "isoAbs", "Photon Charged Isolation [GeV]", 40. );
 
-  TF1* f1 = new TF1("f1", "[0] + [1]*x", 0.0085, 0.019);
+  // add to file
+  TFile* file = TFile::Open(outfilename.c_str(), "update");
+  hp_iso_vs_sigma->Write();
+  hp_isoAbs_vs_sigma->Write();
+  hp_ptGamma_vs_sigma->Write();
+  file->Close();
+
+
+
+  return 0;
+
+}
+
+
+
+
+TProfile* fitSingleVariable( const std::string& outputdir, TTree* tree, const std::string& varName, const std::string& axisName, float yMax ) {
+
+
+  TProfile* hp_var_vs_sigma = new TProfile("var_vs_sigma", "", 50, 0., 0.02);
+  tree->Project( "var_vs_sigma", Form("%s:sietaieta", varName.c_str()), "", "profile" );
+
+  TF1* f1 = new TF1("f1", "[0] + [1]*x", 0.0085, 0.0155);
   //TF1* f1 = new TF1("f1", "[0] + [1]*x + [2]*x*x", 0.0085, 0.018);
   f1->SetLineColor(kRed);
   f1->SetParameter( 0, 0.024 );
   f1->SetParameter( 1, 0.1 );
-  hp_iso_vs_sigma->Fit( f1, "R+" );
+  hp_var_vs_sigma->Fit( f1, "R+" );
 
   
-  // add to file
-  TFile* file = TFile::Open(outfilename.c_str(), "update");
-  hp_iso_vs_sigma->Write();
-  file->Close();
-
-
   TCanvas* c1 = new TCanvas("c1", "", 600, 600);
   c1->cd();
 
-  TH2D* h2_axes = new TH2D("axes", "", 10, 0.008, 0.02, 10, 0., 0.3 );
+  TH2D* h2_axes = new TH2D("axes", "", 10, 0.008, 0.02, 10, 0., yMax );
   h2_axes->SetXTitle( "Photon #sigma_{i#eta i#eta}" );
-  h2_axes->SetYTitle( "Photon Relative Charged Isolation" );
+  h2_axes->SetYTitle( axisName.c_str() );
   h2_axes->Draw();
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();
   labelTop->Draw("same");
 
-  TPaveText* fakeLabel = new TPaveText( 0.7, 0.2, 0.9, 0.3, "brNDC");
+  TPaveText* fakeLabel = new TPaveText( 0.7, 0.18, 0.9, 0.28, "brNDC");
   fakeLabel->SetTextAlign(31);
   fakeLabel->SetFillColor(0);
   fakeLabel->SetTextSize(0.035);
@@ -105,23 +122,23 @@ int main( int argc, char* argv[] ) {
   fakeLabel->AddText("Barrel Only");
   fakeLabel->Draw("same");
 
-  hp_iso_vs_sigma->SetMarkerStyle(20);
-  hp_iso_vs_sigma->SetMarkerSize(1.3);
-  hp_iso_vs_sigma->SetLineColor(kBlack);
-  hp_iso_vs_sigma->SetMarkerColor(kBlack);
-  hp_iso_vs_sigma->Draw("P same");
+  hp_var_vs_sigma->SetMarkerStyle(20);
+  hp_var_vs_sigma->SetMarkerSize(1.3);
+  hp_var_vs_sigma->SetLineColor(kBlack);
+  hp_var_vs_sigma->SetMarkerColor(kBlack);
+  hp_var_vs_sigma->Draw("P same");
 
-  TLine* lineCut = new TLine( 0.01, 0., 0.01, 0.3 );
+  TLine* lineCut = new TLine( 0.01, 0., 0.01, yMax );
   lineCut->Draw("same");
 
   gPad->RedrawAxis();
 
-  c1->SaveAs(Form("IsoFit_%s_%s.eps", samplesFileName.c_str(), regionsSet.c_str()));
-  c1->SaveAs(Form("IsoFit_%s_%s.pdf", samplesFileName.c_str(), regionsSet.c_str()));
-  c1->SaveAs(Form("IsoFit_%s_%s.png", samplesFileName.c_str(), regionsSet.c_str()));
+  c1->SaveAs(Form("%s/%s.eps", outputdir.c_str(), varName.c_str()));
+  c1->SaveAs(Form("%s/%s.pdf", outputdir.c_str(), varName.c_str()));
+  c1->SaveAs(Form("%s/%s.png", outputdir.c_str(), varName.c_str()));
   
 
-  return 0;
+  return hp_var_vs_sigma;
 
 }
 
@@ -145,6 +162,8 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
   MT2Analysis<MT2EstimateTree> analysis( sample.sname, regionsSet, sample.id );
   MT2EstimateTree::addVar( &analysis, "iso" );
+  MT2EstimateTree::addVar( &analysis, "isoAbs" );
+  MT2EstimateTree::addVar( &analysis, "ptGamma" );
   MT2EstimateTree::addVar( &analysis, "sietaieta" );
 
   
@@ -190,6 +209,7 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
 
 
+
     TLorentzVector gamma;
     gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
     int closestJet = -1;
@@ -227,6 +247,8 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
     if( fabs(gamma.Eta())>1.4 ) continue;
     // safety upper thresh on sietaieta:
     if( sietaieta>0.02 ) continue;
+    float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
+    if( iso > 0.1 ) continue;
 
 
     // remove prompt photons from QCD (remove double counting)
@@ -245,11 +267,12 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
     thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
 
-    float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
 
     thisEstimate->assignTree(myTree, lumi*myTree.evt_scale1fb);
     thisEstimate->assignVar( "sietaieta", sietaieta );
     thisEstimate->assignVar( "iso", iso );
+    thisEstimate->assignVar( "isoAbs", iso*gamma.Pt() );
+    thisEstimate->assignVar( "ptGamma", gamma.Pt() );
     thisEstimate->tree->Fill();
 
     
