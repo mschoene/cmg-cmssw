@@ -2,7 +2,7 @@
 How to run:
 root -l
 .L postProcessing.C+
-run("samples_50ns_miniaod.txt", "treeProducerSusyFullHad", "/scratch/mmasciov/ToPostProcess/", "/scratch/mmasciov/PostProcessED/", "_babytree.root")
+run()
 */
 
 #include <sstream>
@@ -98,12 +98,12 @@ int postProcessing(string inputString,
 		   string treeName,
 		   float filter, float kfactor, float xsec, int id)
 {
-  TChain chain = TChain(treeName.c_str());
-
+  TChain* chain = new TChain(treeName.c_str());
   // Add all files in the input folder 
   string dcap = inputFolder.find("pnfs")!=std::string::npos ? "dcap://t3se01.psi.ch:22125/" : "";
-  string fullInputString = dcap + inputFolder + "/" + inputString + "/*.root";
-  int chainReturn = chain.Add(fullInputString.c_str()  );
+  //string fullInputString = dcap + inputFolder + "/" + inputString + "/*.root";
+  string fullInputString = dcap + inputFolder + "/" + inputString + "/mt2_14.root";
+  int chainReturn = chain->Add(fullInputString.c_str()  );
   if (chainReturn < 1) {
     cout << "ERROR: input folder/fileName is not well defined. Exit!" << endl;
     cout << "fullInputString: " << fullInputString << endl;
@@ -112,16 +112,28 @@ int postProcessing(string inputString,
 
 
   // Merge (add) Count histograms from tchain files
-  TFileMerger merger = TFileMerger(kFALSE);
-  TObjArray *fileElements = chain.GetListOfFiles();
-  TIter next(fileElements);
-  TChainElement *chEl=0;
-  while (( chEl=(TChainElement*)next() ))
-    merger.AddFile(chEl->GetTitle());
-  merger.OutputFile(outputFile.c_str(), "RECREATE");
-  merger.SetNotrees(kTRUE);
-  merger.Merge();
-  
+  if(chainReturn>1){
+    TFileMerger merger = TFileMerger(kFALSE);
+    TObjArray *fileElements = chain->GetListOfFiles();
+    TIter next(fileElements);
+    TChainElement *chEl=0;
+    while (( chEl=(TChainElement*)next() )){    
+      merger.AddFile(chEl->GetTitle());
+    }
+    merger.SetNotrees(kTRUE);
+    merger.OutputFile(outputFile.c_str(), "RECREATE");
+    merger.Merge();
+  }else{
+    // have to do this because the merger doesn't work as expected when the input is one single file
+    TFile* fileIn = TFile::Open(fullInputString.c_str());    
+    TH1* histo = (TH1F*)fileIn->Get("Count");
+    TFile output(outputFile.c_str(), "RECREATE");
+    histo->Write();
+    fileIn->Close();
+    delete fileIn;
+  }
+
+
   // This line should be uncommented for all the branches that we want to overwrite.
   // If the branch is not in the input tree, we don't need this.
   //
@@ -132,7 +144,7 @@ int postProcessing(string inputString,
   TFile *out = TFile::Open(outputFile.c_str(), "UPDATE");
   TTree *clone = new TTree("mt2", "post processed baby tree for mt2 analysis");
 
-  clone = chain.CloneTree(-1, "fast"); 
+  clone = chain->CloneTree(-1, "fast"); 
   clone->SetName("mt2");
 
   
@@ -185,11 +197,11 @@ int postProcessing(string inputString,
   }
   //-------------------------------------------------------------
 
+  delete chain; 
 
   clone->Write();
   delete clone;
   out->Close();
-
   return 0;
   
 }
