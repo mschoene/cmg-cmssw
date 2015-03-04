@@ -49,7 +49,7 @@ int main( int argc, char* argv[] ) {
 
   //std::string samplesFileName = "CSA14_Zinv_onlyskim";
   //std::string samplesFileName = "CSA14_Zinv";
-  std::string samplesFileName = "PHYS14_v2_Zinv";
+  std::string samplesFileName = "PHYS14_v3_Zinv";
   //std::string samplesFileName = "CSA14_skimprune_Zinv";
   if( argc>1 ) {
     std::string samplesFileName_tmp(argv[1]); 
@@ -87,8 +87,12 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  //std::string regionsSet = "13TeV_inclusive";
-  std::string regionsSet = "13TeV_CSA14";
+  //std::string regionsSet = "13TeV_PHYS14";
+  //std::string regionsSet = "13TeV_PHYS14_hiHT";
+  // std::string regionsSet = "13TeV_PHYS14_hiJet_mergeHT";
+  std::string regionsSet = "13TeV_PHYS14_loJet_hiHT";
+  //std::string regionsSet = "13TeV_PHYS14_hiJet_extremeHT";
+  //std::string regionsSet = "13TeV_CSA14";
   //std::string regionsSet = "13TeV_onlyHT";
   //std::string regionsSet = "13TeV_CSA14_noMT";
 
@@ -260,6 +264,7 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
           closestJet = i;
         }
       }
+
       float found_pt = 0.;
       int jet_counter = 0;
       for( unsigned i=0; i<myTree.njet; ++i ) {
@@ -280,7 +285,18 @@ MT2Analysis<MT2EstimateTree> computeYield( const MT2Sample& sample, const std::s
 
     } else {
 
-      if( myTree.jet_pt[1]<100. ) continue;
+      float jetCentral_pt[2];
+      int njetsCentral = 0;
+      for(int j=0; j<myTree.njet; ++j){
+	if( fabs( myTree.jet_eta[j] ) < 2.5 ) {
+	  jetCentral_pt[njetsCentral] = myTree.jet_pt[j];
+	  ++njetsCentral;
+	}
+	if( njetsCentral >= 2 ) break;
+      }
+      if (jetCentral_pt[1] < 100. ) continue;
+
+      //if( myTree.jet_pt[1]<100. ) continue;
 
       //for( unsigned i=0; i<myTree.ngenPart; ++i ) {
       //  if( myTree.genPart_pdgId[i]!=23 ) continue;
