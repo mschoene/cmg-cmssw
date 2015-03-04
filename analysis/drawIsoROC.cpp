@@ -154,7 +154,7 @@ void drawROC( const std::string& outputdir, TTree* tree, int optionNGI ) {
   TGraph* wp_iso_tight = getWP( h1_iso_prompt, h1_iso_fake, 3.);
 
   TGraph* wp_isoCP_loose = getWP( h1_isoCP_prompt, h1_isoCP_fake, 60.);
-  TGraph* wp_isoCP_tight = getWP( h1_isoCP_prompt, h1_isoCP_fake, 4.);
+  TGraph* wp_isoCP_tight = getWP( h1_isoCP_prompt, h1_isoCP_fake, 3.);
 
 
   TCanvas* c1 = new TCanvas("c1", "", 600, 600 );
