@@ -9,6 +9,8 @@
 #include "TH1D.h"
 #include "TGraph.h"
 #include "TChain.h"
+#include "TF1.h"
+#include "TProfile.h"
 
 #include "../interface/MT2DrawTools.h"
 
@@ -24,6 +26,8 @@ TGraph* getRoC( TH1D* h1_prompt, TH1D* h1_fake );
 TGraph* getWP( TH1D* h1_prompt, TH1D* h1_fake, float thresh );
 void drawTemplatesVsMT2( const std::string& outputdir, const std::string& varName, TTree* tree );
 void drawVsMT2( const std::string& outputdir, const std::string& varName, const std::string& name, std::vector<TH1D*> histos, std::vector<float> bins );
+void drawIsoVsSigma( const std::string& outputdir, TTree* tree, const std::string& iso1, const std::string& iso2 );
+std::string getLongName( const std::string& name );
 
 
 int main() {
@@ -50,14 +54,15 @@ int main() {
   std::cout << "-> Got stuff from file: " << fileName << std::endl;
 
 
+  drawIsoVsSigma( outputdir, tree, "iso", "isoCP" );
+
   drawROC( outputdir, tree, 0 );
   drawROC( outputdir, tree, 1 );
   drawROC( outputdir, tree, 2 );
 
-
-
   drawTemplatesVsMT2( outputdir, "iso", tree );
   drawTemplatesVsMT2( outputdir, "isoCP", tree );
+
 
   return 0;
 
@@ -453,7 +458,7 @@ void drawVsMT2( const std::string& outputdir, const std::string& varName, const 
   c1_log->SetLogy();
 
 
-  std::string isoLongName = (varName=="iso") ? "Charged" : "Charged + Photon";
+  std::string isoLongName = getLongName( varName );
 
   float yMax = (isPrompt) ? 1. : 0.2;
   TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., yMax );
@@ -595,5 +600,98 @@ TGraph* getWP( TH1D* h1_prompt, TH1D* h1_fake, float thresh ) {
   gr->SetPoint( 0, rej, eff );
 
   return gr;
+
+}
+
+
+
+void drawIsoVsSigma( const std::string& outputdir, TTree* tree, const std::string& iso1, const std::string& iso2 ) {
+
+  float xmin = 0.008;
+  float xmax = 0.012;
+
+
+  TCanvas* c1 = new TCanvas("c1", "", 600, 600);
+  c1->cd();
+
+  TH2D* h2_axes = new TH2D("axes", "", 10, xmin, xmax, 10, 0., 100.);
+  h2_axes->SetXTitle( "#sigma_{i#eta i#eta}" );
+  h2_axes->SetYTitle( "Isolation [GeV]");
+  h2_axes->Draw();
+
+
+  TProfile* hp_iso1_vs_sigma = new TProfile( "iso1_vs_sigma", "", 10, xmin, xmax);
+  TProfile* hp_iso2_vs_sigma = new TProfile( "iso2_vs_sigma", "", 10, xmin, xmax);
+  hp_iso1_vs_sigma->Sumw2();
+  hp_iso2_vs_sigma->Sumw2();
+
+  tree->Project( "iso1_vs_sigma", Form("%s*ptGamma:sietaieta", iso1.c_str()), "weight*(mcMatchId==0)", "prof" );
+  tree->Project( "iso2_vs_sigma", Form("%s*ptGamma:sietaieta", iso2.c_str()), "weight*(mcMatchId==0)", "prof" );
+
+  hp_iso1_vs_sigma->SetMarkerStyle(20);
+  hp_iso1_vs_sigma->SetMarkerSize(1.6);
+  hp_iso1_vs_sigma->SetMarkerColor(kBlack);
+
+  hp_iso2_vs_sigma->SetMarkerStyle(24);
+  hp_iso2_vs_sigma->SetMarkerSize(1.6);
+  hp_iso2_vs_sigma->SetMarkerColor(kBlack);
+
+  TF1* line1 = new TF1("line1", "[0] + [1]*x", xmin, xmax );
+  line1->SetLineColor(kRed);
+  line1->SetLineWidth(2);
+  hp_iso1_vs_sigma->Fit(line1, "QRN");
+  line1->Draw("same");
+
+  TF1* line2 = new TF1("line2", "[0] + [1]*x", xmin, xmax );
+  line2->SetLineColor(kRed);
+  line2->SetLineWidth(2);
+  line2->SetLineStyle(2);
+  hp_iso2_vs_sigma->Fit(line2, "QRN");
+  line2->Draw("same");
+
+  hp_iso1_vs_sigma->Draw("p same");
+  hp_iso2_vs_sigma->Draw("p same");
+
+
+  std::string longName1 = getLongName(iso1);
+  std::string longName2 = getLongName(iso2);
+
+  TLegend* legend = new TLegend( 0.2, 0.7, 0.45, 0.9 );
+  legend->SetTextSize( 0.035 );
+  legend->SetFillColor( 0 );
+  legend->AddEntry( hp_iso1_vs_sigma, longName1.c_str(), "P" );
+  legend->AddEntry( hp_iso2_vs_sigma, longName2.c_str(), "P" );
+  legend->Draw("same");
+
+  TPaveText* labelTop = MT2DrawTools::getLabelTop();
+  labelTop->Draw("same");
+
+  gPad->RedrawAxis();
+
+  c1->SaveAs(Form("%s/iso_vs_sigma.eps", outputdir.c_str()));  
+  c1->SaveAs(Form("%s/iso_vs_sigma.pdf", outputdir.c_str()));  
+  c1->SaveAs(Form("%s/iso_vs_sigma.png", outputdir.c_str()));  
+
+  delete c1;
+  delete h2_axes;
+
+}
+
+
+
+
+std::string getLongName( const std::string& name ) {
+
+  std::string longName;
+  if( name=="iso") 
+    longName = "Charged";
+  else if( name=="isoCP" ) 
+    longName = "Charged + Photon";
+  else if( name=="isoCN" ) 
+    longName = "Charged + Neutral";
+  else if( name=="isoCPN" ) 
+    longName = "Full PF";
+
+  return longName;
 
 }
