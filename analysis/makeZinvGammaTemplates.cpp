@@ -19,6 +19,8 @@ float lumi = 5.; //fb-1
 
 
 void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2Analysis<MT2EstimateZinvGamma>* prompt, MT2Analysis<MT2EstimateZinvGamma>* fake, bool useMC );
+void removeNegatives( MT2Analysis<MT2EstimateZinvGamma>* data );
+void removeNegativesSingleHisto( TH1D* h1 );
 
 
 
@@ -85,15 +87,33 @@ int main( int argc, char* argv[] ) {
     computeYield( samples[i], regionsSet, templatesPrompt, templatesFake, useMC );
   }
 
-  
+
 
   std::string templateFileName = "gammaTemplates";
   if( useMC ) templateFileName += "MC";
   else        templateFileName += "Data";
   templateFileName = templateFileName + "_" + samplesFileName + "_" + regionsSet + ".root";
 
-  templatesPrompt->writeToFile(templateFileName);
-  templatesFake->addToFile(templateFileName);
+  templatesFake->writeToFile(templateFileName);
+
+
+
+  if( !useMC ) {
+
+    templatesPrompt->setName( "templatesPromptRaw" ); // still contaminated from fakes with good sietaieta
+
+    // this doesnt take into account that the amount of fakes in sidebands is different from fakes in SR
+    // to be considered as a starting point
+    MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt_meas  = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt", regionsSet );
+    (*templatesPrompt_meas) = (*templatesPrompt) - (*templatesFake);
+    //(*templatesPrompt) = (*templatesPromptRaw) - 0.8*(*templatesFake);
+    removeNegatives( templatesPrompt_meas );
+
+    templatesPrompt_meas->addToFile(templateFileName);
+
+  }
+  
+  templatesPrompt->addToFile(templateFileName);
 
 
   return 0;
@@ -277,4 +297,32 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 
 }
 
+
+
+void removeNegatives( MT2Analysis<MT2EstimateZinvGamma>* data ) {
+
+  std::set<MT2Region> MT2Regions = data->getRegions();
+
+  for( std::set<MT2Region>::iterator iMT2 = MT2Regions.begin(); iMT2!=MT2Regions.end(); ++iMT2 ) {
+
+    MT2Region thisRegion( (*iMT2) );
+      
+    removeNegativesSingleHisto( data->get(thisRegion)->yield );
+    removeNegativesSingleHisto( data->get(thisRegion)->iso );
+    removeNegativesSingleHisto( data->get(thisRegion)->sietaieta );
+
+  } // for regions
+
+}
+
+
+void removeNegativesSingleHisto( TH1D* h1 ) {
+
+  for( unsigned ibin=1; ibin<h1->GetXaxis()->GetNbins()+1; ++ibin ) {
+
+    if( h1->GetBinContent(ibin)<0. ) h1->SetBinContent( ibin, 0. );
+
+  }
+
+}
 
