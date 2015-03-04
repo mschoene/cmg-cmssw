@@ -60,6 +60,10 @@ int main( int argc, char* argv[] ) {
 
 
   std::string samplesFileName = "PHYS14_v2_Zinv";
+  if( !useMC ) {
+    // use our MC because it is safe and has more sietaieta sideband:
+    samplesFileName="PHYS14_v2_Zinv_noSietaieta";
+  }
   //std::string samplesFileName = "CSA14_Zinv";
 
   std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
@@ -159,9 +163,9 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 
     myTree.GetEntry(iEntry);
 
-    if( myTree.gamma_ht>1000. && sample.id==204 ) continue; // remove high-weight spikes (remove GJet_400to600 leaking into HT>1000)
+    //if( myTree.gamma_ht>1000. && sample.id==204 ) continue; // remove high-weight spikes (remove GJet_400to600 leaking into HT>1000)
 
-    //if( myTree.met_pt > 100.) continue;
+    if( myTree.met_pt > 100.) continue;
     if( myTree.gamma_mt2 < 200.) continue;
 
     if( myTree.nMuons10 > 0) continue;
@@ -179,6 +183,9 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
     if( myTree.ngamma==0 ) continue;
 
 
+    // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH REMOVE THIS SOOOOON
+    if( myTree.evt_scale1fb>1. ) continue;
+    
 
     int mcMatchId = myTree.gamma_mcMatchId[0];
     bool isMatched = (mcMatchId==22 || mcMatchId==7);
@@ -204,12 +211,14 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
     bool sietaietaOK = false;
     if( fabs( gamma.Eta() )<1.479 ) {
       if( hOverE > 0.058 ) continue;
-      if( sietaieta>0.012 ) continue; // end of sidebands
-      sietaietaOK = (sietaieta < 0.0099);
+      if( sietaieta>0.014 ) continue; // end of sidebands
+      //if( sietaieta>0.012 ) continue; // end of sidebands
+      sietaietaOK = (sietaieta <= 0.011);
+      //sietaietaOK = (sietaieta < 0.0099);
     } else {  
       if( hOverE > 0.020 ) continue;
       if( sietaieta>0.035 ) continue; // end of sidebands
-      sietaietaOK = (sietaieta < 0.0268);
+      sietaietaOK = (sietaieta < 0.03);
     }
 
     bool isPrompt = false;
