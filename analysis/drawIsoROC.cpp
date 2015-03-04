@@ -273,13 +273,44 @@ void drawTemplatesVsMT2( const std::string& outputdir, const std::string& varNam
     std::string fakeNameAbs(Form("fake_abs%d", i));
     std::string NGIgNameAbs(Form("NGIg_abs%d", i));
 
+    TH1D* h1_abs_prompt;
+    TH1D* h1_abs_fake  ;
+    TH1D* h1_abs_NGIg  ;
 
-    int nBinsAbs = (varName=="iso") ? 20  : 30;
-    int xMaxAbs  = (varName=="iso") ? 30. : 60.;
+    if( varName=="iso" ) {
+
+      h1_abs_prompt = new TH1D(promptNameAbs.c_str(), "", 20, 0., 30.);
+      h1_abs_fake   = new TH1D(  fakeNameAbs.c_str(), "", 20, 0., 30.);
+      h1_abs_NGIg   = new TH1D(  NGIgNameAbs.c_str(), "", 20, 0., 30.);
+
+      //int nBinsAbsPlusOne = 12;
+      //Double_t isoBinsAbs[nBinsPlusOne];
+      //isoBinsAbs[0]  = 0.;
+      //isoBinsAbs[1]  = 1.;
+      //isoBinsAbs[2]  = 2.;
+      //isoBinsAbs[3]  = 4.;
+      //isoBinsAbs[4]  = 6.;
+      //isoBinsAbs[5]  = 8.;
+      //isoBinsAbs[6]  = 10.;
+      //isoBinsAbs[7]  = 12.;
+      //isoBinsAbs[8]  = 14.;
+      //isoBinsAbs[9]  = 16.;
+      //isoBinsAbs[10] = 18.;
+      //isoBinsAbs[11] = 20.;
+
+      //h1_abs_prompt = new TH1D(promptNameAbs.c_str(), "", nBinsAbsPlusOne-1, isoBinsAbs);
+      //h1_abs_fake   = new TH1D(  fakeNameAbs.c_str(), "", nBinsAbsPlusOne-1, isoBinsAbs);
+      //h1_abs_NGIg   = new TH1D(  NGIgNameAbs.c_str(), "", nBinsAbsPlusOne-1, isoBinsAbs);
+
+    } else {
+
+      h1_abs_prompt = new TH1D(promptNameAbs.c_str(), "", 30, 0., 60.);
+      h1_abs_fake   = new TH1D(  fakeNameAbs.c_str(), "", 30, 0., 60.);
+      h1_abs_NGIg   = new TH1D(  NGIgNameAbs.c_str(), "", 30, 0., 60.);
+
+    }
+
     
-    TH1D* h1_abs_prompt = new TH1D(promptNameAbs.c_str(), "", nBinsAbs, 0., xMaxAbs);
-    TH1D* h1_abs_fake   = new TH1D(  fakeNameAbs.c_str(), "", nBinsAbs, 0., xMaxAbs);
-    TH1D* h1_abs_NGIg   = new TH1D(  NGIgNameAbs.c_str(), "", nBinsAbs, 0., xMaxAbs);
     
     h1_abs_prompt->Sumw2();
     h1_abs_fake  ->Sumw2();
