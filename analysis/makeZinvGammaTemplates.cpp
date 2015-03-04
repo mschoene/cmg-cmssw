@@ -13,11 +13,12 @@
 
 
 float lumi = 5.; //fb-1
-bool useMC = true;
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt );
+
+
+void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2Analysis<MT2EstimateZinvGamma>* prompt, MT2Analysis<MT2EstimateZinvGamma>* fake, bool useMC );
 
 
 
@@ -42,22 +43,30 @@ int main( int argc, char* argv[] ) {
     regionsSet = regionsSet_tmp;
   }
 
+
+  bool useMC = true;
+  if( argc>2 ) {
+    std::string useMC_str(argv[2]); 
+    if( useMC_str!="data" && useMC_str!="MC" ) {
+      std::cout << "ERROR! Second argument may only be 'MC' or 'data'" << std::endl;
+      exit(1111);
+    }
+    if( useMC_str=="data" ) useMC = false;
+  }
+
+
+
+
   std::string samplesFileName = "PHYS14_v2_Zinv";
   //std::string samplesFileName = "CSA14_Zinv";
 
   std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
   
-  std::vector<MT2Sample> samples_gammaJet = MT2Sample::loadSamples(samplesFile, "GJets");
-  if( samples_gammaJet.size()==0 ) {
-    std::cout << "There must be an error: didn't find any gamma+jet files in " << samplesFile << "!" << std::endl;
+  std::vector<MT2Sample> samples = MT2Sample::loadSamples(samplesFile, 100, 299); // GJet and QCD
+  if( samples.size()==0 ) {
+    std::cout << "There must be an error: didn't find any good files in " << samplesFile << "!" << std::endl;
     exit(1209);
   }
-
-  std::cout << std::endl << std::endl;
-  std::cout << "-> Loading QCD samples" << std::endl;
-
-  std::vector<MT2Sample> samples_qcd = MT2Sample::loadSamples(samplesFile, "QCD");
-  
 
 
 
@@ -71,29 +80,20 @@ int main( int argc, char* argv[] ) {
   
   MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt", regionsSet );
   MT2Analysis<MT2EstimateZinvGamma>* templatesFake   = new MT2Analysis<MT2EstimateZinvGamma>( "templatesFake", regionsSet );
-  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt_qcd   = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt_qcd", regionsSet );
 
-
-  for( unsigned i=0; i<samples_gammaJet.size(); ++i ) {
-    (*templatesPrompt) += (computeYield( samples_gammaJet[i], regionsSet, true  ));
-    //(*templatesFake)   += (computeYield( samples_gammaJet[i], regionsSet, false ));
+  for( unsigned i=0; i<samples.size(); ++i ) {
+    computeYield( samples[i], regionsSet, templatesPrompt, templatesFake, useMC );
   }
 
   
-  for( unsigned i=0; i<samples_qcd.size(); ++i ) {
-    (*templatesPrompt_qcd) += (computeYield( samples_qcd[i], regionsSet, true  ));
-    (*templatesFake)   += (computeYield( samples_qcd[i], regionsSet, false ));
-  }
-
-
 
   std::string templateFileName = "gammaTemplates";
   if( useMC ) templateFileName += "MC";
+  else        templateFileName += "Data";
   templateFileName = templateFileName + "_" + samplesFileName + "_" + regionsSet + ".root";
 
   templatesPrompt->writeToFile(templateFileName);
   templatesFake->addToFile(templateFileName);
-  templatesPrompt_qcd->addToFile(templateFileName);
 
 
   return 0;
@@ -108,7 +108,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt ) {
+void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2Analysis<MT2EstimateZinvGamma>* prompt, MT2Analysis<MT2EstimateZinvGamma>* fake, bool useMC ) {
 
 
   std::cout << std::endl << std::endl;
@@ -119,9 +119,9 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
   
   std::cout << "-> Loaded tree: it has " << tree->GetEntries() << " entries." << std::endl;
 
+  bool isQCD  = sample.id>=100 && sample.id<200;
+  bool isGJet = sample.id>=200 && sample.id<300;
 
-
-  MT2Analysis<MT2EstimateZinvGamma> analysis( sample.sname, regionsSet, sample.id );
 
   
   MT2Tree myTree;
@@ -141,7 +141,7 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
     if( myTree.gamma_ht>1000. && sample.id==204 ) continue; // remove high-weight spikes (remove GJet_400to600 leaking into HT>1000)
 
-    if( myTree.met_pt > 100.) continue;
+    //if( myTree.met_pt > 100.) continue;
     if( myTree.gamma_mt2 < 200.) continue;
 
     if( myTree.nMuons10 > 0) continue;
@@ -160,35 +160,53 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
 
 
+    int mcMatchId = myTree.gamma_mcMatchId[0];
+    bool isMatched = (mcMatchId==22 || mcMatchId==7);
+    bool isGenIso = (myTree.gamma_genIso[0]<5.);
+
+    if( isMatched  &&  isGenIso && isQCD  ) continue; //isolated prompts taken from GJet only
+    if( isMatched  && !isGenIso && isGJet ) continue; //non-isolated prompts taken from QCD only
+    if( !isMatched &&              isGJet ) continue; //fakes from QCD only
+
+
+    float iso = myTree.gamma_chHadIso[0];
+    if( iso > 30. ) continue;
+    //float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
+    //if( iso > 0.1 ) continue;
+
+
+    TLorentzVector gamma;
+    gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
+
+
+    float hOverE = myTree.gamma_hOverE[0];
+    float sietaieta = myTree.gamma_sigmaIetaIeta[0];
+    bool sietaietaOK = false;
+    if( fabs( gamma.Eta() )<1.479 ) {
+      if( hOverE > 0.058 ) continue;
+      if( sietaieta>0.012 ) continue; // end of sidebands
+      sietaietaOK = (sietaieta < 0.0099);
+    } else {  
+      if( hOverE > 0.020 ) continue;
+      if( sietaieta>0.035 ) continue; // end of sidebands
+      sietaietaOK = (sietaieta < 0.0268);
+    }
 
     bool isPrompt = false;
 
     if( useMC ) {
 
-      if( myTree.gamma_idCutBased[0]==0 ) continue;
-
-      int mcMatchId = myTree.gamma_mcMatchId[0];
-      float genIso = myTree.gamma_genIso[0];
-      isPrompt = ((mcMatchId==22 || mcMatchId==7) && genIso<5.);
-      if(  onlyPrompt && !isPrompt ) continue;
-      if( !onlyPrompt &&  isPrompt ) continue;
-
-      // remove prompt photons from QCD (remove double counting):
-      if( sample.id>=100 && sample.id<199 && isPrompt ) continue;
+      if( !sietaietaOK ) continue;
+      isPrompt = isMatched;
 
     } else {
 
-      isPrompt = true;
+      isPrompt = sietaietaOK;
 
     }
-    
 
 
 
-
-
-    TLorentzVector gamma;
-    gamma.SetPtEtaPhiM( myTree.gamma_pt[0], myTree.gamma_eta[0], myTree.gamma_phi[0], myTree.gamma_mass[0] );
     int closestJet = -1;
     float deltaRmin = 0.4;
     for( unsigned i=0; i<myTree.njet; ++i ) {
@@ -219,24 +237,35 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
 
 
 
-
     Double_t weight = myTree.evt_scale1fb*lumi; 
 
-    MT2EstimateZinvGamma* thisEstimate = analysis.get( myTree.gamma_ht, myTree.gamma_nJet40, myTree.gamma_nBJet40, myTree.gamma_met_pt );
-    if( thisEstimate==0 ) continue;
 
-    thisEstimate->yield->Fill(myTree.gamma_mt2, weight );
-    thisEstimate->sietaieta->Fill(myTree.gamma_sigmaIetaIeta[0], weight );
+    if( isPrompt ) {
 
-    float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
+      MT2EstimateZinvGamma* thisPrompt = prompt->get( myTree.gamma_ht, myTree.gamma_nJet40, myTree.gamma_nBJet40, myTree.gamma_met_pt );
+      if( thisPrompt==0 ) continue;
 
-    thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
+      thisPrompt->yield->Fill(myTree.gamma_mt2, weight );
+      thisPrompt->sietaieta->Fill(myTree.gamma_sigmaIetaIeta[0], weight );
+      thisPrompt->fillIso( iso, weight, myTree.gamma_mt2 );
+
+    } else {
+
+      MT2EstimateZinvGamma* thisFake = fake->get( myTree.gamma_ht, myTree.gamma_nJet40, myTree.gamma_nBJet40, myTree.gamma_met_pt );
+      if( thisFake==0 ) continue;
+
+      thisFake->yield->Fill(myTree.gamma_mt2, weight );
+      thisFake->sietaieta->Fill(myTree.gamma_sigmaIetaIeta[0], weight );
+      thisFake->fillIso( iso, weight, myTree.gamma_mt2 );
+
+    }
 
     
   } // for entries
 
 
-  analysis.finalize();
+  prompt->finalize();
+  fake->finalize();
   
 
   delete tree;
@@ -245,7 +274,6 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
   file->Close();
   delete file;
   
-  return analysis;
 
 }
 
