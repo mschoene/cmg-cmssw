@@ -149,6 +149,16 @@ void MT2EstimateTree::fillTree( const MT2Tree& mt2tree, float w ) {
 
 
 
+void MT2EstimateTree::fillTree_gamma( const MT2Tree& mt2tree, float w ) {
+
+  this->assignTree_gamma( mt2tree, w );
+
+  tree->Fill();
+
+}
+
+
+
 void MT2EstimateTree::assignTree( const MT2Tree& mt2tree, float w ) {
 
   run    = mt2tree.run;
@@ -164,6 +174,24 @@ void MT2EstimateTree::assignTree( const MT2Tree& mt2tree, float w ) {
   nBJets = mt2tree.nBJet40;
 
 }
+  
+
+void MT2EstimateTree::assignTree_gamma( const MT2Tree& mt2tree, float w ) {
+
+  run    = mt2tree.run;
+  lumi   = mt2tree.lumi;
+  evt    = mt2tree.evt;
+  weight = w;
+  id     = mt2tree.evt_id;
+
+  mt2    = mt2tree.gamma_mt2;
+  ht     = mt2tree.gamma_ht;
+  met    = mt2tree.gamma_met_pt;
+  nJets  = mt2tree.gamma_nJet40;
+  nBJets = mt2tree.gamma_nBJet40;
+
+}
+
   
 
 void MT2EstimateTree::assignVars( float aht, int anJets, int anBJets, float amet, float amt2 ) {
