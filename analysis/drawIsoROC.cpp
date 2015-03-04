@@ -16,7 +16,8 @@
 
 
 TGraph* getRoC( TH1D* h1_prompt, TH1D* h1_fake );
-void drawVsMT2( const std::string& outputdir, const std::string& name, std::vector<TH1D*> histos, std::vector<float> bins );
+void drawTemplatesVsMT2( const std::string& outputdir, const std::string& varName, TTree* tree );
+void drawVsMT2( const std::string& outputdir, const std::string& varName, const std::string& name, std::vector<TH1D*> histos, std::vector<float> bins );
 
 
 int main() {
@@ -197,6 +198,16 @@ int main() {
   rocFile->Close();
   
 
+  drawTemplatesVsMT2( outputdir, "iso", tree );
+  drawTemplatesVsMT2( outputdir, "isoCP", tree );
+
+  return 0;
+
+}
+
+
+
+void drawTemplatesVsMT2( const std::string& outputdir, const std::string& varName, TTree* tree ) {
 
   // now templates vs MT2
   std::vector<float> bins;
@@ -215,20 +226,23 @@ int main() {
   std::vector<TH1D*> templatesAbs_fake;
   std::vector<TH1D*> templatesAbs_NGIg;
 
+  float k = (varName=="iso") ? 1. : 2.;
+
   int nBinsPlusOne = 12;
   Double_t isoBins[nBinsPlusOne];
-  isoBins[0] = 0.;
-  isoBins[1] = 0.005;
-  isoBins[2] = 0.01;
-  isoBins[3] = 0.02;
-  isoBins[4] = 0.03;
-  isoBins[5] = 0.04;
-  isoBins[6] = 0.05;
-  isoBins[7] = 0.06;
-  isoBins[8] = 0.07;
-  isoBins[9] = 0.08;
-  isoBins[10] = 0.09;
-  isoBins[11] = 0.1;
+  isoBins[0]  = k*0.;
+  isoBins[1]  = k*0.005;
+  isoBins[2]  = k*0.01;
+  isoBins[3]  = k*0.02;
+  isoBins[4]  = k*0.03;
+  isoBins[5]  = k*0.04;
+  isoBins[6]  = k*0.05;
+  isoBins[7]  = k*0.06;
+  isoBins[8]  = k*0.07;
+  isoBins[9]  = k*0.08;
+  isoBins[10] = k*0.09;
+  isoBins[11] = k*0.1;
+
 
 
   for( unsigned i=0; i<bins.size()-1; ++i ) {
@@ -237,21 +251,17 @@ int main() {
     std::string fakeName(Form("fake%d", i));
     std::string NGIgName(Form("NGIg%d", i));
 
-    //TH1D* h1_prompt = new TH1D(promptName.c_str(), "", nBinsPlusOne-1, isoBins);
-    //TH1D* h1_fake   = new TH1D(  fakeName.c_str(), "", nBinsPlusOne-1, isoBins);
-    //TH1D* h1_NGIg   = new TH1D(  NGIgName.c_str(), "", nBinsPlusOne-1, isoBins);
-    
-    TH1D* h1_prompt = new TH1D(promptName.c_str(), "", 10, 0., 0.2);
-    TH1D* h1_fake   = new TH1D(  fakeName.c_str(), "", 10, 0., 0.2);
-    TH1D* h1_NGIg   = new TH1D(  NGIgName.c_str(), "", 10, 0., 0.2);
+    TH1D* h1_prompt = new TH1D(promptName.c_str(), "", nBinsPlusOne-1, isoBins);
+    TH1D* h1_fake   = new TH1D(  fakeName.c_str(), "", nBinsPlusOne-1, isoBins);
+    TH1D* h1_NGIg   = new TH1D(  NGIgName.c_str(), "", nBinsPlusOne-1, isoBins);
     
     h1_prompt->Sumw2();
     h1_fake  ->Sumw2();
     h1_NGIg  ->Sumw2();
     
-    tree->Project( promptName.c_str(), "iso", Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
-    tree->Project(   NGIgName.c_str(), "iso", Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso>5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
-    tree->Project(   fakeName.c_str(), "iso", Form("weight*( mt2>%f && mt2<%f && mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
+    tree->Project( promptName.c_str(), varName.c_str(), Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
+    tree->Project(   NGIgName.c_str(), varName.c_str(), Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso>5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
+    tree->Project(   fakeName.c_str(), varName.c_str(), Form("weight*( mt2>%f && mt2<%f && mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
 
     templates_prompt.push_back( h1_prompt );
     templates_fake  .push_back( h1_fake );
@@ -263,17 +273,21 @@ int main() {
     std::string fakeNameAbs(Form("fake_abs%d", i));
     std::string NGIgNameAbs(Form("NGIg_abs%d", i));
 
-    TH1D* h1_abs_prompt = new TH1D(promptNameAbs.c_str(), "", 10, 0., 20.);
-    TH1D* h1_abs_fake   = new TH1D(  fakeNameAbs.c_str(), "", 10, 0., 20.);
-    TH1D* h1_abs_NGIg   = new TH1D(  NGIgNameAbs.c_str(), "", 10, 0., 20.);
+
+    int nBinsAbs = (varName=="iso") ? 20  : 30;
+    int xMaxAbs  = (varName=="iso") ? 30. : 60.;
+    
+    TH1D* h1_abs_prompt = new TH1D(promptNameAbs.c_str(), "", nBinsAbs, 0., xMaxAbs);
+    TH1D* h1_abs_fake   = new TH1D(  fakeNameAbs.c_str(), "", nBinsAbs, 0., xMaxAbs);
+    TH1D* h1_abs_NGIg   = new TH1D(  NGIgNameAbs.c_str(), "", nBinsAbs, 0., xMaxAbs);
     
     h1_abs_prompt->Sumw2();
     h1_abs_fake  ->Sumw2();
     h1_abs_NGIg  ->Sumw2();
     
-    tree->Project( promptNameAbs.c_str(), "iso*ptGamma", Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
-    tree->Project(   NGIgNameAbs.c_str(), "iso*ptGamma", Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso>5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
-    tree->Project(   fakeNameAbs.c_str(), "iso*ptGamma", Form("weight*( mt2>%f && mt2<%f && mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
+    tree->Project( promptNameAbs.c_str(), Form("%s*ptGamma", varName.c_str()), Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
+    tree->Project(   NGIgNameAbs.c_str(), Form("%s*ptGamma", varName.c_str()), Form("weight*( mt2>%f && mt2<%f && mcMatchId==22 && genIso>5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
+    tree->Project(   fakeNameAbs.c_str(), Form("%s*ptGamma", varName.c_str()), Form("weight*( mt2>%f && mt2<%f && mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))", bins[i], bins[i+1]) );
 
     templatesAbs_prompt.push_back( h1_abs_prompt );
     templatesAbs_fake  .push_back( h1_abs_fake );
@@ -282,15 +296,22 @@ int main() {
   }
 
 
-  drawVsMT2( outputdir, "prompt", templates_prompt, bins );
-  drawVsMT2( outputdir, "fake"  , templates_fake  , bins );
-  drawVsMT2( outputdir, "NGIg"  , templates_NGIg  , bins );
+  drawVsMT2( outputdir, varName, "prompt", templates_prompt, bins );
+  drawVsMT2( outputdir, varName, "fake"  , templates_fake  , bins );
+  drawVsMT2( outputdir, varName, "NGIg"  , templates_NGIg  , bins );
 
-  drawVsMT2( outputdir, "prompt", templatesAbs_prompt, bins );
-  drawVsMT2( outputdir, "fake"  , templatesAbs_fake  , bins );
-  drawVsMT2( outputdir, "NGIg"  , templatesAbs_NGIg  , bins );
+  drawVsMT2( outputdir, varName, "prompt", templatesAbs_prompt, bins );
+  drawVsMT2( outputdir, varName, "fake"  , templatesAbs_fake  , bins );
+  drawVsMT2( outputdir, varName, "NGIg"  , templatesAbs_NGIg  , bins );
 
-  return 0;
+  for( unsigned i=0; i<templates_prompt.size(); ++i ) {
+    delete templates_prompt[i];
+    delete templates_fake[i];
+    delete templates_NGIg[i];
+    delete templatesAbs_prompt[i];
+    delete templatesAbs_fake[i];
+    delete templatesAbs_NGIg[i];
+  }
 
 }
 
@@ -320,7 +341,7 @@ TGraph* getRoC( TH1D* h1_prompt, TH1D* h1_fake ) {
 }
 
 
-void drawVsMT2( const std::string& outputdir, const std::string& name, std::vector<TH1D*> histos, std::vector<float> bins ) {
+void drawVsMT2( const std::string& outputdir, const std::string& varName, const std::string& name, std::vector<TH1D*> histos, std::vector<float> bins ) {
 
   bool isPrompt = (name!="fake");
   float xMax = histos[0]->GetXaxis()->GetXmax();
@@ -339,12 +360,14 @@ void drawVsMT2( const std::string& outputdir, const std::string& name, std::vect
   c1_log->SetLogy();
 
 
+  std::string isoLongName = (varName=="iso") ? "Charged" : "Charged + Photon";
+
   float yMax = (isPrompt) ? 1. : 0.2;
   TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., yMax );
   if( isAbs )
-    h2_axes->SetXTitle( "Photon Charged Isolation [GeV]" );
+    h2_axes->SetXTitle( Form("%s Isolation [GeV]", isoLongName.c_str()) );
   else
-    h2_axes->SetXTitle( "Photon Relative Charged Isolation" );
+    h2_axes->SetXTitle( Form("Relative %s Isolation", isoLongName.c_str()) );
   h2_axes->SetYTitle( "Normalized to Unity" );
   c1->cd();
   h2_axes->Draw("");
@@ -365,9 +388,9 @@ void drawVsMT2( const std::string& outputdir, const std::string& name, std::vect
   
   TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, 0., xMax, 10, yMin_log, yMax_log );
   if( isAbs )
-    h2_axes_log->SetXTitle( "Photon Charged Isolation [GeV]" );
+    h2_axes_log->SetXTitle( Form("%s Isolation [GeV]", isoLongName.c_str()) );
   else
-    h2_axes_log->SetXTitle( "Photon Relative Charged Isolation" );
+    h2_axes_log->SetXTitle( Form("Relative %s Isolation", isoLongName.c_str()) );
   h2_axes_log->SetYTitle( "Normalized to Unity" );
   c1_log->cd();
   h2_axes_log->Draw("");
@@ -398,9 +421,18 @@ void drawVsMT2( const std::string& outputdir, const std::string& name, std::vect
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();
 
-  float xMin_label = (name=="prompt") ? 0.75 : 0.2;
+  float xMin_label;
+  float yMin_label;
+  if( name=="prompt" ) {
+    xMin_label = 0.75;
+    yMin_label = 0.2;
+  } else if( name=="fake" || name=="NGIg" ) {
+    xMin_label = 0.2;
+    yMin_label = 0.8;
+  }
+  
   TPaveText* labelPrompt     = new TPaveText( 0.22, 0.8, 0.49, 0.9, "brNDC" );
-  TPaveText* labelPrompt_log = new TPaveText( xMin_label, 0.2, xMin_label+0.3, 0.3, "brNDC" );
+  TPaveText* labelPrompt_log = new TPaveText( xMin_label, yMin_label, xMin_label+0.2, yMin_label+0.1, "brNDC" );
   labelPrompt   ->SetFillColor(0);
   labelPrompt   ->SetTextSize(0.035);
   labelPrompt   ->SetTextAlign(11); // align left
@@ -437,13 +469,13 @@ void drawVsMT2( const std::string& outputdir, const std::string& name, std::vect
   std::string suffix = "";
   if( isAbs ) suffix = "Abs";
 
-  c1->SaveAs( Form("%s/templ%s%s_vsMT2.eps", outputdir.c_str(), suffix.c_str(), name.c_str()) );
-  c1->SaveAs( Form("%s/templ%s%s_vsMT2.pdf", outputdir.c_str(), suffix.c_str(), name.c_str()) );
-  c1->SaveAs( Form("%s/templ%s%s_vsMT2.png", outputdir.c_str(), suffix.c_str(), name.c_str()) );
+  c1->SaveAs( Form("%s/templ_%s%s_%s_vsMT2.eps", outputdir.c_str(), varName.c_str(), suffix.c_str(), name.c_str()) );
+  c1->SaveAs( Form("%s/templ_%s%s_%s_vsMT2.pdf", outputdir.c_str(), varName.c_str(), suffix.c_str(), name.c_str()) );
+  c1->SaveAs( Form("%s/templ_%s%s_%s_vsMT2.png", outputdir.c_str(), varName.c_str(), suffix.c_str(), name.c_str()) );
 
-  c1_log->SaveAs( Form("%s/templ%s%s_vsMT2_log.eps", outputdir.c_str(), suffix.c_str(), name.c_str()) );
-  c1_log->SaveAs( Form("%s/templ%s%s_vsMT2_log.pdf", outputdir.c_str(), suffix.c_str(), name.c_str()) );
-  c1_log->SaveAs( Form("%s/templ%s%s_vsMT2_log.png", outputdir.c_str(), suffix.c_str(), name.c_str()) );
+  c1_log->SaveAs( Form("%s/templ_%s%s_%s_vsMT2_log.eps", outputdir.c_str(), varName.c_str(), suffix.c_str(), name.c_str()) );
+  c1_log->SaveAs( Form("%s/templ_%s%s_%s_vsMT2_log.pdf", outputdir.c_str(), varName.c_str(), suffix.c_str(), name.c_str()) );
+  c1_log->SaveAs( Form("%s/templ_%s%s_%s_vsMT2_log.png", outputdir.c_str(), varName.c_str(), suffix.c_str(), name.c_str()) );
 
 
   delete c1;
