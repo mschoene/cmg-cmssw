@@ -37,11 +37,11 @@ int postProcessing(string inputString="input",
 int run(string cfg="postProcessing.cfg",
 	string treeName="tree", 
 	string inputFolder = "/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_QCDpt_noSietaieta/", 
-	string outputFolder = "/scratch/mangano/babies/Mar3/",  
+	string outputFolder = "./test/",  
 	string fileExtension = "_post.root"){
   
   // for measuring timing
-  //int start_s=clock();
+  time_t start = time(0);
 
   cout<<"Configuration file is: "<<cfg.c_str()<<endl;
   
@@ -76,18 +76,16 @@ int run(string cfg="postProcessing.cfg",
 	   << xsec << " , " 
 	   << filter << " , " 
 	   << kfactor << endl;
-    }
+    }  
 
     string outputFile = outputFolder + "/" + name + fileExtension;
-    cout << "outputFile: " << outputFile << endl;
     postProcessing(name, inputFolder, outputFile, treeName, filter, kfactor, xsec, id);
-
   }
   
   // for printing measured timing
-  //int stop_s=clock();
-  //std::cout << std::endl << "time: " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << std::endl;
-
+  time_t stop = time(0);
+  double time = difftime(stop, start);
+  cout << "real time in seconds: " << time << endl;
   
   return 0;
 }
@@ -101,15 +99,15 @@ int postProcessing(string inputString,
   TChain* chain = new TChain(treeName.c_str());
   // Add all files in the input folder 
   string dcap = inputFolder.find("pnfs")!=std::string::npos ? "dcap://t3se01.psi.ch:22125/" : "";
-  //string fullInputString = dcap + inputFolder + "/" + inputString + "/*.root";
-  string fullInputString = dcap + inputFolder + "/" + inputString + "/mt2_14.root";
+  string fullInputString = dcap + inputFolder + "/" + inputString + "/*.root";
+  //string fullInputString = dcap + inputFolder + "/" + inputString + "/mt2_14.root";
   int chainReturn = chain->Add(fullInputString.c_str()  );
   if (chainReturn < 1) {
     cout << "ERROR: input folder/fileName is not well defined. Exit!" << endl;
     cout << "fullInputString: " << fullInputString << endl;
     return 1;
   }
-
+  
 
   // Merge (add) Count histograms from tchain files
   if(chainReturn>1){
