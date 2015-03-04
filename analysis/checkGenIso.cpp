@@ -209,27 +209,35 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
     //if( myTree.gamma_chHadIso[0]+myTree.gamma_neuHadIso[0] > 10. ) continue;
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
 
+    float effAreaCH = 0.; // not used now
     float effAreaNH = 0.;
     float effAreaPH = 0.;
     if( fabs(gamma.Eta())< 1. ) {
+      effAreaCH = 0.0130;
       effAreaNH = 0.0056;
       effAreaPH = 0.0896;
     } else if( fabs(gamma.Eta())< 1.479 ) {
+      effAreaCH = 0.0096;
       effAreaNH = 0.0107;
       effAreaPH = 0.0762;
     } else if( fabs(gamma.Eta())< 2.0   ) {
+      effAreaCH = 0.0107;
       effAreaNH = 0.0019;
       effAreaPH = 0.0383;
     } else if( fabs(gamma.Eta())< 2.2   ) {
+      effAreaCH = 0.0077;
       effAreaNH = 0.0011;
       effAreaPH = 0.0534;
     } else if( fabs(gamma.Eta())< 2.3   ) {
+      effAreaCH = 0.0088;
       effAreaNH = 0.0077;
       effAreaPH = 0.0846;
     } else if( fabs(gamma.Eta())< 2.4   ) {
+      effAreaCH = 0.0065;
       effAreaNH = 0.0178;
       effAreaPH = 0.1032;
     } else                                {
+      effAreaCH = 0.0030;
       effAreaNH = 0.1675;
       effAreaPH = 0.1598;
     }
