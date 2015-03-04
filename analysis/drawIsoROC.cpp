@@ -14,8 +14,14 @@
 
 
 
+// 0: put them in BG
+// 1: put them in signal
+// 2: ignore them
 
+
+void drawROC( const std::string& outputdir, TTree* tree, int optionNGI );
 TGraph* getRoC( TH1D* h1_prompt, TH1D* h1_fake );
+TGraph* getWP( TH1D* h1_prompt, TH1D* h1_fake, float thresh );
 void drawTemplatesVsMT2( const std::string& outputdir, const std::string& varName, TTree* tree );
 void drawVsMT2( const std::string& outputdir, const std::string& varName, const std::string& name, std::vector<TH1D*> histos, std::vector<float> bins );
 
@@ -40,10 +46,28 @@ int main() {
 
 
 
+  drawROC( outputdir, tree, 0 );
+  drawROC( outputdir, tree, 1 );
+  drawROC( outputdir, tree, 2 );
+
+
+
+  drawTemplatesVsMT2( outputdir, "iso", tree );
+  drawTemplatesVsMT2( outputdir, "isoCP", tree );
+
+  return 0;
+
+}
+
+
+
+void drawROC( const std::string& outputdir, TTree* tree, int optionNGI ) {
+
 
   int nbins = 1200;
   float xmin = 0.;
-  float xmax = 1.2;
+  //float xmax = 1.2; // rel
+  float xmax = 200.; // abs
 
   TH1D* h1_iso_prompt = new TH1D("iso_prompt", "", nbins, xmin, xmax );
   h1_iso_prompt->Sumw2();
@@ -66,61 +90,55 @@ int main() {
   h1_isoCPN_fake->Sumw2();
 
 
-//// putting NGIg in BG:
-//tree->Project( "iso_prompt", "iso", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "iso_fake"  , "iso", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+  if( optionNGI==0 ) {
 
-//tree->Project( "isoCP_prompt", "isoCP", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "isoCP_fake"  , "isoCP", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-
-//tree->Project( "isoCN_prompt", "isoCN", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "isoCN_fake"  , "isoCN", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-
-//tree->Project( "isoCPN_prompt", "isoCPN", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "isoCPN_fake"  , "isoCPN", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-
-
-
-//// putting NGIg in signal:
-//tree->Project( "iso_prompt", "iso", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "iso_fake", "iso", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-
-//tree->Project( "isoCP_prompt", "isoCP", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "isoCP_fake", "isoCP", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-
-//tree->Project( "isoCN_prompt", "isoCN", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "isoCN_fake", "isoCN", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-
-//tree->Project( "isoCPN_prompt", "isoCPN", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree->Project( "isoCPN_fake", "isoCPN", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    // putting NGIg in BG:
+    tree->Project( "iso_prompt", "iso*ptGamma", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "iso_fake"  , "iso*ptGamma", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    
+    tree->Project( "isoCP_prompt", "isoCP*ptGamma", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCP_fake"  , "isoCP*ptGamma", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    
+    tree->Project( "isoCN_prompt", "isoCN*ptGamma", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCN_fake"  , "isoCN*ptGamma", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    
+    tree->Project( "isoCPN_prompt", "isoCPN*ptGamma", "weight*(   mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCPN_fake"  , "isoCPN*ptGamma", "weight*((!(mcMatchId==22 && genIso<5.)) && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
 
-  // ignoring NGIg:
-  tree->Project( "iso_prompt", "iso", "weight*( mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-  tree->Project( "iso_fake"  , "iso", "weight*( mcMatchId==0                 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+  } else if( optionNGI==1 ) {
 
-  tree->Project( "isoCP_prompt", "isoCP", "weight*( mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-  tree->Project( "isoCP_fake"  , "isoCP", "weight*( mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    // putting NGIg in signal:
+    tree->Project( "iso_prompt", "iso*ptGamma", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "iso_fake"  , "iso*ptGamma", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    
+    tree->Project( "isoCP_prompt", "isoCP*ptGamma", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCP_fake"  , "isoCP*ptGamma", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    
+    tree->Project( "isoCN_prompt", "isoCN*ptGamma", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCN_fake"  , "isoCN*ptGamma", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    
+    tree->Project( "isoCPN_prompt", "isoCPN*ptGamma", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCPN_fake"  , "isoCPN*ptGamma", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
-  tree->Project( "isoCN_prompt", "isoCN", "weight*( mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-  tree->Project( "isoCN_fake"  , "isoCN", "weight*( mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
-  tree->Project( "isoCPN_prompt", "isoCPN", "weight*( mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-  tree->Project( "isoCPN_fake"  , "isoCPN", "weight*( mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+  } else if( optionNGI==2 ) {
 
+    // ignoring NGIg:
+    tree->Project( "iso_prompt", "iso*ptGamma", "weight*( mcMatchId==22 && genIso<5.   && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "iso_fake"  , "iso*ptGamma", "weight*( mcMatchId==0                 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
+    tree->Project( "isoCP_prompt", "isoCP*ptGamma", "weight*( mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCP_fake"  , "isoCP*ptGamma", "weight*( mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
-//tree_gjet->Project( "iso_prompt", "iso", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree_qcd->Project( "iso_fake", "iso", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCN_prompt", "isoCN*ptGamma", "weight*( mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCN_fake"  , "isoCN*ptGamma", "weight*( mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
-//tree_gjet->Project( "isoCP_prompt", "isoCP", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree_qcd->Project( "isoCP_fake", "isoCP", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCPN_prompt", "isoCPN*ptGamma", "weight*( mcMatchId==22 && genIso<5. && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+    tree->Project( "isoCPN_fake"  , "isoCPN*ptGamma", "weight*( mcMatchId==0               && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
-//tree_gjet->Project( "isoCN_prompt", "isoCN", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree_qcd->Project( "isoCN_fake", "isoCN", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
+  }
 
-//tree_gjet->Project( "isoCPN_prompt", "isoCPN", "weight*(mcMatchId==22 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
-//tree_qcd->Project( "isoCPN_fake", "isoCPN", "weight*(mcMatchId==0 && (sietaieta<0.01 || (sietaieta>0.02 && sietaieta<0.027)))" );
 
 
   TGraph* roc_iso = getRoC( h1_iso_prompt, h1_iso_fake );
@@ -128,16 +146,24 @@ int main() {
   TGraph* roc_isoCN = getRoC( h1_isoCN_prompt, h1_isoCN_fake );
   TGraph* roc_isoCPN = getRoC( h1_isoCPN_prompt, h1_isoCPN_fake );
 
+  TGraph* wp_iso_loose = getWP( h1_iso_prompt, h1_iso_fake, 20.);
+  TGraph* wp_iso_tight = getWP( h1_iso_prompt, h1_iso_fake, 3.);
+
+  TGraph* wp_isoCP_loose = getWP( h1_isoCP_prompt, h1_isoCP_fake, 60.);
+  TGraph* wp_isoCP_tight = getWP( h1_isoCP_prompt, h1_isoCP_fake, 4.);
+
 
   TCanvas* c1 = new TCanvas("c1", "", 600, 600 );
   c1->cd();
 
-  //// NGIg in BG:
-  //TH2D* h2_axes = new TH2D("axes", "", 10, 0.5, 1.0001, 10, 0.98, 1.0001);
-  //// NGIg in signal:
-  //TH2D* h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.75, 1.0001);
-  // NGIg ignored:
-  TH2D* h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
+  TH2D* h2_axes;
+  if( optionNGI==0 ) {
+    h2_axes = new TH2D("axes", "", 10, 0.5, 1.0001, 10, 0.95, 1.0001);
+  } else if( optionNGI==1 ) {
+    h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.75, 1.0001);
+  } else if( optionNGI==2 ) {
+    h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
+  }
   h2_axes->SetXTitle("Fake Photon Rejection");
   h2_axes->SetYTitle("Prompt Photon Efficiency");
   h2_axes->Draw();
@@ -158,6 +184,20 @@ int main() {
   roc_isoCPN->SetMarkerStyle(24);
   roc_isoCPN->SetMarkerSize(1.6);
   roc_isoCPN->SetMarkerColor(46);
+
+  wp_iso_loose->SetMarkerStyle(30);
+  wp_iso_tight->SetMarkerStyle(29);
+  wp_iso_loose->SetMarkerSize(2.);
+  wp_iso_tight->SetMarkerSize(2.);
+  wp_iso_loose->SetMarkerColor(kOrange);
+  wp_iso_tight->SetMarkerColor(kOrange);
+
+  wp_isoCP_loose->SetMarkerStyle(30);
+  wp_isoCP_tight->SetMarkerStyle(29);
+  wp_isoCP_loose->SetMarkerSize(2.);
+  wp_isoCP_tight->SetMarkerSize(2.);
+  wp_isoCP_loose->SetMarkerColor(kBlue);
+  wp_isoCP_tight->SetMarkerColor(kBlue);
 
   TLegend* legend = new TLegend( 0.2, 0.2, 0.5, 0.48 );
   legend->SetFillColor(0);
@@ -180,31 +220,49 @@ int main() {
   roc_isoCN->Draw("psame");
   roc_isoCPN->Draw("psame");
 
+  //wp_isoCP_loose->Draw("psame");
+  wp_isoCP_tight->Draw("psame");
+  //wp_iso_loose->Draw("psame");
+  wp_iso_tight->Draw("psame");
 
   gPad->RedrawAxis();
 
-  c1->SaveAs(Form("%s/isoROC.png", outputdir.c_str()));
-  c1->SaveAs(Form("%s/isoROC.pdf", outputdir.c_str()));
-  c1->SaveAs(Form("%s/isoROC.eps", outputdir.c_str()));
+  std::string suffix;
+  if( optionNGI==0 ) suffix = "NGIsig";
+  else if( optionNGI==1 ) suffix = "NGIbg";
+  else if( optionNGI==2 ) suffix = "NGIig";
 
-  TFile* rocFile = TFile::Open("rocFile.root", "recreate");
-  rocFile->cd();
-  roc_iso->Write();
-  roc_isoCP->Write();
-  h1_iso_prompt->Write();
-  h1_iso_fake->Write();
-  h1_isoCP_prompt->Write();
-  h1_isoCP_fake->Write();
-  rocFile->Close();
-  
+  c1->SaveAs(Form("%s/isoROC_%s.png", outputdir.c_str(), suffix.c_str()));
+  c1->SaveAs(Form("%s/isoROC_%s.pdf", outputdir.c_str(), suffix.c_str()));
+  c1->SaveAs(Form("%s/isoROC_%s.eps", outputdir.c_str(), suffix.c_str()));
 
-  drawTemplatesVsMT2( outputdir, "iso", tree );
-  drawTemplatesVsMT2( outputdir, "isoCP", tree );
+  //TFile* rocFile = TFile::Open("rocFile.root", "recreate");
+  //rocFile->cd();
+  //roc_iso->Write();
+  //roc_isoCP->Write();
+  //h1_iso_prompt->Write();
+  //h1_iso_fake->Write();
+  //h1_isoCP_prompt->Write();
+  //h1_isoCP_fake->Write();
+  //rocFile->Close();
 
-  return 0;
+  delete c1;
+  delete h2_axes;
+
+  delete h1_iso_prompt;
+  delete h1_iso_fake;
+
+  delete h1_isoCP_prompt;
+  delete h1_isoCP_fake;
+
+  delete h1_isoCN_prompt;
+  delete h1_isoCN_fake;
+
+  delete h1_isoCPN_prompt;
+  delete h1_isoCPN_fake;
 
 }
-
+  
 
 
 void drawTemplatesVsMT2( const std::string& outputdir, const std::string& varName, TTree* tree ) {
@@ -515,6 +573,23 @@ void drawVsMT2( const std::string& outputdir, const std::string& varName, const 
   delete h2_axes_log;
 
 
+}
 
+
+
+
+TGraph* getWP( TH1D* h1_prompt, TH1D* h1_fake, float thresh ) {
+
+  int iBin = h1_prompt->FindBin(thresh);
+  int nbins = h1_prompt->GetNbinsX() + 1;
+
+  float eff      = h1_prompt->Integral( 1, iBin ) / h1_prompt->Integral( 1, nbins+1 );
+  float eff_fake = h1_fake  ->Integral( 1, iBin ) / h1_fake  ->Integral( 1, nbins+1 );
+  float rej = 1.-eff_fake;
+
+  TGraph* gr = new TGraph(0);
+  gr->SetPoint( 0, rej, eff );
+
+  return gr;
 
 }
