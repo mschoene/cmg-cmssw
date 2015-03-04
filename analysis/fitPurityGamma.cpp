@@ -56,6 +56,11 @@ int main( int argc, char* argv[] ) {
     regionsSet = regionsSet_tmp;
   }
 
+  std::string mc_or_data = "MC";
+  if( argc>2 ) {
+    mc_or_data = std::string(argv[2]);
+  }
+
 
   TH1::AddDirectory(kFALSE);
 
@@ -65,10 +70,11 @@ int main( int argc, char* argv[] ) {
 
   //std::string templateSamples = "CSA14_Zinv";
   MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplatesMC_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
-  MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplatesMC_" + samples + "_" + regionsSet + ".root", "templatesFake" );
+  //MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesFake" );
 
 
-  std::string outputdir = "PurityFits_" + samples + "_" + regionsSet;
+  std::string outputdir = "PurityFits" + mc_or_data + "_" + samples + "_" + regionsSet;
   system( Form( "mkdir -p %s", outputdir.c_str()) );
 
   std::set<MT2Region> regions = gammaJet_data->getRegions();

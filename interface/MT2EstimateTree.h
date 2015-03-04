@@ -21,6 +21,9 @@ class MT2EstimateTree : public MT2Estimate {
   void assignTree( const MT2Tree& mt2tree, float w );
   void fillTree( const MT2Tree& mt2tree, float w );
 
+  void assignTree_gamma( const MT2Tree& mt2tree, float w );
+  void fillTree_gamma( const MT2Tree& mt2tree, float w );
+
   static void addVar( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name );
   //static void addVarFloat( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name );
   //static void addVarInt( MT2Analysis<MT2EstimateTree>* analysis, const std::string& name );

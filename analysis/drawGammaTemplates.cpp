@@ -13,12 +13,13 @@
 
 
 
-bool useMC = false;
+bool useMC = true;
 
 
 void compareRegions( const std::string& outputdir, std::vector<MT2Region> regions, MT2Analysis<MT2EstimateZinvGamma>* templ, bool isPrompt, const std::string& suffix="" );
 void compareSigmaIetaIeta( const std::string& outputdir, TH1D* prompt, TH1D* fake );
 void drawSingleSigmaPlot( const std::string& outputdir, const std::string& label, float xMin, float xMax, TH1D* prompt, TH1D* fake );
+void compareTemplatesVsMt2( const std::string& outputdir, MT2Analysis<MT2EstimateZinvGamma>* templ, bool isPrompt );
 
 
 int main( int argc, char* argv[] ) {
@@ -46,7 +47,11 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2EstimateZinvGamma>* templatesFake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates" + mc_or_not + "_" + samples + "_" + regionsSet + ".root", "templatesFake");
 
 
-  if( regionsSet=="13TeV_inclusive" ) compareSigmaIetaIeta( outputdir, templatesPrompt->get(*(templatesPrompt->getRegions().begin()))->sietaieta, templatesFake->get(*(templatesFake->getRegions().begin()))->sietaieta );
+  if( regionsSet=="13TeV_inclusive" ) {
+    compareSigmaIetaIeta( outputdir, templatesPrompt->get(*(templatesPrompt->getRegions().begin()))->sietaieta, templatesFake->get(*(templatesFake->getRegions().begin()))->sietaieta );
+    compareTemplatesVsMt2( outputdir, templatesPrompt, true );
+    compareTemplatesVsMt2( outputdir, templatesFake, false );
+  }
 
   
 
@@ -222,6 +227,115 @@ void drawSingleSigmaPlot( const std::string& outputdir, const std::string& label
 
 
 
+void compareTemplatesVsMt2( const std::string& outputdir, MT2Analysis<MT2EstimateZinvGamma>* templ, bool isPrompt ) {
+
+  std::vector<int> colors;
+  colors.push_back( 46 );
+  colors.push_back( 29 );
+  colors.push_back( 38 );
+  colors.push_back( 42 );
+  colors.push_back( kGray+2 );
+
+  MT2Region region = *(templ->getRegions().begin());
+  std::vector<TH1D*> histos = templ->get(region)->iso_bins_hist;
+  int nBins;
+  double* bins;
+  region.getBins(nBins, bins);
+
+
+  TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
+  TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
+  c1_log->SetLogy();
+
+  float xMax = 0.1;
+
+  float yMax = (isPrompt) ? 1. : 0.2;
+  TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., yMax );
+  h2_axes->SetXTitle( "Photon Relative Charged Isolation" );
+  h2_axes->SetYTitle( "Normalized to Unity" );
+  c1->cd();
+  h2_axes->Draw("");
+
+
+  float yMax_log = (isPrompt) ? 5. : 50.;
+  float yMin_log = (isPrompt) ? 0.0001 : 0.001;
+  
+  TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, 0., xMax, 10, yMin_log, yMax_log );
+  h2_axes_log->SetXTitle( "Photon Relative Charged Isolation" );
+  h2_axes_log->SetYTitle( "Normalized to Unity" );
+  c1_log->cd();
+  h2_axes_log->Draw("");
+
+
+  int maxHistos = 4;
+  TLegend* legend = new TLegend( 0.45, 0.91-0.07*maxHistos, 0.9, 0.91 );
+  legend->SetTextSize(0.038);
+  legend->SetFillColor(0);
+  
+
+  for( unsigned i=0; i<histos.size(); ++i ) {
+
+    if( i>=maxHistos ) break;
+
+    histos[i]->SetLineColor(colors[i]);
+    histos[i]->SetLineWidth(2);
+    legend->AddEntry( histos[i], Form("%.0f < M_{T2} < %.0f GeV", bins[i], bins[i+1]), "L" );
+
+    c1->cd();
+    histos[i]->DrawNormalized("same");
+
+    c1_log->cd();
+    histos[i]->DrawNormalized("same");
+
+  }
+
+
+  TPaveText* labelTop = MT2DrawTools::getLabelTop();
+
+  TPaveText* labelPrompt = new TPaveText( 0.2, 0.8, 0.49, 0.9, "brNDC" );
+  labelPrompt->SetFillColor(0);
+  labelPrompt->SetTextSize(0.035);
+  labelPrompt->SetTextAlign(11); // align left
+  if( isPrompt )
+    labelPrompt->AddText( "Prompt" );
+  else
+    labelPrompt->AddText( "Fake" );
+  labelPrompt->AddText( "Photons" );
+
+
+  c1->cd();
+  labelTop->Draw("same");
+  labelPrompt->Draw("same");
+  legend->Draw("same");
+  gPad->RedrawAxis();
+
+  c1_log->cd();
+  labelTop->Draw("same");
+  labelPrompt->Draw("same");
+  legend->Draw("same");
+  gPad->RedrawAxis();
+
+
+  std::string prefix = (isPrompt) ? "Prompt" : "Fake";
+
+  c1->SaveAs( Form("%s/templ%s_vsMT2.eps", outputdir.c_str(), prefix.c_str()) );
+  c1->SaveAs( Form("%s/templ%s_vsMT2.pdf", outputdir.c_str(), prefix.c_str()) );
+  c1->SaveAs( Form("%s/templ%s_vsMT2.png", outputdir.c_str(), prefix.c_str()) );
+
+  c1_log->SaveAs( Form("%s/templ%s_vsMT2_log.eps", outputdir.c_str(), prefix.c_str()) );
+  c1_log->SaveAs( Form("%s/templ%s_vsMT2_log.pdf", outputdir.c_str(), prefix.c_str()) );
+  c1_log->SaveAs( Form("%s/templ%s_vsMT2_log.png", outputdir.c_str(), prefix.c_str()) );
+
+
+  delete c1;
+  delete c1_log;
+  delete h2_axes;
+  delete h2_axes_log;
+
+
+
+}
+
 
 void compareRegions( const std::string& outputdir, std::vector<MT2Region> regions, MT2Analysis<MT2EstimateZinvGamma>* templ, bool isPrompt, const std::string& suffix ) {
 //void compareRegions( const std::string& outputdir, std::vector<MT2Region> regions, MT2Analysis<MT2EstimateZinvGamma>* templ, MT2Analysis<MT2EstimateZinvGamma>* templ_qcd, const std::string& suffix ) {
@@ -290,8 +404,8 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
     }
 
     TH1D* thisTempl = (TH1D*)(thisEstimate->iso->Clone());
-    if( !isPrompt )
-      thisTempl->Rebin(2);
+    //if( !isPrompt )
+    //  thisTempl->Rebin(2);
     thisTempl->SetLineColor(colors[i]);
     thisTempl->SetLineWidth(2);
 

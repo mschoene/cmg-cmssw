@@ -10,6 +10,7 @@
 
 #include "TLorentzVector.h"
 #include "TH1F.h"
+#include "TF1.h"
 #include "TRandom3.h"
 
 
@@ -18,7 +19,7 @@ bool dummyData = true;
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt );
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prompt_fake="all", TF1* corr=0);
 void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data );
 void randomizeSingleHisto( TRandom3* rand, TH1D* h1 );
 void removeNegatives( MT2Analysis<MT2EstimateZinvGamma>* data );
@@ -34,6 +35,8 @@ int main( int argc, char* argv[] ) {
     std::string regionsSet_tmp(argv[1]); 
     regionsSet = regionsSet_tmp;
   }
+
+
 
   std::string samplesFileName = "PHYS14_v2_Zinv";
 
@@ -56,24 +59,35 @@ int main( int argc, char* argv[] ) {
   
   MT2Analysis<MT2EstimateZinvGamma>* templatesPromptRaw  = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPromptRaw", regionsSet );
   MT2Analysis<MT2EstimateZinvGamma>* templatesFake       = new MT2Analysis<MT2EstimateZinvGamma>( "templatesFake", regionsSet );
+  MT2Analysis<MT2EstimateZinvGamma>* templatesAll        = new MT2Analysis<MT2EstimateZinvGamma>( "templatesAll", regionsSet );
+
+  // get correction function for fakes:
+  TFile* file = TFile::Open("IsoFit_PHYS14_v2_Zinv_noSietaieta_13TeV_inclusive.root");
+  TH1D* h1 = (file!=0) ? (TH1D*)file->Get("iso_vs_sigma") : 0;
+  TF1* f1 = (h1!=0) ? (TF1*)h1->GetFunction("f1") : 0;
 
 
   for( unsigned i=0; i<samples.size(); ++i ) {
-    (*templatesPromptRaw) += (computeYield( samples[i], regionsSet, true  ));
-    (*templatesFake) += (computeYield( samples[i], regionsSet, false  ));
+    (*templatesPromptRaw) += (computeYield( samples[i], regionsSet, "prompt"  ));
+    (*templatesFake) += (computeYield( samples[i], regionsSet, "fake", f1  ));
+    (*templatesAll) += (computeYield( samples[i], regionsSet, "all"  ));
   }
 
   
   randomizePoisson( templatesPromptRaw );
   randomizePoisson( templatesFake );
+  randomizePoisson( templatesAll );
 
   MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt  = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt", regionsSet );
   (*templatesPrompt) = (*templatesPromptRaw) - (*templatesFake);
+  //(*templatesPrompt) = (*templatesPromptRaw) - 0.8*(*templatesFake);
   removeNegatives( templatesPrompt );
 
   std::string templateFileName = "gammaTemplatesDummy_" + samplesFileName + "_" + regionsSet + ".root";
 
   templatesPrompt->writeToFile(templateFileName);
+  templatesPromptRaw->addToFile(templateFileName);
+  templatesAll->addToFile(templateFileName);
   templatesFake->addToFile(templateFileName);
 
   return 0;
@@ -85,7 +99,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, bool onlyPrompt ) {
+MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const std::string& regionsSet, const std::string& prompt_fake, TF1* corr ) {
 
 
   std::cout << std::endl << std::endl;
@@ -179,11 +193,18 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     if( fabs( gamma.Eta() )<1.4445 ) {
       isPrompt = sietaieta<0.01;
     } else {
-      isPrompt = sietaieta<0.027;
+      isPrompt = sietaieta<0.03; // POG cut, but 0.027 would be better
+    }
+
+    // remove prompt photons from QCD (remove double counting)
+    if( sample.id>=100 && sample.id<199 ) {
+      int mcMatchId = myTree.gamma_mcMatchId[0];
+      float genIso = myTree.gamma_genIso[0];
+      if((mcMatchId==22 || mcMatchId==7) && genIso<5.) continue;
     }
     
-    if(  onlyPrompt && !isPrompt ) continue;
-    if( !onlyPrompt &&  isPrompt ) continue;
+    if( prompt_fake=="prompt" && !isPrompt ) continue;
+    if( prompt_fake=="fake"   &&  isPrompt ) continue;
 
 
     Double_t weight = myTree.evt_scale1fb*lumi; 
@@ -195,6 +216,13 @@ MT2Analysis<MT2EstimateZinvGamma> computeYield( const MT2Sample& sample, const s
     thisEstimate->sietaieta->Fill(sietaieta, weight );
 
     float iso = myTree.gamma_chHadIso[0]/myTree.gamma_pt[0];
+    if( corr!=0 ) {
+      //float f_cut  = corr->Eval(0.0092);
+      float f_cut  = corr->Eval(0.01);
+      float f_this = corr->Eval(sietaieta);
+      float k = f_cut/f_this;
+      iso *= k;
+    }
 
     thisEstimate->fillIso( iso, weight, myTree.gamma_mt2 );
 
