@@ -36,14 +36,18 @@ int main() {
 
   //TH1::AddDirectory(kFALSE); // stupid ROOT memory allocation needs this
 
-  TFile* file = TFile::Open("GenIsoCheck_PHYS14_v2_Zinv_noSietaieta_13TeV_inclusive/genIso.root");
-  TTree* tree_qcd = (TTree*)file->Get("qcd/HT450toInf_j2toInf_b0toInf/tree_qcd_HT450toInf_j2toInf_b0toInf");
-  TTree* tree_gjet = (TTree*)file->Get("gjet/HT450toInf_j2toInf_b0toInf/tree_gjet_HT450toInf_j2toInf_b0toInf");
+  //TFile* file = TFile::Open("GenIsoCheck_PHYS14_v2_Zinv_noSietaieta_13TeV_inclusive/genIso.root");
+  //TTree* tree_qcd = (TTree*)file->Get("qcd/HT450toInf_j2toInf_b0toInf/tree_qcd_HT450toInf_j2toInf_b0toInf");
+  //TTree* tree_gjet = (TTree*)file->Get("gjet/HT450toInf_j2toInf_b0toInf/tree_gjet_HT450toInf_j2toInf_b0toInf");
+
+
+  std::string fileName = "GenIsoCheck_PHYS14_v2_Zinv_noSietaieta_13TeV_inclusive/genIso.root";
 
   TChain* tree = new TChain("t");
-  tree->Add( "GenIsoCheck_PHYS14_v2_Zinv_noSietaieta_13TeV_inclusive/genIso.root/qcd/HT450toInf_j2toInf_b0toInf/tree_qcd_HT450toInf_j2toInf_b0toInf");
-  tree->Add( "GenIsoCheck_PHYS14_v2_Zinv_noSietaieta_13TeV_inclusive/genIso.root/gjet/HT450toInf_j2toInf_b0toInf/tree_gjet_HT450toInf_j2toInf_b0toInf");
+  tree->Add( Form("%s/qcd/HT450toInf_j2toInf_b0toInf/tree_qcd_HT450toInf_j2toInf_b0toInf", fileName.c_str()));
+  tree->Add( Form("%s/gjet/HT450toInf_j2toInf_b0toInf/tree_gjet_HT450toInf_j2toInf_b0toInf", fileName.c_str()));
 
+  std::cout << "-> Got stuff from file: " << fileName << std::endl;
 
 
   drawROC( outputdir, tree, 0 );
@@ -228,8 +232,8 @@ void drawROC( const std::string& outputdir, TTree* tree, int optionNGI ) {
   gPad->RedrawAxis();
 
   std::string suffix;
-  if( optionNGI==0 ) suffix = "NGIsig";
-  else if( optionNGI==1 ) suffix = "NGIbg";
+  if( optionNGI==0 ) suffix = "NGIbg";
+  else if( optionNGI==1 ) suffix = "NGIsig";
   else if( optionNGI==2 ) suffix = "NGIig";
 
   c1->SaveAs(Form("%s/isoROC_%s.png", outputdir.c_str(), suffix.c_str()));
