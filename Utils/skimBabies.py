@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 from ROOT import TFile, TTree
+import commands
 
 
 
@@ -57,12 +58,18 @@ if __name__ == '__main__':
    skimdir = outdir
    os.system("mkdir -p " + skimdir)
 
-   files = os.listdir(dir)
+
+
+   if "pnfs/psi.ch" in dir : 
+     status,files = commands.getstatusoutput("gfal-ls "+"srm://t3se01.psi.ch"+dir)
+     files=files.splitlines()
+   else :
+     files = os.listdir(dir)
 
    for f in files:
      if ".root" in f:
        if options.filter in f:
          skimBaby(f, dir, skimdir, cuts)
 
-   print "Find skimmed babies in " + skimdir
+   #print "Find skimmed babies in " + skimdir
 

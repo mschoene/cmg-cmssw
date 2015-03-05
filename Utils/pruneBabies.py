@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 from ROOT import TFile, TTree
+import commands
 
 
 
@@ -66,13 +67,16 @@ if __name__ == '__main__':
 
    prunedir = outdir
    os.system("mkdir -p " + prunedir)
-   print "prunedir: " + prunedir
-   print "dir: " + dir
 
-   files = os.listdir(dir)
+   if "pnfs/psi.ch" in dir : 
+     status,files = commands.getstatusoutput("gfal-ls "+"srm://t3se01.psi.ch"+dir)
+     files=files.splitlines()
+   else :
+     files = os.listdir(dir)
+
+
 
    for f in files:
-     #print "found : " + str(f)
      if ".root" in f:
        if options.filter in f:
          pruneBaby(f, dir, prunedir, pruneBranches)

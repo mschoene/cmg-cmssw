@@ -3,7 +3,7 @@
 # --- configuration (consider to move this into a separate file) ---
 treeName="tree"
 inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_QCDpt_noSietaieta/"
-productionName="test6"
+productionName="test26"
 fileExt="_post.root"
 # --------------------------
 
@@ -11,7 +11,7 @@ fileExt="_post.root"
 
 # initialization
 jobsLogsFolder="./$productionName"
-outputFolder="/pnfs/psi.ch/cms/trivcat/store/user/`whoami`/babies/postprocessed/"$productionName
+outputFolder="/pnfs/psi.ch/cms/trivcat/store/user/`whoami`/babies/postprocessed/"$productionName/
 workingFolder="/scratch/`whoami`/"$productionName
 
 
@@ -59,12 +59,6 @@ do
 
 
 #### The following configurations you should not need to change
-# The SE's user home area (SRMv2 URL)
-USER_SRM_HOME="srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/"
-
-# Top working directory on worker node's local disk. The batch
-# job working directory will be created below this
-
 # Job name (defines name seen in monitoring by qstat and the
 #     job script's stderr/stdout names)
 #$ -N postProcessing_${name}_`whoami`
@@ -90,13 +84,24 @@ eval \`scramv1 runtime -sh\`
 mkdir -p $workingFolder
 gfal-mkdir -p srm://t3se01.psi.ch/$outputFolder
 
+echo "postProcessing(\"$name\",\"$inputFolder\",\"$outputFile\",\"$treeName\",$filter,$kfactor,$xsec,$id);"
 echo "gROOT->LoadMacro(\"postProcessing.C\"); postProcessing(\"$name\",\"$inputFolder\",\"$outputFile\",\"$treeName\",$filter,$kfactor,$xsec,$id); gSystem->Exit(0);" |root.exe -b -l ;
 
-
-# to be replaced with copy to SE
 #mv $outputFile $outputFolder
 gfal-copy file://$outputFile srm://t3se01.psi.ch/$outputFolder
 rm $outputFile
+
+
+
+tmpCfg="${workingFolder}/skimmingPruning_${name}.cfg"
+
+cat skimmingPruning.cfg |grep -v \# | sed  "s#INPUTDIR#${outputFolder}#" |sed "s#INPUTFILTER#${name}#" | sed "s#OUTPUTDIR#${outputFolder}/skims#" > \$tmpCfg
+
+./runSkimmingPruning.sh \$tmpCfg
+
+
+
+
 
 EOF
 

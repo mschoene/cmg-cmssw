@@ -60,6 +60,8 @@ if [ "$doSkimming" = true ]; then
     python skimBabies.py $inputDir $outputSkimming "$skimmingSelection"  --filter="$inputFilter"
 fi
 
+
+
 # --- here I run the pruning python code
 outputPruning=/scratch/`whoami`/dirOutPruning_$rand3
 if [ "$doPruning" = true ]; then
@@ -73,7 +75,6 @@ fi
 
 # --- creating destinatinon folder, copying files, cleaning of tmp folders in scratch
 if [[ "$outputDir" == *"/pnfs/psi.ch/"* ]]; then
-    echo "destination: " srm://t3se01.psi.ch/$outputDir
     gfal-mkdir -p srm://t3se01.psi.ch/$outputDir
 else
     mkdir -p $outputDir
@@ -117,4 +118,5 @@ elif [[ "$doSkimming" = true &&  "$doPruning" = true ]]; then
     rm $outputSkimming/*; rmdir $outputSkimming;
 fi
 
+echo ""
 echo "Find your files in: " $outputDir
