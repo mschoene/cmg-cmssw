@@ -158,7 +158,7 @@ void drawROC( const std::string& outputdir, TTree* tree, int optionNGI ) {
   TGraph* roc_isoCPN = getRoC( h1_isoCPN_prompt, h1_isoCPN_fake );
 
   TGraph* wp_iso_loose = getWP( h1_iso_prompt, h1_iso_fake, 20.);
-  TGraph* wp_iso_tight = getWP( h1_iso_prompt, h1_iso_fake, 3.);
+  TGraph* wp_iso_tight = getWP( h1_iso_prompt, h1_iso_fake, 2.5);
 
   TGraph* wp_isoCP_loose = getWP( h1_isoCP_prompt, h1_isoCP_fake, 60.);
   TGraph* wp_isoCP_tight = getWP( h1_isoCP_prompt, h1_isoCP_fake, 3.);
@@ -168,13 +168,14 @@ void drawROC( const std::string& outputdir, TTree* tree, int optionNGI ) {
   c1->cd();
 
   TH2D* h2_axes;
-  if( optionNGI==0 ) {
-    h2_axes = new TH2D("axes", "", 10, 0.5, 1.0001, 10, 0.95, 1.0001);
-  } else if( optionNGI==1 ) {
-    h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.75, 1.0001);
-  } else if( optionNGI==2 ) {
-    h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
-  }
+  //if( optionNGI==0 ) {
+  //  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
+  //} else if( optionNGI==1 ) {
+  //  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.75, 1.0001);
+  //} else if( optionNGI==2 ) {
+  //  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
+  //}
+  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.9, 1.0001);
   h2_axes->SetXTitle("Fake Photon Rejection");
   h2_axes->SetYTitle("Prompt Photon Efficiency");
   h2_axes->Draw();
