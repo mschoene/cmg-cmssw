@@ -8,7 +8,9 @@ from ROOT import TFile, TTree
 def skimBaby( fname, dir, skimdir, cuts ):
 
   fullname = dir+"/"+fname
-  file = TFile(fullname)
+  if "pnfs" in fullname : 
+    fullname = "dcap://t3se01.psi.ch:22125//"+fullname
+  file = TFile.Open(fullname)
   tree = file.Get("mt2")
 
   print "-> Skimming " + fullname

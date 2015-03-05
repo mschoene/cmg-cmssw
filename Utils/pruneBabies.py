@@ -8,7 +8,9 @@ from ROOT import TFile, TTree
 def pruneBaby( fname, dir, prunedir, pruneBranches ):
 
   fullname = dir+"/"+fname
-  file = TFile(fullname)
+  if "pnfs" in fullname : 
+    fullname = "dcap://t3se01.psi.ch:22125//"+fullname
+  file = TFile.Open(fullname)
   tree = file.Get("mt2")
 
   print "-> Pruning " + fullname
@@ -70,7 +72,7 @@ if __name__ == '__main__':
    files = os.listdir(dir)
 
    for f in files:
-     print "found : " + str(f)
+     #print "found : " + str(f)
      if ".root" in f:
        if options.filter in f:
          pruneBaby(f, dir, prunedir, pruneBranches)
