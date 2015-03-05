@@ -3,7 +3,7 @@
 # --- configuration (consider to move this into a separate file) ---
 treeName="tree"
 inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_QCDpt_noSietaieta/"
-productionName="test26"
+productionName="testSkimPrune3"
 fileExt="_post.root"
 # --------------------------
 
@@ -17,9 +17,9 @@ workingFolder="/scratch/`whoami`/"$productionName
 
 if [[ "$#" -eq 0 ]]; then
     echo "Relunch the script with one of the following options: "
-    echo "./doAllProduction.sh post"
-    echo "./doAllProduction.sh postCheck"
-    echo "./doAllProduction.sh clean"
+    echo "./doTreeProduction.sh post"
+    echo "./doTreeProduction.sh postCheck"
+    echo "./doTreeProduction.sh clean"
 fi;
 
 if [[ "$1" = "post" ]]; then
@@ -53,6 +53,7 @@ do
     kfactor=`echo $line |awk '{print $5}'`
     
     outputFile=${workingFolder}/${name}$fileExt;
+
 
     cat <<EOF > batchScript_${name}.sh
 #!/bin/bash
@@ -91,16 +92,14 @@ echo "gROOT->LoadMacro(\"postProcessing.C\"); postProcessing(\"$name\",\"$inputF
 gfal-copy file://$outputFile srm://t3se01.psi.ch/$outputFolder
 rm $outputFile
 
+skimmingPruningCfg="${workingFolder}/skimmingPruning_${name}.cfg"
+    cat skimmingPruning.cfg |grep -v \# | sed  "s#INPUTDIR#${outputFolder}#" |sed "s#INPUTFILTER#${name}#" \
+	| sed "s#OUTPUTDIR#${outputFolder}/skims#" > \$skimmingPruningCfg
 
+./runSkimmingPruning.sh \$skimmingPruningCfg
 
-tmpCfg="${workingFolder}/skimmingPruning_${name}.cfg"
-
-cat skimmingPruning.cfg |grep -v \# | sed  "s#INPUTDIR#${outputFolder}#" |sed "s#INPUTFILTER#${name}#" | sed "s#OUTPUTDIR#${outputFolder}/skims#" > \$tmpCfg
-
-./runSkimmingPruning.sh \$tmpCfg
-
-
-
+echo "is anything left in working folder? workingFolder: " 
+ls $workingFolder
 
 
 EOF
