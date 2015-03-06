@@ -63,7 +63,7 @@ int main( int argc, char* argv[] ) {
 void drawSinglePlot( const std::string& outputdir, const std::string& name, const MT2Region& region, TH1D* histo1, const std::string& name1, TH1D* histo2, const std::string& name2, TH1D* histo3, const std::string& name3 ) {
 
 
-  bool rebin = true;
+  bool rebin = false;
 
 
   TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
@@ -106,6 +106,7 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
   histo1->SetMarkerStyle( 20 );
   histo1->SetMarkerSize( 1.6 );
   histo1->SetMarkerColor( kBlack );
+  histo1->SetLineColor( kBlack );
   if( rebin ) histo1->Rebin(2);
   legend->AddEntry( histo1, name1.c_str(), "P" );
 
@@ -113,6 +114,7 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
     histo2->SetMarkerStyle( 24 );
     histo2->SetMarkerSize( 1.6 );
     histo2->SetMarkerColor( kBlue );
+    histo2->SetLineColor( kBlack );
     if( rebin ) histo2->Rebin(2);
     histo2->Draw("p same");
     legend->AddEntry( histo2, name2.c_str(), "P" );
