@@ -30,7 +30,7 @@ if [ -d "$jobsLogsFolder" ]; then
     echo "ERROR: the logFolder" $jobsLogsFolder " already exists."
     echo "Delete it and start from a clean area, or redirect the logs in a different place."
     echo "Exiting ..."
-    #exit
+    exit
 else
     mkdir  $jobsLogsFolder
 fi
