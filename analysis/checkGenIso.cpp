@@ -25,7 +25,7 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 int main( int argc, char* argv[] ) {
 
 
-  std::string samplesFileName = "PHYS14_v2_Zinv_noSietaieta";
+  std::string samplesFileName = "PHYS14_v2_Zinv";
   //std::string samplesFileName = "CSA14_Zinv";
   if( argc>1 ) {
     std::string samplesFileName_tmp(argv[1]); 
@@ -82,8 +82,8 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string samplesFile_snt = "../samples/samples_QCD_snt.dat";
-  std::vector<MT2Sample> samples_qcd = MT2Sample::loadSamples(samplesFile_snt, "QCD_Pt");
+  //std::string samplesFile_snt = "../samples/samples_QCD_snt.dat";
+  std::vector<MT2Sample> samples_qcd = MT2Sample::loadSamples(samplesFile, "QCD_Pt");
 //  std::vector<MT2Sample> samples_qcd = MT2Sample::loadSamples(samplesFile_snt, "QCD_Ht");
   //std::vector<MT2Sample> samples_qcd = MT2Sample::loadSamples(samplesFile, "QCD_HT");
   MT2Analysis<MT2EstimateTree>* fake = new MT2Analysis<MT2EstimateTree>( "fake", regionsSet );
@@ -187,6 +187,8 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 
     if( myTree.ngamma==0 ) continue;
 
+    // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa REMOVE SOON
+    if( myTree.evt_scale1fb > 1. ) continue;
 
     //if( myTree.gamma_idCutBased[0]==0 ) continue;
 
@@ -198,7 +200,7 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
     float sietaieta = myTree.gamma_sigmaIetaIeta[0];
     if( fabs( gamma.Eta() )<1.479 ) {
       if( hOverE > 0.058 ) continue;
-      if( sietaieta > 0.014 ) continue;
+      //if( sietaieta > 0.014 ) continue;
       //if( sietaieta > 0.0099 ) continue;
     } else {  
       if( hOverE > 0.020 ) continue;
@@ -253,8 +255,6 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 
     int mcMatchId = myTree.gamma_mcMatchId[0];
     bool isMatched = (mcMatchId==22 || mcMatchId==7);
-    //if( sample.id >= 200 && sample.id<=299 && !isMatched ) continue;
-    //if( sample.id >= 100 && sample.id<=199 &&  isMatched ) continue;
     bool isGenIso = (myTree.gamma_genIso[0]<5.);
 
     if( isMatched  &&  isGenIso && isQCD  ) continue; //isolated prompts taken from GJet only

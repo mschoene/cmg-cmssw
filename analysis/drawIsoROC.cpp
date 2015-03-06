@@ -11,6 +11,8 @@
 #include "TChain.h"
 #include "TF1.h"
 #include "TProfile.h"
+#include "TBox.h"
+#include "THStack.h"
 
 #include "../interface/MT2DrawTools.h"
 
@@ -21,6 +23,7 @@
 // 2: ignore them
 
 
+void drawSietaieta( const std::string& outputdir, TTree* tree, const std::string& eb_ee );
 void drawROC( const std::string& outputdir, TTree* tree, int optionNGI );
 TGraph* getRoC( TH1D* h1_prompt, TH1D* h1_fake );
 TGraph* getWP( TH1D* h1_prompt, TH1D* h1_fake, float thresh );
@@ -28,6 +31,7 @@ void drawTemplatesVsMT2( const std::string& outputdir, const std::string& varNam
 void drawVsMT2( const std::string& outputdir, const std::string& varName, const std::string& name, std::vector<TH1D*> histos, std::vector<float> bins );
 void drawIsoVsSigma( const std::string& outputdir, TTree* tree, const std::string& iso1, const std::string& iso2 );
 std::string getLongName( const std::string& name );
+void setBins( TH1D* h1, TH2D* h2 );
 
 
 int main() {
@@ -45,7 +49,7 @@ int main() {
   //TTree* tree_gjet = (TTree*)file->Get("gjet/HT450toInf_j2toInf_b0toInf/tree_gjet_HT450toInf_j2toInf_b0toInf");
 
 
-  std::string fileName = "GenIsoCheck_PHYS14_v2_Zinv_noSietaieta_13TeV_inclusive/genIso.root";
+  std::string fileName = "GenIsoCheck_PHYS14_v2_Zinv_13TeV_inclusive/genIso.root";
 
   TChain* tree = new TChain("t");
   tree->Add( Form("%s/qcd/HT450toInf_j2toInf_b0toInf/tree_qcd_HT450toInf_j2toInf_b0toInf", fileName.c_str()));
@@ -54,7 +58,11 @@ int main() {
   std::cout << "-> Got stuff from file: " << fileName << std::endl;
 
 
+  drawSietaieta( outputdir, tree, "Barrel" );
+  drawSietaieta( outputdir, tree, "Endcap" );
+
   drawIsoVsSigma( outputdir, tree, "iso", "isoCP" );
+  //drawIsoVsSigma( outputdir, tree, "iso", "(isoCP-iso)" );
 
   drawROC( outputdir, tree, 0 );
   drawROC( outputdir, tree, 1 );
@@ -65,6 +73,135 @@ int main() {
 
 
   return 0;
+
+}
+
+
+
+
+void drawSietaieta( const std::string& outputdir, TTree* tree, const std::string& eb_ee ) {
+
+
+  float etaMin;
+  float etaMax;
+  float xMin;
+  float xMax;
+  float xCut;
+  float xSBmin;
+  float xSBmax;
+  int nBins;
+  float xMinLegend;
+  float xMaxLegend;
+  if( eb_ee=="Barrel" ) {
+    etaMin = 0.;
+    etaMax = 1.479;
+    xMin = 0.007;
+    xMax = 0.02;
+    nBins = 65;
+    xCut = 0.010;
+    xSBmin = 0.011;
+    xSBmax = 0.015;
+    xMinLegend = 0.68;
+    xMaxLegend = 0.91;
+  } else if( eb_ee=="Endcap" ) {
+    etaMin = 1.479;
+    etaMax = 3.;
+    xMin = 0.02;
+    xMax = 0.035;
+    xCut = 0.030;
+    nBins = 50;
+    xSBmin = 0.03;
+    xSBmax = 0.035;
+    xMinLegend = 0.45;
+    xMaxLegend = 0.68;
+  } else {
+    std::cout << "Unkown ECAL region: " << eb_ee << std::endl;
+    return;
+  }
+    
+
+  TH1D* h1_prompt = new TH1D("prompt", "", nBins, xMin, xMax );
+  h1_prompt->Sumw2();
+  TH1D* h1_fake = new TH1D("fake", "", nBins, xMin, xMax );
+  h1_fake->Sumw2();
+
+  tree->Project( "prompt", "sietaieta", "weight*( mcMatchId==22)" );
+  tree->Project( "fake"  , "sietaieta", "weight*( mcMatchId==0 )" );
+
+  std::cout << std::endl;
+  std::cout << eb_ee << ":" << std::endl;
+  int binCut = h1_prompt->FindBin(xCut);
+  int binSBmin = h1_prompt->FindBin(xSBmin);
+  int binSBmax = h1_prompt->FindBin(xSBmax);
+  std::cout << "Signal region: " << h1_prompt->Integral(1, binCut) + h1_fake->Integral(1, binCut) << std::endl;
+  std::cout << "Sideband: " << h1_prompt->Integral(binSBmin, binSBmax) + h1_fake->Integral(binSBmin, binSBmax) << std::endl;
+
+  TCanvas* c1 = new TCanvas("c1", "", 600, 600);
+  c1->cd();
+
+  float yMax = (h1_prompt->GetMaximum()+h1_fake->GetMaximum())*1.1;
+
+  TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax);
+  h2_axes->SetXTitle("Photon #sigma_{i#eta i#eta}");
+  h2_axes->SetYTitle("Events");
+  h2_axes->Draw();
+
+  h1_prompt->SetFillColor(kOrange+1);
+  h1_prompt->SetLineColor(kBlack);
+
+  h1_fake->SetFillColor(29);
+  h1_fake->SetLineColor(kBlack);
+
+  //h1_fake->SetLineColor(kRed+3);
+  //h1_fake->SetLineWidth(2);
+
+
+
+  TBox* sbBox = new TBox( xSBmin, 0., xSBmax, yMax );
+  sbBox->SetFillColor(kGray);
+  sbBox->Draw("same");
+
+  THStack* stack = new THStack();
+  stack->Add( h1_fake ); 
+  stack->Add( h1_prompt ); 
+  stack->Draw("histo same");
+
+
+  TLine* lineCut = new TLine( xCut, 0., xCut, yMax );
+  lineCut->SetLineWidth(2);
+  lineCut->Draw("same");
+
+
+  TLine* lineSB1 = new TLine( xSBmin, 0., xSBmin, yMax );
+  lineSB1->SetLineStyle(2);
+  lineSB1->SetLineWidth(2);
+  lineSB1->Draw("same");
+
+  TLine* lineSB2 = new TLine( xSBmax, 0., xSBmax, yMax );
+  lineSB2->SetLineStyle(2);
+  lineSB2->SetLineWidth(2);
+  lineSB2->Draw("same");
+
+  TLegend* legend = new TLegend( xMinLegend, 0.67, xMaxLegend, 0.88, eb_ee.c_str());
+  legend->SetTextSize(0.035);
+  legend->SetFillColor(0);
+  legend->AddEntry( h1_prompt, "Prompt", "F" );
+  legend->AddEntry( h1_fake, "Fake", "F" );
+  legend->Draw("same");
+
+  TPaveText* labelTop = MT2DrawTools::getLabelTop(4.);
+  labelTop->Draw("same");
+
+  gPad->RedrawAxis();
+
+  c1->SaveAs(Form("%s/sietaieta%s.eps", outputdir.c_str(), eb_ee.c_str()));
+  c1->SaveAs(Form("%s/sietaieta%s.pdf", outputdir.c_str(), eb_ee.c_str()));
+  c1->SaveAs(Form("%s/sietaieta%s.png", outputdir.c_str(), eb_ee.c_str()));
+
+  delete c1;
+  delete h2_axes;
+  delete h1_prompt;
+  delete h1_fake;
 
 }
 
@@ -156,7 +293,7 @@ void drawROC( const std::string& outputdir, TTree* tree, int optionNGI ) {
   TGraph* roc_isoCPN = getRoC( h1_isoCPN_prompt, h1_isoCPN_fake );
 
   TGraph* wp_iso_loose = getWP( h1_iso_prompt, h1_iso_fake, 20.);
-  TGraph* wp_iso_tight = getWP( h1_iso_prompt, h1_iso_fake, 3.);
+  TGraph* wp_iso_tight = getWP( h1_iso_prompt, h1_iso_fake, 2.5);
 
   TGraph* wp_isoCP_loose = getWP( h1_isoCP_prompt, h1_isoCP_fake, 60.);
   TGraph* wp_isoCP_tight = getWP( h1_isoCP_prompt, h1_isoCP_fake, 3.);
@@ -166,13 +303,14 @@ void drawROC( const std::string& outputdir, TTree* tree, int optionNGI ) {
   c1->cd();
 
   TH2D* h2_axes;
-  if( optionNGI==0 ) {
-    h2_axes = new TH2D("axes", "", 10, 0.5, 1.0001, 10, 0.95, 1.0001);
-  } else if( optionNGI==1 ) {
-    h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.75, 1.0001);
-  } else if( optionNGI==2 ) {
-    h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
-  }
+  //if( optionNGI==0 ) {
+  //  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
+  //} else if( optionNGI==1 ) {
+  //  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.75, 1.0001);
+  //} else if( optionNGI==2 ) {
+  //  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.95, 1.0001);
+  //}
+  h2_axes = new TH2D("axes", "", 10, 0.75, 1.0001, 10, 0.9, 1.0001);
   h2_axes->SetXTitle("Fake Photon Rejection");
   h2_axes->SetYTitle("Prompt Photon Efficiency");
   h2_axes->Draw();
@@ -608,60 +746,83 @@ TGraph* getWP( TH1D* h1_prompt, TH1D* h1_fake, float thresh ) {
 void drawIsoVsSigma( const std::string& outputdir, TTree* tree, const std::string& iso1, const std::string& iso2 ) {
 
   float xmin = 0.008;
-  float xmax = 0.012;
+  float xmax = 0.015;
+
+  float iso1Max = 20.;
+  //float iso2Max = 30.;
+  float iso2Max = 60.;
+
+  TH2D* h2_iso1_vs_sigma = new TH2D( "iso1_vs_sigma_2D", "", 20, xmin, xmax, 100, 0., iso1Max);
+  TH2D* h2_iso2_vs_sigma = new TH2D( "iso2_vs_sigma_2D", "", 20, xmin, xmax, 100, 0., iso2Max);
+  h2_iso1_vs_sigma->Sumw2();
+  h2_iso2_vs_sigma->Sumw2();
 
 
-  TCanvas* c1 = new TCanvas("c1", "", 600, 600);
-  c1->cd();
-
-  TH2D* h2_axes = new TH2D("axes", "", 10, xmin, xmax, 10, 0., 100.);
-  h2_axes->SetXTitle( "#sigma_{i#eta i#eta}" );
-  h2_axes->SetYTitle( "Isolation [GeV]");
-  h2_axes->Draw();
+  tree->Project( "iso1_vs_sigma_2D", Form("%s*ptGamma:sietaieta", iso1.c_str()), Form("weight*(mcMatchId==0 && %s*ptGamma<%f)", iso1.c_str(), iso1Max) );
+  tree->Project( "iso2_vs_sigma_2D", Form("%s*ptGamma:sietaieta", iso2.c_str()), Form("weight*(mcMatchId==0 && %s*ptGamma<%f)", iso2.c_str(), iso2Max) );
 
 
-  TProfile* hp_iso1_vs_sigma = new TProfile( "iso1_vs_sigma", "", 10, xmin, xmax);
-  TProfile* hp_iso2_vs_sigma = new TProfile( "iso2_vs_sigma", "", 10, xmin, xmax);
-  hp_iso1_vs_sigma->Sumw2();
-  hp_iso2_vs_sigma->Sumw2();
+  TH1D* h1_iso1_vs_sigma = new TH1D( "iso1_vs_sigma", "", 20, xmin, xmax );
+  TH1D* h1_iso2_vs_sigma = new TH1D( "iso2_vs_sigma", "", 20, xmin, xmax );
 
-  tree->Project( "iso1_vs_sigma", Form("%s*ptGamma:sietaieta", iso1.c_str()), "weight*(mcMatchId==0)", "prof" );
-  tree->Project( "iso2_vs_sigma", Form("%s*ptGamma:sietaieta", iso2.c_str()), "weight*(mcMatchId==0)", "prof" );
+  setBins( h1_iso1_vs_sigma, h2_iso1_vs_sigma );
+  setBins( h1_iso2_vs_sigma, h2_iso2_vs_sigma );
 
-  hp_iso1_vs_sigma->SetMarkerStyle(20);
-  hp_iso1_vs_sigma->SetMarkerSize(1.6);
-  hp_iso1_vs_sigma->SetMarkerColor(kBlack);
-
-  hp_iso2_vs_sigma->SetMarkerStyle(24);
-  hp_iso2_vs_sigma->SetMarkerSize(1.6);
-  hp_iso2_vs_sigma->SetMarkerColor(kBlack);
 
   TF1* line1 = new TF1("line1", "[0] + [1]*x", xmin, xmax );
   line1->SetLineColor(kRed);
   line1->SetLineWidth(2);
-  hp_iso1_vs_sigma->Fit(line1, "QRN");
+  h1_iso1_vs_sigma->Fit(line1, "R+");
   line1->Draw("same");
 
   TF1* line2 = new TF1("line2", "[0] + [1]*x", xmin, xmax );
   line2->SetLineColor(kRed);
   line2->SetLineWidth(2);
   line2->SetLineStyle(2);
-  hp_iso2_vs_sigma->Fit(line2, "QRN");
+  h1_iso2_vs_sigma->Fit(line2, "R+");
   line2->Draw("same");
 
-  hp_iso1_vs_sigma->Draw("p same");
-  hp_iso2_vs_sigma->Draw("p same");
+
+  TCanvas* c1 = new TCanvas("c1", "", 600, 600);
+  c1->cd();
+
+
+  float yMax = 18.;
+
+  TH2D* h2_axes = new TH2D("axes", "", 10, xmin, xmax, 10, 0., yMax );
+  h2_axes->SetXTitle( "#sigma_{i#eta i#eta}" );
+  h2_axes->SetYTitle( "Isolation [GeV]");
+  h2_axes->Draw();
+
+
+  h1_iso1_vs_sigma->SetMarkerStyle(20);
+  h1_iso1_vs_sigma->SetMarkerSize(1.6);
+  h1_iso1_vs_sigma->SetMarkerColor(kBlack);
+  h1_iso1_vs_sigma->SetLineColor(kBlack);
+
+  h1_iso2_vs_sigma->SetMarkerStyle(24);
+  h1_iso2_vs_sigma->SetMarkerSize(1.6);
+  h1_iso2_vs_sigma->SetMarkerColor(kBlack);
+  h1_iso2_vs_sigma->SetLineColor(kBlack);
+
+  TLine* lineCut = new TLine( 0.01, 0., 0.01, yMax );
+  lineCut->SetLineColor(kBlack);
+  lineCut->Draw("same");
 
 
   std::string longName1 = getLongName(iso1);
   std::string longName2 = getLongName(iso2);
 
-  TLegend* legend = new TLegend( 0.2, 0.7, 0.45, 0.9 );
+  TLegend* legend = new TLegend( 0.52, 0.48, 0.9, 0.63 );
   legend->SetTextSize( 0.035 );
   legend->SetFillColor( 0 );
-  legend->AddEntry( hp_iso1_vs_sigma, longName1.c_str(), "P" );
-  legend->AddEntry( hp_iso2_vs_sigma, longName2.c_str(), "P" );
+  legend->AddEntry( h1_iso1_vs_sigma, longName1.c_str(), "P" );
+  legend->AddEntry( h1_iso2_vs_sigma, longName2.c_str(), "P" );
   legend->Draw("same");
+
+
+  h1_iso1_vs_sigma->Draw("p same");
+  h1_iso2_vs_sigma->Draw("p same");
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();
   labelTop->Draw("same");
@@ -693,5 +854,21 @@ std::string getLongName( const std::string& name ) {
     longName = "Full PF";
 
   return longName;
+
+}
+
+
+
+void setBins( TH1D* h1, TH2D* h2 ) {
+
+  for( unsigned iBin=1; iBin<h2->GetNbinsX()+1; ++iBin ) {
+
+    TH1D* thisProj = h2->ProjectionY(Form("%s_proj%d", h2->GetName(), iBin), iBin, iBin);
+
+    h1->SetBinContent( iBin, thisProj->GetMean() );
+    //h1->SetBinError( iBin, thisProj->GetRMS() );
+    h1->SetBinError( iBin, thisProj->GetMeanError() );
+
+  }
 
 }
