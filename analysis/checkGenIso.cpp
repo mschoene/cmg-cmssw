@@ -255,8 +255,6 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 
     int mcMatchId = myTree.gamma_mcMatchId[0];
     bool isMatched = (mcMatchId==22 || mcMatchId==7);
-    //if( sample.id >= 200 && sample.id<=299 && !isMatched ) continue;
-    //if( sample.id >= 100 && sample.id<=199 &&  isMatched ) continue;
     bool isGenIso = (myTree.gamma_genIso[0]<5.);
 
     if( isMatched  &&  isGenIso && isQCD  ) continue; //isolated prompts taken from GJet only
