@@ -2,8 +2,9 @@
 
 # --- configuration (consider to move this into a separate file) ---
 treeName="tree"
-inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_QCDpt_noSietaieta/"
-productionName="testSkimPrune3"
+#inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_QCDpt_noSietaieta/"
+inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_Feb20/"
+productionName="testSkimPruneBig4"
 fileExt="_post.root"
 # --------------------------
 
@@ -94,12 +95,13 @@ rm $outputFile
 
 skimmingPruningCfg="${workingFolder}/skimmingPruning_${name}.cfg"
     cat skimmingPruning.cfg |grep -v \# | sed  "s#INPUTDIR#${outputFolder}#" |sed "s#INPUTFILTER#${name}#" \
-	| sed "s#OUTPUTDIR#${outputFolder}/skims#" > \$skimmingPruningCfg
+	| sed "s#OUTPUTDIR#${outputFolder}/skimAndPrune#" > \$skimmingPruningCfg
 
 ./runSkimmingPruning.sh \$skimmingPruningCfg
+rm \$skimmingPruningCfg
 
-echo "is anything left in working folder? workingFolder: " 
-ls $workingFolder
+#echo "is anything left in working folder? workingFolder: " 
+#ls $workingFolder
 
 
 EOF
