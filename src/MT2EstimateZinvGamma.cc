@@ -39,8 +39,8 @@ MT2EstimateZinvGamma::MT2EstimateZinvGamma( const std::string& aname, const MT2R
   ////bins[10] = 1.;
   //float xmax = bins[nbins-1];
 
-  int nbins = 20;
-  float xmax = 30.;
+  int nbins = 8;
+  float xmax = 20.;
 
 
   // this histo will be used to create histogram templates:
@@ -141,7 +141,20 @@ void MT2EstimateZinvGamma::fillIso( float iso, float weight, float mt2 ) {
       
 }
  
+
+
+RooDataSet* MT2EstimateZinvGamma::isoData() const {
+
+  RooDataSet* dataset = new RooDataSet( this->getHistoName("isoData").c_str(), "", RooArgSet(*x_,*w_), w_->GetName() );
+  
+  for( unsigned i=0; i<iso_bins.size(); ++i ) 
+    dataset->append( *(iso_bins[i]) );
+  
+  return dataset;
+
+}
  
+
 void MT2EstimateZinvGamma::fakeDatasetsFromHistos(int seed) {
 
   TRandom3 rand(seed);
