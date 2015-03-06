@@ -11,6 +11,8 @@
 #include "TChain.h"
 #include "TF1.h"
 #include "TProfile.h"
+#include "TBox.h"
+#include "THStack.h"
 
 #include "../interface/MT2DrawTools.h"
 
@@ -21,6 +23,7 @@
 // 2: ignore them
 
 
+void drawSietaieta( const std::string& outputdir, TTree* tree, const std::string& eb_ee );
 void drawROC( const std::string& outputdir, TTree* tree, int optionNGI );
 TGraph* getRoC( TH1D* h1_prompt, TH1D* h1_fake );
 TGraph* getWP( TH1D* h1_prompt, TH1D* h1_fake, float thresh );
@@ -55,6 +58,9 @@ int main() {
   std::cout << "-> Got stuff from file: " << fileName << std::endl;
 
 
+  drawSietaieta( outputdir, tree, "Barrel" );
+  drawSietaieta( outputdir, tree, "Endcap" );
+
   drawIsoVsSigma( outputdir, tree, "iso", "isoCP" );
   //drawIsoVsSigma( outputdir, tree, "iso", "(isoCP-iso)" );
 
@@ -67,6 +73,135 @@ int main() {
 
 
   return 0;
+
+}
+
+
+
+
+void drawSietaieta( const std::string& outputdir, TTree* tree, const std::string& eb_ee ) {
+
+
+  float etaMin;
+  float etaMax;
+  float xMin;
+  float xMax;
+  float xCut;
+  float xSBmin;
+  float xSBmax;
+  int nBins;
+  float xMinLegend;
+  float xMaxLegend;
+  if( eb_ee=="Barrel" ) {
+    etaMin = 0.;
+    etaMax = 1.479;
+    xMin = 0.007;
+    xMax = 0.02;
+    nBins = 65;
+    xCut = 0.010;
+    xSBmin = 0.011;
+    xSBmax = 0.015;
+    xMinLegend = 0.68;
+    xMaxLegend = 0.91;
+  } else if( eb_ee=="Endcap" ) {
+    etaMin = 1.479;
+    etaMax = 3.;
+    xMin = 0.02;
+    xMax = 0.035;
+    xCut = 0.030;
+    nBins = 50;
+    xSBmin = 0.03;
+    xSBmax = 0.035;
+    xMinLegend = 0.45;
+    xMaxLegend = 0.68;
+  } else {
+    std::cout << "Unkown ECAL region: " << eb_ee << std::endl;
+    return;
+  }
+    
+
+  TH1D* h1_prompt = new TH1D("prompt", "", nBins, xMin, xMax );
+  h1_prompt->Sumw2();
+  TH1D* h1_fake = new TH1D("fake", "", nBins, xMin, xMax );
+  h1_fake->Sumw2();
+
+  tree->Project( "prompt", "sietaieta", "weight*( mcMatchId==22)" );
+  tree->Project( "fake"  , "sietaieta", "weight*( mcMatchId==0 )" );
+
+  std::cout << std::endl;
+  std::cout << eb_ee << ":" << std::endl;
+  int binCut = h1_prompt->FindBin(xCut);
+  int binSBmin = h1_prompt->FindBin(xSBmin);
+  int binSBmax = h1_prompt->FindBin(xSBmax);
+  std::cout << "Signal region: " << h1_prompt->Integral(1, binCut) + h1_fake->Integral(1, binCut) << std::endl;
+  std::cout << "Sideband: " << h1_prompt->Integral(binSBmin, binSBmax) + h1_fake->Integral(binSBmin, binSBmax) << std::endl;
+
+  TCanvas* c1 = new TCanvas("c1", "", 600, 600);
+  c1->cd();
+
+  float yMax = (h1_prompt->GetMaximum()+h1_fake->GetMaximum())*1.1;
+
+  TH2D* h2_axes = new TH2D("axes", "", 10, xMin, xMax, 10, 0., yMax);
+  h2_axes->SetXTitle("Photon #sigma_{i#eta i#eta}");
+  h2_axes->SetYTitle("Events");
+  h2_axes->Draw();
+
+  h1_prompt->SetFillColor(kOrange+1);
+  h1_prompt->SetLineColor(kBlack);
+
+  h1_fake->SetFillColor(29);
+  h1_fake->SetLineColor(kBlack);
+
+  //h1_fake->SetLineColor(kRed+3);
+  //h1_fake->SetLineWidth(2);
+
+
+
+  TBox* sbBox = new TBox( xSBmin, 0., xSBmax, yMax );
+  sbBox->SetFillColor(kGray);
+  sbBox->Draw("same");
+
+  THStack* stack = new THStack();
+  stack->Add( h1_fake ); 
+  stack->Add( h1_prompt ); 
+  stack->Draw("histo same");
+
+
+  TLine* lineCut = new TLine( xCut, 0., xCut, yMax );
+  lineCut->SetLineWidth(2);
+  lineCut->Draw("same");
+
+
+  TLine* lineSB1 = new TLine( xSBmin, 0., xSBmin, yMax );
+  lineSB1->SetLineStyle(2);
+  lineSB1->SetLineWidth(2);
+  lineSB1->Draw("same");
+
+  TLine* lineSB2 = new TLine( xSBmax, 0., xSBmax, yMax );
+  lineSB2->SetLineStyle(2);
+  lineSB2->SetLineWidth(2);
+  lineSB2->Draw("same");
+
+  TLegend* legend = new TLegend( xMinLegend, 0.67, xMaxLegend, 0.88, eb_ee.c_str());
+  legend->SetTextSize(0.035);
+  legend->SetFillColor(0);
+  legend->AddEntry( h1_prompt, "Prompt", "F" );
+  legend->AddEntry( h1_fake, "Fake", "F" );
+  legend->Draw("same");
+
+  TPaveText* labelTop = MT2DrawTools::getLabelTop(4.);
+  labelTop->Draw("same");
+
+  gPad->RedrawAxis();
+
+  c1->SaveAs(Form("%s/sietaieta%s.eps", outputdir.c_str(), eb_ee.c_str()));
+  c1->SaveAs(Form("%s/sietaieta%s.pdf", outputdir.c_str(), eb_ee.c_str()));
+  c1->SaveAs(Form("%s/sietaieta%s.png", outputdir.c_str(), eb_ee.c_str()));
+
+  delete c1;
+  delete h2_axes;
+  delete h1_prompt;
+  delete h1_fake;
 
 }
 
