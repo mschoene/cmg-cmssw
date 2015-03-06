@@ -106,10 +106,16 @@ elif [[ ! "$doSkimming" = true &&  "$doPruning" = true ]]; then
     rm $outputPruning/*; rmdir $outputPruning;
 elif [[ "$doSkimming" = true &&  "$doPruning" = true ]]; then
     if [[ "$outputDir" == *"/pnfs/psi.ch/"* ]]; then
+	for x in $outputSkimming/*; do 
+	    gfal-copy file://$x "srm://t3se01.psi.ch"$outputDir/
+	done;
 	for x in $outputPruning/*; do 
 	    gfal-copy file://$x "srm://t3se01.psi.ch"$outputDir/
 	done;
     else
+	for x in $outputSkimming/*; do 
+	    cp $x $outputDir/
+	done;
 	for x in $outputPruning/*; do 
 	    cp $x $outputDir/
 	done;
