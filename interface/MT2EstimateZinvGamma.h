@@ -24,6 +24,7 @@ class MT2EstimateZinvGamma : public MT2Estimate {
 
   // integrated over mt2:
   TH1D* iso;
+  RooDataSet* isoData() const;
 
   // this will be used to fill RooDataSets:
   RooRealVar* x_; // iso var
