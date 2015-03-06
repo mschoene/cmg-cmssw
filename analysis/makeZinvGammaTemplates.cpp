@@ -12,6 +12,9 @@
 #include "TH1F.h"
 
 
+
+
+
 float lumi = 5.; //fb-1
 
 
@@ -19,13 +22,14 @@ float lumi = 5.; //fb-1
 
 
 void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2Analysis<MT2EstimateZinvGamma>* prompt, MT2Analysis<MT2EstimateZinvGamma>* fake, bool useMC );
-void removeNegatives( MT2Analysis<MT2EstimateZinvGamma>* data );
-void removeNegativesSingleHisto( TH1D* h1 );
+void setPoissonError( MT2Analysis<MT2EstimateZinvGamma>* data );
+//void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data );
 
 
 
 
 int main( int argc, char* argv[] ) {
+
 
   if( argc==1 ) {
     std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
@@ -58,14 +62,7 @@ int main( int argc, char* argv[] ) {
 
 
 
-
   std::string samplesFileName = "PHYS14_v2_Zinv";
-  if( !useMC ) {
-    // use our MC because it is safe and has more sietaieta sideband:
-    samplesFileName="PHYS14_v2_Zinv_noSietaieta";
-  }
-  //std::string samplesFileName = "CSA14_Zinv";
-
   std::string samplesFile = "../samples/samples_" + samplesFileName + ".dat";
   
   std::vector<MT2Sample> samples = MT2Sample::loadSamples(samplesFile, 100, 299); // GJet and QCD
@@ -98,26 +95,17 @@ int main( int argc, char* argv[] ) {
   else        templateFileName += "Data";
   templateFileName = templateFileName + "_" + samplesFileName + "_" + regionsSet + ".root";
 
-  templatesFake->writeToFile(templateFileName);
-
 
 
   if( !useMC ) {
-
-    templatesPrompt->setName( "templatesPromptRaw" ); // still contaminated from fakes with good sietaieta
-
-    // this doesnt take into account that the amount of fakes in sidebands is different from fakes in SR
-    // to be considered as a starting point
-    MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt_meas  = new MT2Analysis<MT2EstimateZinvGamma>( "templatesPrompt", regionsSet );
-    (*templatesPrompt_meas) = (*templatesPrompt) - (*templatesFake);
-    //(*templatesPrompt) = (*templatesPromptRaw) - 0.8*(*templatesFake);
-    removeNegatives( templatesPrompt_meas );
-
-    templatesPrompt_meas->addToFile(templateFileName);
-
+    setPoissonError( templatesFake );
+    setPoissonError( templatesPrompt );
   }
-  
-  templatesPrompt->addToFile(templateFileName);
+  templatesFake->writeToFile(templateFileName);
+
+  if( !useMC ) 
+    templatesPrompt->setName( "templatesPromptRaw" ); // still contaminated from fakes with good sietaieta
+  templatesPrompt->addToFile(templateFileName, true);
 
 
   return 0;
@@ -211,7 +199,7 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
     bool sietaietaOK = false;
     if( fabs( gamma.Eta() )<1.479 ) {
       if( hOverE > 0.058 ) continue;
-      if( sietaieta>0.014 ) continue; // end of sidebands
+      if( sietaieta>0.015 ) continue; // end of sidebands
       //if( sietaieta>0.012 ) continue; // end of sidebands
       sietaietaOK = (sietaieta <= 0.011);
       //sietaietaOK = (sietaieta < 0.0099);
@@ -293,8 +281,8 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
   } // for entries
 
 
-  prompt->finalize();
-  fake->finalize();
+  //prompt->finalize();
+  //fake->finalize();
   
 
   delete tree;
@@ -308,30 +296,47 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 
 
 
-void removeNegatives( MT2Analysis<MT2EstimateZinvGamma>* data ) {
+//void randomizePoisson( MT2Analysis<MT2EstimateZinvGamma>* data ) {
+//
+//  TRandom3 rand(13);
+//
+//
+//  std::set<MT2Region> MT2Regions = data->getRegions();
+//
+//  for( std::set<MT2Region>::iterator iMT2 = MT2Regions.begin(); iMT2!=MT2Regions.end(); ++iMT2 ) {
+//
+//    TH1D* h1_iso = data->get(*iMT2)->iso;
+//    
+//    for( unsigned ibin=1; ibin<h1_iso->GetXaxis()->GetNbins()+1; ++ibin ) {
+//    
+//      int poisson_data = rand.Poisson(h1_iso->GetBinContent(ibin));
+//      //h1_iso->SetBinContent(ibin, poisson_data);
+//      h1_iso->SetBinError(ibin, sqrt(poisson_data));
+//      
+//    }  // for bins
+//
+//  }// for MT2 regions
+//
+//
+//}
+
+
+void setPoissonError( MT2Analysis<MT2EstimateZinvGamma>* data ) {
+
 
   std::set<MT2Region> MT2Regions = data->getRegions();
 
   for( std::set<MT2Region>::iterator iMT2 = MT2Regions.begin(); iMT2!=MT2Regions.end(); ++iMT2 ) {
 
-    MT2Region thisRegion( (*iMT2) );
+    TH1D* h1_iso = data->get(*iMT2)->iso;
+    
+    for( unsigned ibin=1; ibin<h1_iso->GetXaxis()->GetNbins()+1; ++ibin ) {
+    
+      h1_iso->SetBinError(ibin, sqrt(h1_iso->GetBinContent(ibin)));
       
-    removeNegativesSingleHisto( data->get(thisRegion)->yield );
-    removeNegativesSingleHisto( data->get(thisRegion)->iso );
-    removeNegativesSingleHisto( data->get(thisRegion)->sietaieta );
+    }  // for bins
 
-  } // for regions
+  }// for MT2 regions
+
 
 }
-
-
-void removeNegativesSingleHisto( TH1D* h1 ) {
-
-  for( unsigned ibin=1; ibin<h1->GetXaxis()->GetNbins()+1; ++ibin ) {
-
-    if( h1->GetBinContent(ibin)<0. ) h1->SetBinContent( ibin, 0. );
-
-  }
-
-}
-
