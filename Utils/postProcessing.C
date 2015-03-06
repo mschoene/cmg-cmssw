@@ -120,7 +120,8 @@ int postProcessing(string inputString,
     }
     merger.SetNotrees(kTRUE);
     merger.OutputFile(outputFile.c_str(), "RECREATE");
-    merger.Merge();
+    bool returnCode=merger.Merge();
+    if(returnCode) cout << "ERROR: merger.Merge() returned " << returnCode << endl;
   }else{
     // have to do this because the merger doesn't work as expected when the input is one single file
     TFile* fileIn = TFile::Open(fullInputString.c_str());    
