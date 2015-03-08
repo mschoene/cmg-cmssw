@@ -201,10 +201,10 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
     float sietaieta = myTree.gamma_sigmaIetaIeta[0];
     if( fabs( gamma.Eta() )<1.479 ) {
       if( hOverE > 0.058 ) continue;
-      if( sietaieta > 0.0099 ) continue;
+      if( sietaieta > 0.01 ) continue;
     } else {  
       if( hOverE > 0.020 ) continue;
-      if( sietaieta > 0.0268 ) continue;
+      if( sietaieta > 0.03 ) continue;
     }
 
 
@@ -215,11 +215,10 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
 
     // absolute iso:
     float iso = myTree.gamma_chHadIso[0];
-    if( iso>30. ) continue; // preselection anyways in there
+    if( iso>20. ) continue; // preselection anyways in there
 
 
     bool isPrompt = (isMatched);
-    //bool isPrompt = (isMatched && isGenIso);
 
     int closestJet = -1;
     float deltaRmin = 0.4;
