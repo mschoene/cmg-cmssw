@@ -35,17 +35,17 @@ void removeNegativesSingleHisto( TH1D* h1 );
 
 int main( int argc, char* argv[] ) {
 
-  if( argc==1 ) {
-    std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
-    std::cout << "  13TeV_CSA14" << std::endl;
-    std::cout << "  13TeV_onlyHT" << std::endl;
-    std::cout << "  13TeV_onlyJets" << std::endl;
-    std::cout << "  13TeV_inclusive" << std::endl;
-    exit(101);
-  }
+  //if( argc==1 ) {
+  //  std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
+  //  std::cout << "  13TeV_CSA14" << std::endl;
+  //  std::cout << "  13TeV_onlyHT" << std::endl;
+  //  std::cout << "  13TeV_onlyJets" << std::endl;
+  //  std::cout << "  13TeV_inclusive" << std::endl;
+  //  exit(101);
+  //}
 
   //std::string regionsSet = "13TeV_onlyHT";
-  std::string regionsSet = "13TeV_CSA14";
+  std::string regionsSet = "13TeV_inclusive";
   //std::string regionsSet = "13TeV_inclusive";
   //std::string regionsSet = "13TeV_ZinvGammaPurity";
   if( argc>1 ) {

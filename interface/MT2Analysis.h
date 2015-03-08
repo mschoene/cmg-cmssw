@@ -65,7 +65,7 @@ class MT2Analysis {
   MT2Analysis operator/=( float k );
 
   static MT2Analysis* readFromFile( const std::string& fileName, const std::string& matchName="" );
-  static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, const std::string& matchExpression="", bool verbose=true );
+  static std::vector<MT2Analysis*> readAllFromFile( const std::string& fileName, const std::string& matchName="", bool verbose=true );
   void writeToFile( const std::string& fileName, const std::string& option="RECREATE", bool overwrite=false );
   void addToFile( const std::string& fileName, bool overwrite=false ) {
     return this->writeToFile(fileName,"UPDATE",overwrite);
@@ -1524,7 +1524,7 @@ void MT2Analysis<T>::print( const std::string& ofs ) const {
 
 
 template<class T> 
-std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName, const std::string& matchExpression, bool verbose ) {
+std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string& fileName, const std::string& matchName, bool verbose ) {
 
   TFile* file = TFile::Open(fileName.c_str());
  
@@ -1552,13 +1552,11 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
 
     std::set<MT2Region> regions;
 
-    //bool firstIteration = true;
-
     TIter next2(gDirectory->GetListOfKeys());
 
     // these are the directiories inside the analysis dir
-    // there will be one directory per HT region
-    // and the dir name is the HT region identifying name
+    // there will be one directory per region
+    // and the dir name is the region identifying name
     while(TObject *obj2 = next2()) { 
 
       std::string regionName(obj2->GetName());
@@ -1566,40 +1564,14 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
       regions.insert(region);
 
       
-      //if( firstIteration ) {
-
-      //  std::string path = analysisName + "/" + regionName;
-      //  file->cd(path.c_str());
-
-      //  TList* hists = gDirectory->GetListOfKeys();
-      //  TIter next3(hists);
-
-      //  // these are the histos inside the HT region folder
-      //  // the name format is: [prefix]_[name]_[region]
-      //  // so we now have to find the signal regions
-      //  // (to do it once is enough as for now the format is that
-      //  // each HT region has the same jet/bjet regions)
-      //  while(TObject *obj3 = next3()) { 
-
-      //    std::string name_str(obj3->GetName());
-      //    std::size_t foundPos = name_str.find(regionName);
-      //    std::string signalRegionName(name_str.begin()+foundPos+regionName.size()+1, name_str.end());
-      //    MT2SignalRegion sigRegion(signalRegionName);
-      //    sigRegions.insert(sigRegion);
-
-      //  } 
-
-      //  firstIteration=false;
-
-      //} // if firstIteration
-
       file->cd(analysisName.c_str());
 
     } // while regions
 
 
-    TString analysisName_tstr(analysisName);
-    if( matchExpression!="" && !(analysisName_tstr.Contains(matchExpression)) ) continue;
+    //TString analysisName_tstr(analysisName);
+    //if( matchExpression!="" && !(analysisName_tstr.Contains(matchExpression)) ) continue;
+    if( matchName!=analysisName ) continue;
 
     // now that we know name and region structure we can istantiate an MT2Analysis:
     MT2Analysis<T>* analysis = new MT2Analysis<T>( analysisName, regions );
@@ -1608,7 +1580,7 @@ std::vector<MT2Analysis<T>*> MT2Analysis<T>::readAllFromFile( const std::string&
     file->cd(analysisName.c_str()); 
     TIter nextAgain(gDirectory->GetListOfKeys());
 
-    while(TObject *obj2 = nextAgain()) { // loop on ht regions
+    while(TObject *obj2 = nextAgain()) { // loop on regions
 
       std::string regionName(obj2->GetName());
       MT2Region region(regionName);
