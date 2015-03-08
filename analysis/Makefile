@@ -98,9 +98,6 @@ drawPurityFits: drawPurityFits.cpp MT2Region.o MT2Estimate.o MT2EstimateZinvGamm
 drawQG: drawQG.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o 
 	$(CC) -Wall $(INCLUDES) -o drawQG drawQG.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o  $(ROOTFLAG) $(EXTRALIBS)
 
-drawSietaieta: drawSietaieta.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o 
-	$(CC) -Wall $(INCLUDES) -o drawSietaieta drawSietaieta.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o  $(ROOTFLAG) $(EXTRALIBS)
-
 drawGammaControlRegion: drawGammaControlRegion.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o 
 	$(CC) -Wall $(INCLUDES) -o drawGammaControlRegion drawGammaControlRegion.cpp MT2Region.o MT2Estimate.o MT2EstimateTree.o MT2DrawTools.o  $(ROOTFLAG) $(EXTRALIBS)
 
