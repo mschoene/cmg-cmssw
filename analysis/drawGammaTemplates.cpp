@@ -33,8 +33,8 @@ int main( int argc, char* argv[] ) {
   }
 
 
-  std::string regionsSet = "13TeV_inclusive";
-  //std::string regionsSet = "13TeV_CSA14";
+  //std::string regionsSet = "13TeV_inclusive";
+  std::string regionsSet = "13TeV_CSA14";
 
   MT2DrawTools::setStyle();
 
@@ -43,7 +43,7 @@ int main( int argc, char* argv[] ) {
   std::string outputdir = "Plots_GammaTemplates" + mc_or_not + "_" + samples + "_" + regionsSet;
   system( Form("mkdir -p %s", outputdir.c_str()) );
 
-  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates" + mc_or_not + "_" + samples +  "_" + regionsSet + ".root", "templates");
+  MT2Analysis<MT2EstimateZinvGamma>* templatesPrompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates" + mc_or_not + "_" + samples + "_" + regionsSet + ".root", "templatesPrompt");
   MT2Analysis<MT2EstimateZinvGamma>* templatesFake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile("gammaTemplates" + mc_or_not + "_" + samples + "_" + regionsSet + ".root", "templatesFake");
 
 
@@ -247,11 +247,11 @@ void compareTemplatesVsMt2( const std::string& outputdir, MT2Analysis<MT2Estimat
   TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
   c1_log->SetLogy();
 
-  float xMax = 0.1;
+  float xMax = templ->get(region)->iso->GetXaxis()->GetXmax();
 
   float yMax = (isPrompt) ? 1. : 0.2;
   TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., yMax );
-  h2_axes->SetXTitle( "Photon Relative Charged Isolation" );
+  h2_axes->SetXTitle( "Photon Charged Isolation [GeV]" );
   h2_axes->SetYTitle( "Normalized to Unity" );
   c1->cd();
   h2_axes->Draw("");
@@ -261,7 +261,7 @@ void compareTemplatesVsMt2( const std::string& outputdir, MT2Analysis<MT2Estimat
   float yMin_log = (isPrompt) ? 0.0001 : 0.001;
   
   TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, 0., xMax, 10, yMin_log, yMax_log );
-  h2_axes_log->SetXTitle( "Photon Relative Charged Isolation" );
+  h2_axes_log->SetXTitle( "Photon Charged Isolation [GeV]" );
   h2_axes_log->SetYTitle( "Normalized to Unity" );
   c1_log->cd();
   h2_axes_log->Draw("");
@@ -292,7 +292,20 @@ void compareTemplatesVsMt2( const std::string& outputdir, MT2Analysis<MT2Estimat
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();
 
-  TPaveText* labelPrompt = new TPaveText( 0.2, 0.8, 0.49, 0.9, "brNDC" );
+  float xMinLabel, xMaxLabel, yMinLabel, yMaxLabel;
+  if( isPrompt ) {
+    xMinLabel = 0.7;
+    yMinLabel = 0.2;
+    xMaxLabel = 0.9;
+    yMaxLabel = 0.3;
+  } else {
+    xMinLabel = 0.2;
+    yMinLabel = 0.8;
+    xMaxLabel = 0.49;
+    yMaxLabel = 0.9;
+  }
+
+  TPaveText* labelPrompt = new TPaveText( xMinLabel, yMinLabel, xMaxLabel, yMaxLabel, "brNDC" );
   labelPrompt->SetFillColor(0);
   labelPrompt->SetTextSize(0.035);
   labelPrompt->SetTextAlign(11); // align left
@@ -369,11 +382,10 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
   c1_log->SetLogy();
 
-  float xMax = 0.4;
-  //float xMax = (isPrompt) ? 8. : 50.;
+  float xMax = templ->get(*(templ->getRegions().begin()))->iso->GetXaxis()->GetXmax();
 
   TH2D* h2_axes = new TH2D( "axes", "", 10, 0., xMax, 10, 0., 1. );
-  h2_axes->SetXTitle( "Photon Relative Charged Isolation" );
+  h2_axes->SetXTitle( "Photon Charged Isolation [GeV]" );
   h2_axes->SetYTitle( "Normalized to Unity" );
   c1->cd();
   h2_axes->Draw("");
@@ -383,10 +395,57 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
   float yMin_log = (isPrompt) ? 0.0001 : 0.001;
   
   TH2D* h2_axes_log = new TH2D( "axes_log", "", 10, 0., xMax, 10, yMin_log, yMax_log );
-  h2_axes_log->SetXTitle( "Photon Relative Charged Isolation" );
+  h2_axes_log->SetXTitle( "Photon Charged Isolation [GeV]" );
   h2_axes_log->SetYTitle( "Normalized to Unity" );
   c1_log->cd();
   h2_axes_log->Draw("");
+
+
+  float xMinLabel, xMaxLabel, yMinLabel, yMaxLabel;
+  if( isPrompt ) {
+    xMinLabel = 0.7;
+    yMinLabel = 0.2;
+    xMaxLabel = 0.9;
+    yMaxLabel = 0.3;
+  } else {
+    xMinLabel = 0.2;
+    yMinLabel = 0.8;
+    xMaxLabel = 0.49;
+    yMaxLabel = 0.9;
+  }
+
+  TPaveText* labelPrompt = new TPaveText( xMinLabel, yMinLabel, xMaxLabel, yMaxLabel, "brNDC" );
+  labelPrompt->SetFillColor(0);
+  labelPrompt->SetTextSize(0.035);
+  labelPrompt->SetTextAlign(11); // align left
+  if( isPrompt )
+    labelPrompt->AddText( "Prompt" );
+  else
+    labelPrompt->AddText( "Fake" );
+  labelPrompt->AddText( "Photons" );
+  c1->cd();
+  labelPrompt->Draw("same");
+
+
+  float xMinLabelLog = xMinLabel;
+  float xMaxLabelLog = xMaxLabel;
+  if( isPrompt ) {
+    xMinLabelLog = 0.2;
+    xMaxLabelLog = 0.38;
+  }
+
+  TPaveText* labelPrompt_log = new TPaveText( xMinLabelLog, yMinLabel, xMaxLabelLog, yMaxLabel, "brNDC" );
+  labelPrompt_log->SetFillColor(0);
+  labelPrompt_log->SetTextSize(0.035);
+  labelPrompt_log->SetTextAlign(11); // align left
+  if( isPrompt )
+    labelPrompt_log->AddText( "Prompt" );
+  else
+    labelPrompt_log->AddText( "Fake" );
+  labelPrompt_log->AddText( "Photons" );
+  c1_log->cd();
+  labelPrompt_log->Draw("same");
+
 
   std::string legendTitle = (loopOnHT) ? regions[0].sigRegion()->getNiceName() : regions[0].htRegion()->getNiceName();
 
@@ -425,26 +484,15 @@ void compareRegions( const std::string& outputdir, std::vector<MT2Region> region
 
   TPaveText* labelTop = MT2DrawTools::getLabelTop();
 
-  TPaveText* labelPrompt = new TPaveText( 0.2, 0.8, 0.49, 0.9, "brNDC" );
-  labelPrompt->SetFillColor(0);
-  labelPrompt->SetTextSize(0.035);
-  labelPrompt->SetTextAlign(11); // align left
-  if( isPrompt )
-    labelPrompt->AddText( "Prompt" );
-  else
-    labelPrompt->AddText( "Fake" );
-  labelPrompt->AddText( "Photons" );
 
 
   c1->cd();
   labelTop->Draw("same");
-  labelPrompt->Draw("same");
   legend->Draw("same");
   gPad->RedrawAxis();
 
   c1_log->cd();
   labelTop->Draw("same");
-  labelPrompt->Draw("same");
   legend->Draw("same");
   gPad->RedrawAxis();
 
