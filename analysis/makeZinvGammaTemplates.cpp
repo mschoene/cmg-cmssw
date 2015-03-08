@@ -199,10 +199,9 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
     bool sietaietaOK = false;
     if( fabs( gamma.Eta() )<1.479 ) {
       if( hOverE > 0.058 ) continue;
+      if( sietaieta>0.010 && sietaieta<0.011 ) continue; // no man's land
       if( sietaieta>0.015 ) continue; // end of sidebands
-      //if( sietaieta>0.012 ) continue; // end of sidebands
-      sietaietaOK = (sietaieta <= 0.011);
-      //sietaietaOK = (sietaieta < 0.0099);
+      sietaietaOK = (sietaieta < 0.01);
     } else {  
       if( hOverE > 0.020 ) continue;
       if( sietaieta>0.035 ) continue; // end of sidebands
