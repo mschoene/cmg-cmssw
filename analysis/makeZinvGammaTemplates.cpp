@@ -215,9 +215,16 @@ void computeYield( const MT2Sample& sample, const std::string& regionsSet, MT2An
       if( !sietaietaOK ) continue;
       isPrompt = isMatched;
 
-    } else {
+    } else { // is data
 
       isPrompt = sietaietaOK;
+
+      if( isPrompt ) {
+        // for prompts use only low-sensitivity regions:
+        if( myTree.gamma_mt2>300. ) continue;
+        if( myTree.gamma_ht>1000. ) continue;
+        if( myTree.gamma_nBJet40>0 ) continue;
+      }
 
     }
 
