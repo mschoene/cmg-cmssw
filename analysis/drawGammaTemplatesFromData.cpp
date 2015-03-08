@@ -68,6 +68,8 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
 
   TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
   c1->cd();
+  TCanvas* c1_log = new TCanvas( "c1_log", "", 600, 600 );
+  c1_log->SetLogy();
 
   float yMinLegend = 0.75;
   float yMaxScale = 1.25;
@@ -97,7 +99,14 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
   TH2D* h2_axes = new TH2D("axes", "", 10, 0., xMax, 10, 0., yMax );
   h2_axes->SetXTitle( "Photon Charged Isolation [GeV]" );
   h2_axes->SetYTitle( "Entries" );
+  c1->cd();
   h2_axes->Draw();
+
+  TH2D* h2_axes_log = new TH2D("axes_log", "", 10, 0., xMax, 10, 1., 10.*yMax );
+  h2_axes_log->SetXTitle( "Photon Charged Isolation [GeV]" );
+  h2_axes_log->SetYTitle( "Entries" );
+  c1_log->cd();
+  h2_axes_log->Draw();
 
   TLegend* legend = new TLegend( 0.55, yMinLegend, 0.9, 0.9 );
   legend->SetFillColor(0);
@@ -116,6 +125,9 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
     histo2->SetMarkerColor( kBlue );
     histo2->SetLineColor( kBlack );
     if( rebin ) histo2->Rebin(2);
+    c1->cd();
+    histo2->Draw("p same");
+    c1_log->cd();
     histo2->Draw("p same");
     legend->AddEntry( histo2, name2.c_str(), "P" );
   }
@@ -124,31 +136,40 @@ void drawSinglePlot( const std::string& outputdir, const std::string& name, cons
     histo3->SetLineColor( 46 );
     histo3->SetLineWidth( 2 );
     if( rebin ) histo3->Rebin(2);
+    c1->cd();
+    histo3->Draw("L E same");
+    c1_log->cd();
     histo3->Draw("L E same");
     legend->AddEntry( histo3, name3.c_str(), "L" );
   }
 
+  TPaveText* labelTop = MT2DrawTools::getLabelTop(4.);
+
+  c1->cd();
   histo1->Draw("p same" );
   legend->Draw("same");
-
-  TPaveText* labelTop = MT2DrawTools::getLabelTop(4.);
   labelTop->Draw("same");
-
-  //TPaveText* photonLabel = new TPaveText( 0.2, 0.8, 0.5, 0.9, "brNDC" );
-  //photonLabel->SetFillColor(0);
-  //photonLabel->SetTextSize(0.035);
-  //photonLabel->AddText(name.c_str());
-  //photonLabel->AddText("Photons");
-  //photonLabel->SetTextAlign(11); // align left
-  //photonLabel->Draw("same");
-
   gPad->RedrawAxis();
+
+
+  c1_log->cd();
+  histo1->Draw("p same" );
+  legend->Draw("same");
+  labelTop->Draw("same");
+  gPad->RedrawAxis();
+
 
   c1->SaveAs(Form("%s/templateClosure%s_%s.eps", outputdir.c_str(), name.c_str(), region.getName().c_str()));
   c1->SaveAs(Form("%s/templateClosure%s_%s.png", outputdir.c_str(), name.c_str(), region.getName().c_str()));
   c1->SaveAs(Form("%s/templateClosure%s_%s.pdf", outputdir.c_str(), name.c_str(), region.getName().c_str()));
 
+  c1_log->SaveAs(Form("%s/templateClosure%s_%s_log.eps", outputdir.c_str(), name.c_str(), region.getName().c_str()));
+  c1_log->SaveAs(Form("%s/templateClosure%s_%s_log.png", outputdir.c_str(), name.c_str(), region.getName().c_str()));
+  c1_log->SaveAs(Form("%s/templateClosure%s_%s_log.pdf", outputdir.c_str(), name.c_str(), region.getName().c_str()));
+
   delete c1;
   delete h2_axes;
+  delete c1_log;
+  delete h2_axes_log;
 
 }
