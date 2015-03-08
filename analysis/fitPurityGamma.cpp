@@ -154,7 +154,7 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
   RooAddPdf  model("model","", RooArgList(pdfPrompt,pdfFake), sigFrac) ;
 
 
-  float xMaxFit = 0.299;
+  float xMaxFit = 19.9;
   x->setRange( "fittingRange", 0., xMaxFit );
   model.fitTo(*data, SumW2Error(kTRUE), Range("fittingRange")); 
 
