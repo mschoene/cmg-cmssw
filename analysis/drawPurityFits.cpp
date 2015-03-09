@@ -83,8 +83,8 @@ void doAllPurityPlots( const std::string& outputdir, const std::string& samples,
     fits.push_back( PurityFit( "Jet Bins"  , "13TeV_onlyJet"   , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_onlyJets/purityFit_"  + samples + "_13TeV_onlyJets.root" , purityName), 24, kAzure ));
     fits.push_back( PurityFit( "Inclusive" , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 25, kOrange+1 ));
   } else {
-    fits.push_back( PurityFit( "Inclusive (MC)"  , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_"   + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 21, 29 ));
-    fits.push_back( PurityFit( "Inclusive (Data)", "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsData_" + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 20, kOrange+1 ));
+    fits.push_back( PurityFit( "Template Fit (MC)"  , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_"   + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 21, 29 ));
+    fits.push_back( PurityFit( "Template Fit (Data)", "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsData_" + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 20, kOrange+1 ));
   }
 
 
@@ -116,8 +116,7 @@ void doAllPurityPlots( const std::string& outputdir, const std::string& samples,
 
     thisPurityMC->Draw("same");
 
-    //TLegend* legend = new TLegend( 0.175, 0.2, 0.65, 0.2+0.06*(fits.size()+1.) );
-    float xMin_legend = (mc_or_data=="MC") ? 0.65 : 0.58;
+    float xMin_legend = (mc_or_data=="MC") ? 0.65 : 0.52;
     TLegend* legend = new TLegend( xMin_legend, 0.2, 0.9, 0.2+0.06*(fits.size()+1.) );
     legend->SetTextSize(0.038); 
     legend->SetFillColor(0);
@@ -139,7 +138,6 @@ void doAllPurityPlots( const std::string& outputdir, const std::string& samples,
     legend->Draw("same");
 
     std::vector<std::string> regionNames = iR->getNiceNames();
-    //TPaveText* labelRegion = new TPaveText( 0.57, 0.2, 0.92, 0.35, "brNDC" );
     TPaveText* labelRegion = new TPaveText( 0.23, 0.18, 0.48, 0.29, "brNDC" );
     labelRegion->SetTextSize(0.034); 
     labelRegion->SetFillColor(0);
