@@ -2,6 +2,7 @@
 #include "interface/MT2Region.h"
 #include "interface/MT2Analysis.h"
 #include "interface/MT2EstimateZinvGamma.h"
+#include "interface/MT2Efficiency.h"
 
 
 #define mt2_cxx
@@ -86,19 +87,12 @@ int main( int argc, char* argv[] ) {
   MT2Analysis<MT2EstimateZinvGamma>* gammaCR_pass = new MT2Analysis<MT2EstimateZinvGamma>( "gammaCR_pass", regionsSet );
   (*gammaCR_pass) = (*prompt_pass) + (*fake_pass);
 
-  MT2Analysis<MT2Estimate>* eff_isoCut = new MT2Analysis<MT2Estimate>( "eff_isoCut", regionsSet );
-  (*eff_isoCut) = *( (MT2Analysis<MT2Estimate>*) (prompt_pass) );
-  (*eff_isoCut) /= *( (MT2Analysis<MT2Estimate>*) (prompt) );
 
+  MT2Analysis<MT2Efficiency>* eff_isoCut = MT2Efficiency::createAnalysis( "eff_isoCut", regionsSet, (MT2Analysis<MT2Estimate>*)prompt_pass, (MT2Analysis<MT2Estimate>*)prompt );
 
-  MT2Analysis<MT2Estimate>* purityTight = new MT2Analysis<MT2Estimate>( "purity", regionsSet );
-  (*purityTight) = *( (MT2Analysis<MT2Estimate>*) (prompt_pass) );
-  (*purityTight) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR_pass) );
+  MT2Analysis<MT2Efficiency>* purityTight = MT2Efficiency::createAnalysis( "purity", regionsSet, (MT2Analysis<MT2Estimate>*)prompt_pass, (MT2Analysis<MT2Estimate>*)gammaCR_pass );
 
-
-  MT2Analysis<MT2Estimate>* purityLoose = new MT2Analysis<MT2Estimate>( "purityLoose", regionsSet );
-  (*purityLoose)  = *( (MT2Analysis<MT2Estimate>*) (prompt) );
-  (*purityLoose) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR) );
+  MT2Analysis<MT2Efficiency>* purityLoose = MT2Efficiency::createAnalysis( "purityLoose", regionsSet, (MT2Analysis<MT2Estimate>*)prompt, (MT2Analysis<MT2Estimate>*)gammaCR );
 
 
   gammaCR->writeToFile( outputdir + "/mc.root" );
