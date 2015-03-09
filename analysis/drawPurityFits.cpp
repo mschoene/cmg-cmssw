@@ -37,6 +37,11 @@ class PurityFit {
 
 
 
+
+void doAllPurityPlots( const std::string& outputdir, const std::string& samples, const std::string& mc_or_data, const std::string& purityName );
+
+
+
 int main( int argc, char* argv[] ) {
 
 
@@ -53,18 +58,33 @@ int main( int argc, char* argv[] ) {
   std::string outputdir = "PurityFitPlots" + mc_or_data + "_" + samples;
   system( Form("mkdir -p %s", outputdir.c_str() ));
 
+  
+  doAllPurityPlots( outputdir, samples, mc_or_data, "purityLoose" ); 
+  doAllPurityPlots( outputdir, samples, mc_or_data, "purity" ); 
+
+  return 0;
+
+}
+
+
+
+
+
+void doAllPurityPlots( const std::string& outputdir, const std::string& samples, const std::string& mc_or_data, const std::string& purityName ) {
+
+
   //MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_inclusive/purityMC.root" );
-  MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/purityMC.root", "purityMC" );
+  MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/purityMC.root", purityName );
 
   std::vector< PurityFit > fits;
   if( mc_or_data=="MC" ) {
-    fits.push_back( PurityFit( "All Bins"  , "13TeV_CSA14"     , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_CSA14/purityFit_"     + samples + "_13TeV_CSA14.root"    ), 20, kRed+2 ));
-    fits.push_back( PurityFit( "HT Bins"   , "13TeV_onlyHT"    , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_onlyHT/purityFit_"    + samples + "_13TeV_onlyHT.root"   ), 21, 29 ));
-    fits.push_back( PurityFit( "Jet Bins"  , "13TeV_onlyJet"   , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_onlyJets/purityFit_"  + samples + "_13TeV_onlyJets.root" ), 24, kAzure ));
-    fits.push_back( PurityFit( "Inclusive" , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root"), 25, kOrange+1 ));
+    fits.push_back( PurityFit( "All Bins"  , "13TeV_CSA14"     , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_CSA14/purityFit_"     + samples + "_13TeV_CSA14.root"    , purityName), 20, kRed+2 ));
+    fits.push_back( PurityFit( "HT Bins"   , "13TeV_onlyHT"    , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_onlyHT/purityFit_"    + samples + "_13TeV_onlyHT.root"   , purityName), 21, 29 ));
+    fits.push_back( PurityFit( "Jet Bins"  , "13TeV_onlyJet"   , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_onlyJets/purityFit_"  + samples + "_13TeV_onlyJets.root" , purityName), 24, kAzure ));
+    fits.push_back( PurityFit( "Inclusive" , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_" + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 25, kOrange+1 ));
   } else {
-    fits.push_back( PurityFit( "Inclusive (MC)"  , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_"    + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root"), 25, kOrange+1 ));
-    fits.push_back( PurityFit( "Inclusive (Data)", "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsDummy_" + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root"), 25, 38        ));
+    fits.push_back( PurityFit( "Inclusive (MC)"  , "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsMC_"   + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 21, 29 ));
+    fits.push_back( PurityFit( "Inclusive (Data)", "13TeV_inclusive" , MT2Analysis<MT2Estimate>::readFromFile("PurityFitsData_" + samples + "_13TeV_inclusive/purityFit_" + samples + "_13TeV_inclusive.root", purityName), 20, kOrange+1 ));
   }
 
 
@@ -82,7 +102,10 @@ int main( int argc, char* argv[] ) {
     thisPurityMC->SetLineColor( kBlack );
     thisPurityMC->SetLineWidth( 2 );
 
-    TH2D* axes = new TH2D( "axes", "", 10, thisPurityMC->GetXaxis()->GetXmin(), thisPurityMC->GetXaxis()->GetXmax(), 10, 0., 1.0001 );
+
+    float yMin = (purityName=="purity") ? 0.5 : 0.;
+
+    TH2D* axes = new TH2D( "axes", "", 10, thisPurityMC->GetXaxis()->GetXmin(), thisPurityMC->GetXaxis()->GetXmax(), 10, yMin, 1.0001 );
     axes->SetXTitle( "M_{T2} [GeV]");
     axes->SetYTitle( "Photon Purity" );
     axes->Draw("");
@@ -125,16 +148,14 @@ int main( int argc, char* argv[] ) {
 
     gPad->RedrawAxis();
 
-    c1->SaveAs( Form("%s/fits_%s.eps", outputdir.c_str(), iR->getName().c_str()) );
-    c1->SaveAs( Form("%s/fits_%s.png", outputdir.c_str(), iR->getName().c_str()) );
-    c1->SaveAs( Form("%s/fits_%s.pdf", outputdir.c_str(), iR->getName().c_str()) );
+    c1->SaveAs( Form("%s/fits_%s_%s.eps", outputdir.c_str(), purityName.c_str(), iR->getName().c_str()) );
+    c1->SaveAs( Form("%s/fits_%s_%s.png", outputdir.c_str(), purityName.c_str(), iR->getName().c_str()) );
+    c1->SaveAs( Form("%s/fits_%s_%s.pdf", outputdir.c_str(), purityName.c_str(), iR->getName().c_str()) );
 
     delete c1;
     delete axes;
 
   } // for regions
 
-
-  return 0;
 
 }
