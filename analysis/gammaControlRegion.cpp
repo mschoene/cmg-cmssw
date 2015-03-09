@@ -90,22 +90,22 @@ int main( int argc, char* argv[] ) {
   (*eff_isoCut) = *( (MT2Analysis<MT2Estimate>*) (prompt_pass) );
   (*eff_isoCut) /= *( (MT2Analysis<MT2Estimate>*) (prompt) );
 
-  MT2Analysis<MT2Estimate>* purity_isoCut = new MT2Analysis<MT2Estimate>( "purity_isoCut", regionsSet );
-  (*purity_isoCut) = *( (MT2Analysis<MT2Estimate>*) (prompt_pass) );
-  (*purity_isoCut) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR_pass) );
+
+  MT2Analysis<MT2Estimate>* purityTight = new MT2Analysis<MT2Estimate>( "purity", regionsSet );
+  (*purityTight) = *( (MT2Analysis<MT2Estimate>*) (prompt_pass) );
+  (*purityTight) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR_pass) );
 
 
-
-  MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purityMC", regionsSet );
-  (*purity) = *( (MT2Analysis<MT2Estimate>*) (prompt) );
-  (*purity) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR) );
+  MT2Analysis<MT2Estimate>* purityLoose = new MT2Analysis<MT2Estimate>( "purityLoose", regionsSet );
+  (*purityLoose)  = *( (MT2Analysis<MT2Estimate>*) (prompt) );
+  (*purityLoose) /= *( (MT2Analysis<MT2Estimate>*) (gammaCR) );
 
 
   gammaCR->writeToFile( outputdir + "/mc.root" );
   //qcd->addToFile( outputdir + "/mc.root" );
   //gammaJet->addToFile( outputdir + "/mc.root" );
-  purity->writeToFile( outputdir + "/purityMC.root" );
-  purity_isoCut->addToFile( outputdir + "/purityMC.root" );
+  purityTight->writeToFile( outputdir + "/purityMC.root" );
+  purityLoose->addToFile( outputdir + "/purityMC.root" );
   eff_isoCut->addToFile( outputdir + "/purityMC.root" );
   prompt->addToFile( outputdir + "/purityMC.root" );
   fake->addToFile( outputdir + "/purityMC.root" );
