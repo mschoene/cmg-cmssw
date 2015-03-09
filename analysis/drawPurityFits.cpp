@@ -10,6 +10,7 @@
 #include "../interface/MT2Region.h"
 #include "../interface/MT2EstimateZinvGamma.h"
 #include "../interface/MT2DrawTools.h"
+#include "../interface/MT2Efficiency.h"
 
 
 
@@ -74,7 +75,7 @@ void doAllPurityPlots( const std::string& outputdir, const std::string& samples,
 
 
   //MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_inclusive/purityMC.root" );
-  MT2Analysis<MT2Estimate>* purityMC = MT2Analysis<MT2Estimate>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/purityMC.root", purityName );
+  MT2Analysis<MT2Efficiency>* purityMC = MT2Analysis<MT2Efficiency>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/purityMC.root", purityName );
 
   std::vector< PurityFit > fits;
   if( mc_or_data=="MC" ) {
@@ -98,14 +99,17 @@ void doAllPurityPlots( const std::string& outputdir, const std::string& samples,
     c1->cd();
 
 
-    TH1D* thisPurityMC = purityMC->get( *iR )->yield;
-    thisPurityMC->SetLineColor( kBlack );
-    thisPurityMC->SetLineWidth( 2 );
+    TEfficiency* thisPurityMC = purityMC->get( *iR )->eff;
+    TGraphAsymmErrors* gr_purityMC = thisPurityMC->CreateGraph();
+    gr_purityMC->SetLineColor( kBlack );
+    gr_purityMC->SetLineWidth( 2 );
 
 
     float yMin = (purityName=="purity") ? 0.7 : 0.;
 
-    TH2D* axes = new TH2D( "axes", "", 10, thisPurityMC->GetXaxis()->GetXmin(), thisPurityMC->GetXaxis()->GetXmax(), 10, yMin, 1.0001 );
+    TH1* h1_purityMC = thisPurityMC->GetCopyTotalHisto();
+
+    TH2D* axes = new TH2D( "axes", "", 10, h1_purityMC->GetXaxis()->GetXmin(), h1_purityMC->GetXaxis()->GetXmax(), 10, yMin, 1.0001 );
     axes->SetXTitle( "M_{T2} [GeV]");
     axes->SetYTitle( "Photon Purity" );
     axes->Draw("");
@@ -114,13 +118,13 @@ void doAllPurityPlots( const std::string& outputdir, const std::string& samples,
     labelTop->Draw("same");
 
 
-    thisPurityMC->Draw("same");
+    gr_purityMC->Draw("p same");
 
     float xMin_legend = (mc_or_data=="MC") ? 0.65 : 0.52;
     TLegend* legend = new TLegend( xMin_legend, 0.2, 0.9, 0.2+0.06*(fits.size()+1.) );
     legend->SetTextSize(0.038); 
     legend->SetFillColor(0);
-    legend->AddEntry( thisPurityMC, "MC Purity", "L" );
+    legend->AddEntry( gr_purityMC, "MC Purity", "L" );
    
     for( unsigned i=0; i<fits.size(); ++i ) {
 
