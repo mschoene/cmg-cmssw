@@ -103,7 +103,7 @@ void doAllPurityPlots( const std::string& outputdir, const std::string& samples,
     thisPurityMC->SetLineWidth( 2 );
 
 
-    float yMin = (purityName=="purity") ? 0.5 : 0.;
+    float yMin = (purityName=="purity") ? 0.7 : 0.;
 
     TH2D* axes = new TH2D( "axes", "", 10, thisPurityMC->GetXaxis()->GetXmin(), thisPurityMC->GetXaxis()->GetXmax(), 10, yMin, 1.0001 );
     axes->SetXTitle( "M_{T2} [GeV]");
