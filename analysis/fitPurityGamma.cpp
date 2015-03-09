@@ -9,12 +9,16 @@
 #include "RooDataHist.h"
 #include "RooHistPdf.h"
 #include "RooAddPdf.h"
+#include "RooPlot.h"
+
 #include "TCanvas.h"
 #include "TAxis.h"
 #include "TH2D.h"
 #include "TH1D.h"
 #include "TRandom3.h"
-#include "RooPlot.h"
+#include "TEfficiency.h"
+#include "TGraphAsymmErrors.h"
+
 
 #include "../interface/MT2Analysis.h"
 #include "../interface/MT2Region.h"
@@ -25,10 +29,17 @@ using namespace RooFit;
 
 
 
+struct Purity {
 
-//void fitPurity( const std::string& outputdir, TH1D* purity, RooRealVar* x, std::vector<RooDataSet*> data, std::vector<TH1D*> templPrompt, std::vector<TH1D*> templFake );
-void fitPurity( const std::string& outputdir, TH1D* purity, RooRealVar* x, std::vector<RooDataSet*> data, TH1D* templPrompt, TH1D* templFake );
-void fitSinglePurity( const std::string& outputdir, float& purity, float& purityError, RooRealVar* x, RooDataSet* h1_data, TH1D* h1_templPrompt, TH1D* h1_templFake );
+  float purity;
+  float purityError;
+
+};
+
+
+
+void fitPurity( const std::string& outputdir, TH1D* h1_purityLoose, TH1D* h1_purityTight, RooRealVar* x, std::vector<RooDataSet*> data, TH1D* templPrompt, TH1D* templFake );
+void fitSinglePurity( const std::string& outputdir, Purity& loose, Purity& tight, RooRealVar* x, RooDataSet* data, TH1D* h1_templPrompt, TH1D* h1_templFake );
 
 
 
@@ -38,7 +49,6 @@ int main( int argc, char* argv[] ) {
 
 
   std::string samples = "PHYS14_v2_Zinv";
-  //std::string samples = "CSA14_Zinv";
 
   if( argc==1 ) {
     std::cout << "-> You need to pass me the regions set name. Here are some suggestions: " << std::endl;
@@ -59,18 +69,17 @@ int main( int argc, char* argv[] ) {
   std::string mc_or_data = "MC";
   if( argc>2 ) {
     mc_or_data = std::string(argv[2]);
+    if( mc_or_data=="data" ) mc_or_data="Data";
+    if( mc_or_data=="mc" ) mc_or_data="MC";
   }
 
 
   TH1::AddDirectory(kFALSE);
 
 
-  //MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_CSA14_Zinv_13TeV_CSA14/data.root", "gammaCR" );
   MT2Analysis<MT2EstimateZinvGamma>* gammaJet_data = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "GammaControlRegion_" + samples + "_13TeV_CSA14/mc.root", "gammaCR" );
 
-  //std::string templateSamples = "CSA14_Zinv";
-  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplatesMC_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
-  //MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
+  MT2Analysis<MT2EstimateZinvGamma>* templates_prompt = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesPrompt" );
   MT2Analysis<MT2EstimateZinvGamma>* templates_fake   = MT2Analysis<MT2EstimateZinvGamma>::readFromFile( "gammaTemplates" + mc_or_data + "_" + samples + "_" + regionsSet + ".root", "templatesFake" );
 
 
@@ -79,7 +88,8 @@ int main( int argc, char* argv[] ) {
 
   std::set<MT2Region> regions = gammaJet_data->getRegions();
 
-  MT2Analysis<MT2Estimate>* purity = new MT2Analysis<MT2Estimate>( "purity", "13TeV_CSA14" );
+  MT2Analysis<MT2Estimate>* purityLoose = new MT2Analysis<MT2Estimate>( "purityLoose", "13TeV_CSA14" );
+  MT2Analysis<MT2Estimate>* purityTight = new MT2Analysis<MT2Estimate>( "purity"     , "13TeV_CSA14" );
 
 
   for( std::set<MT2Region>::iterator iR=regions.begin(); iR!=regions.end(); ++iR ) {
@@ -91,18 +101,22 @@ int main( int argc, char* argv[] ) {
     MT2EstimateZinvGamma* templatePrompt = templates_prompt->get( *(templates_prompt->matchRegion( *iR )) );
     MT2EstimateZinvGamma* templateFake   = templates_fake  ->get( *(templates_fake  ->matchRegion( *iR )) );
 
-    MT2Estimate* thisPurityFit = purity->get( *iR );
-    std::string name = thisPurityFit->yield->GetName();
+    MT2Estimate* thisLoosePurity = purityLoose->get( *iR );
+    std::string nameLoose = thisLoosePurity->yield->GetName();
 
+    MT2Estimate* thisTightPurity = purityTight->get( *iR );
+    std::string nameTight = thisTightPurity->yield->GetName();
 
-    fitPurity( outputdir, thisPurityFit->yield, thisEstimate->x_, thisEstimate->iso_bins, templatePrompt->iso, templateFake->iso);
+    fitPurity( outputdir, thisLoosePurity->yield, thisTightPurity->yield, thisEstimate->x_, thisEstimate->iso_bins, templatePrompt->iso, templateFake->iso);
 
-    thisPurityFit->yield->SetName( name.c_str() );
+    thisLoosePurity->yield->SetName( nameLoose.c_str() );
+    thisTightPurity->yield->SetName( nameTight.c_str() );
 
   }
     
 
-  purity->writeToFile( outputdir + "/purityFit_" + samples + "_" + regionsSet + ".root" );
+  purityLoose->writeToFile( outputdir + "/purityFit_" + samples + "_" + regionsSet + ".root" );
+  purityTight->addToFile( outputdir + "/purityFit_" + samples + "_" + regionsSet + ".root" );
 
   return 0;
 
@@ -112,19 +126,21 @@ int main( int argc, char* argv[] ) {
 
 
 
-//void fitPurity( const std::string& outputdir, TH1D* h1_purity, RooRealVar* x, std::vector<RooDataSet*> data, std::vector<TH1D*> templPrompt, std::vector<TH1D*> templFake ) {
-void fitPurity( const std::string& outputdir, TH1D* h1_purity, RooRealVar* x, std::vector<RooDataSet*> data, TH1D* templPrompt, TH1D* templFake ) {
+void fitPurity( const std::string& outputdir, TH1D* h1_purityLoose, TH1D* h1_purityTight, RooRealVar* x, std::vector<RooDataSet*> data, TH1D* templPrompt, TH1D* templFake ) {
 
 
   for( unsigned i=0; i<data.size(); ++i ) {
 
     int ibin = i+1;
 
-    float purity, purityError;
-    fitSinglePurity( outputdir, purity, purityError, x, data[i], templPrompt, templFake );
+    Purity loose, tight;
+    fitSinglePurity( outputdir, loose, tight, x, data[i], templPrompt, templFake );
 
-    h1_purity->SetBinContent( ibin, purity );
-    h1_purity->SetBinError  ( ibin, purityError );
+    h1_purityLoose->SetBinContent( ibin, loose.purity );
+    h1_purityLoose->SetBinError  ( ibin, loose.purityError );
+
+    h1_purityTight->SetBinContent( ibin, tight.purity );
+    h1_purityTight->SetBinError  ( ibin, tight.purityError );
 
   }
 
@@ -134,12 +150,19 @@ void fitPurity( const std::string& outputdir, TH1D* h1_purity, RooRealVar* x, st
 }
 
 
-void fitSinglePurity( const std::string& outputdir, float& purity, float& purityError, RooRealVar* x, RooDataSet* data, TH1D* h1_templPrompt, TH1D* h1_templFake ) {
 
 
-  if( data->sumEntries() == 0. ) {
-    purity=-1;
-    purityError=0.;
+
+void fitSinglePurity( const std::string& outputdir, Purity& loose, Purity& tight, RooRealVar* x, RooDataSet* data, TH1D* h1_templPrompt, TH1D* h1_templFake ) {
+
+
+  float dataIntegral = data->sumEntries();
+
+  if( dataIntegral == 0. ) {
+    loose.purity=-1;
+    loose.purityError=0.;
+    tight.purity=-1;
+    tight.purityError=0.;
     return;
   }
 
@@ -153,18 +176,26 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
   RooRealVar sigFrac("promptFrac","fraction of prompt",0.9,0.,1.) ;
   RooAddPdf  model("model","", RooArgList(pdfPrompt,pdfFake), sigFrac) ;
 
+  int nBins = h1_templPrompt->GetNbinsX();
+  float xMin = h1_templPrompt->GetXaxis()->GetXmin();
+  float xMax = h1_templPrompt->GetXaxis()->GetXmax();
 
-  float xMaxFit = 19.9;
+  float xMaxFit = 0.999*xMax;
   x->setRange( "fittingRange", 0., xMaxFit );
   model.fitTo(*data, SumW2Error(kTRUE), Range("fittingRange")); 
 
-  int binMax = h1_templFake->FindBin( xMaxFit );
-  float correctionFactor = h1_templFake->Integral( 1, binMax ) / h1_templFake->Integral();
-  purity = sigFrac.getVal() * correctionFactor;
-  purityError = sigFrac.getError();
+  loose.purity = sigFrac.getVal();
+  loose.purityError = sigFrac.getError();
+
+  float sigEff = h1_templPrompt->GetBinContent(1)/h1_templPrompt->Integral(1,nBins);
+  float bgEff = h1_templFake->GetBinContent(1)/h1_templFake->Integral(1,nBins);
+  float sigFirstBin = sigFrac.getVal()*sigEff;
+  float bgFirstBin = (1.-sigFrac.getVal())*bgEff;
+  tight.purity = sigFirstBin / (sigFirstBin+bgFirstBin);
+  tight.purityError = sigFrac.getError();
 
   RooPlot* xframe = x->frame();
-  data->plotOn(xframe, Binning(h1_templPrompt->GetNbinsX(),  h1_templPrompt->GetXaxis()->GetXmin(), h1_templPrompt->GetXaxis()->GetXmax()) );
+  data->plotOn(xframe, Binning(nBins, xMin, xMax));
   model.plotOn(xframe);
 
   // Overlay the background component of model with a dashed line
@@ -186,3 +217,4 @@ void fitSinglePurity( const std::string& outputdir, float& purity, float& purity
   return;
 
 }
+
