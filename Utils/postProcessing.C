@@ -22,7 +22,7 @@ run()
 #include "TChainElement.h"
 #include "TBranch.h"
 #include "TString.h"
-#include "TH1F.h"
+#include "TH1D.h"
 
 using namespace std;
 
@@ -121,11 +121,14 @@ int postProcessing(string inputString,
     merger.SetNotrees(kTRUE);
     merger.OutputFile(outputFile.c_str(), "RECREATE");
     bool returnCode=merger.Merge();
-    if(returnCode) cout << "ERROR: merger.Merge() returned " << returnCode << endl;
+    if(!returnCode) {
+      cout << "ERROR: merger.Merge() returned " << returnCode << endl;
+      return 1;
+    }
   }else{
     // have to do this because the merger doesn't work as expected when the input is one single file
     TFile* fileIn = TFile::Open(fullInputString.c_str());    
-    TH1* histo = (TH1F*)fileIn->Get("Count");
+    TH1* histo = (TH1D*)fileIn->Get("Count");
     TFile output(outputFile.c_str(), "RECREATE");
     histo->Write();
     fileIn->Close();
@@ -157,7 +160,7 @@ int postProcessing(string inputString,
 
   //Calculate scaling factor and put variables into tree 
   int nEventsTree = clone->GetEntries();
-  int nEventsHisto = (int)((TH1F*)out->Get("Count"))->GetBinContent(1);
+  int nEventsHisto = (int)((TH1D*)out->Get("Count"))->GetBinContent(1);
   float scale1fb = xsec*kfactor*1000*filter/(Float_t)nEventsHisto;
  
   if (nEventsHisto < nEventsTree) // this should not happen
