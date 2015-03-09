@@ -3,8 +3,8 @@
 # --- configuration (consider to move this into a separate file) ---
 treeName="tree"
 #inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_QCDpt_noSietaieta/"
-inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/casal/babies/PHYS14_Production_Feb20/"
-productionName="testSkimPruneBig4"
+inputFolder="/pnfs/psi.ch/cms/trivcat/store/user/mangano/babies/testMarch7attempt8/"
+productionName="prodMarch9"
 fileExt="_post.root"
 # --------------------------
 
@@ -122,6 +122,8 @@ if [[ "$1" = "postCheck" ]]; then
 	cd ..
 	rm $jobsLogsFolder/*
 	rmdir $jobsLogsFolder
+	rm postProcessing_C.d;
+	rm postProcessing_C.so;
     else
 	echo "ERROR: something went wrong. Check your logs in " $jobsLogsFolder
     fi
