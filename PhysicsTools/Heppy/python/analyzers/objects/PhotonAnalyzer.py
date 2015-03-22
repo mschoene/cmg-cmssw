@@ -219,19 +219,18 @@ class PhotonAnalyzer( Analyzer ):
           while phiRC>pi:
             phiRC -= 2.*pi
 
+
           gamma.chHadIsoRC03 = self.computeRandomCone( event, etaPhot, phiRC, 0.3, charged, jets20, photons10 )
           gamma.chHadIsoRC04 = self.computeRandomCone( event, etaPhot, phiRC, 0.4, charged, jets20, photons10 )
-
-          if gamma.chHadIsoRC>=0. : continue #good to go
-
-          #if not, try other side:
+          
+          
+          #try other side
           phiRC = phiPhot - 0.5*pi
           while phiRC<-pi:
             phiRC += 2.*pi
-
-          gamma.chHadIsoRC03 = self.computeRandomCone( event, etaPhot, phiRC, 0.3, charged, jets20, photons10 )
-          gamma.chHadIsoRC   = self.computeRandomCone( event, etaPhot, phiRC, 0.4, charged, jets20, photons10 )
-
+          
+          if gamma.chHadIsoRC03<0. : gamma.chHadIsoRC03 = self.computeRandomCone( event, etaPhot, phiRC, 0.3, charged, jets20, photons10 )
+          if gamma.chHadIsoRC04<0. : gamma.chHadIsoRC04 = self.computeRandomCone( event, etaPhot, phiRC, 0.4, charged, jets20, photons10 )
 
 
 
@@ -281,3 +280,4 @@ setattr(PhotonAnalyzer,"defaultConfig",cfg.Analyzer(
     do_randomCone = False,
   )
 )
+
