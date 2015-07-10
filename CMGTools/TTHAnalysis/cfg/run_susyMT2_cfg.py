@@ -330,7 +330,6 @@ if doSpecialSettingsForMECCA:
 if isData:
     jetAna.recalibrateJets = False
     photonAna.do_mc_match = False
-    susyCounter.isMC = False
     for comp in mcSamples:
         comp.isMC = False
         comp.isData = True
