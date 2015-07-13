@@ -211,7 +211,7 @@ from PhysicsTools.HeppyCore.framework.heppy import getHeppyOption
 
 #-------- HOW TO RUN
 # choose 2 for full production
-test = 0
+test = 1
 isData = False
 doSpecialSettingsForMECCA = 1
 if test==0:
@@ -260,8 +260,9 @@ elif test==1:
 #    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/gjets_ht200to400_miniaodsim_fix.root']
 
     comp=TTJets
-    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/TTJets_miniAOD_fixPhoton_forSynch.root']
-    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTspring/ttbar25nsmad_1ECE44F9-5F02-E511-9A65-02163E00EA1F.root']
+    ##comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/TTJets_miniAOD_fixPhoton_forSynch.root']
+    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTspring/ttbar25nsmad_1ECE44F9-5F02-E511-9A65-02163E00EA1F.root']
+    comp.files = comp.files[:1]
 #    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/74samples/JetHT_GR_R_74_V12_19May_RelVal/1294BDDB-B7FE-E411-8028-002590596490.root']
 
     selectedComponents = [comp]
@@ -288,8 +289,14 @@ elif test==2:
 
     from CMGTools.TTHAnalysis.samples.samples_13TeV_74X import *
     selectedComponents = [ 
-TTJets, TTJets_LO, # TTJets
-QCD_Pt80to120, QCD_Pt120to170, QCD_Pt300to470, QCD_Pt470to600, QCD_Pt1000to1400, QCD_Pt1400to1800, QCD_Pt1800to2400, QCD_Pt2400to3200, QCD_Pt3200toInf, # QCD_Pt
+TTJets, #TTJets
+#TTJets_NLO, # TTJets NLO
+WJetsToLNu_HT100to200, WJetsToLNu_HT200to400, WJetsToLNu_HT400to600, WJetsToLNu_HT600toInf, # WJets_HT
+GJets_HT400To600, GJets_HT600ToInf, # GJets_HT
+#QCD_Pt10to15, QCD_Pt15to30, QCD_Pt30to50, QCD_Pt50to80, QCD_Pt80to120, QCD_Pt120to170, QCD_Pt170to300, # QCD_Pt for QCD 
+QCD_Pt300to470, QCD_Pt470to600, QCD_Pt600to800, QCD_Pt800to1000, QCD_Pt1000to1400, QCD_Pt1400to1800, QCD_Pt1800to2400, QCD_Pt2400to3200, QCD_Pt3200toInf, # QCD_Pt
+QCD_HT300to500, QCD_HT500to700, QCD_HT700to1000, QCD_HT2000toInf, # QCD_HT
+DYJetsToLL_M50, #DY inclusive
 ]
 
     # test all components (1 thread per component).
