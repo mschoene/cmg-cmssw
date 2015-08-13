@@ -75,7 +75,8 @@ class ttHMT2Control( Analyzer ):
         gamma_objects40j = [ j for j in event.gamma_cleanJets if j.pt() > 40 and abs(j.eta()) < 2.5 ]
         gamma_objects40ja = [ j for j in event.gamma_cleanJetsAll if j.pt() > 40 ]
         gamma_objectsXj = [ j for j in event.gamma_cleanJets if j.pt() > self.jetPt and abs(j.eta()) < 2.5 ]
-        gamma_objectsXja = [ j for j in event.gamma_cleanJetsAll if j.pt() > self.jetPt ]
+#        gamma_objectsXja = [ j for j in event.gamma_cleanJetsAll if j.pt() > self.jetPt ]
+        gamma_objectsXja = [ j for j in event.gamma_cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0 ]
        
         event.gamma_htJet25 = sum([x.pt() for x in gamma_objects25])
         event.gamma_mhtJet25vec = ROOT.reco.Particle.LorentzVector(-1.*(sum([x.px() for x in gamma_objects25])) , -1.*(sum([x.py() for x in gamma_objects25])), 0, 0 )
@@ -204,7 +205,8 @@ class ttHMT2Control( Analyzer ):
 
             event.zll_deltaPhiMin_Xj = 999.
             objectsXjc = [ j for j in event.cleanJets if j.pt() > self.jetPt and abs(j.eta())<2.5 ]
-            objectsXja = [ j for j in event.cleanJets if j.pt() > self.jetPt]
+#            objectsXja = [ j for j in event.cleanJets if j.pt() > self.jetPt]
+            objectsXja = [ j for j in event.cleanJets if j.pt() > self.jetPt and abs(j.eta())<3.0]
             event.zll_ht_Xj = sum([x.pt() for x in objectsXjc])
             for n,j in enumerate(objectsXja):
                 if n>3:  break

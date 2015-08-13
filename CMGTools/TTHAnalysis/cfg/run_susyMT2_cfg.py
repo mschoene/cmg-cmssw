@@ -15,9 +15,6 @@ cfg.Analyzer.nosubdir = True
 ### jet pt treshold for mt2 calculation
 mt2JPt = 30.0
 
-#JSON
-jsonAna.useLumiBlocks = True
-
 #Vertex
 vertexAna.keepFailingEvents = True # keep events with no good vertices
 
@@ -59,6 +56,7 @@ jetAna.jetPt = 10.
 #jetAna.mcGT     = "Summer15_50nsV2_MC", # jec corrections
 #jetAna.dataGT   = "Summer15_50nsV2_MC", # jec corrections
 jetAna.recalibrateJets = True
+jetAna.applyL2L3Residual = 'Data'
 jetAna.jetLepDR = 0.4
 jetAna.smearJets = False
 jetAna.jetGammaDR = 0.4
@@ -106,7 +104,9 @@ metAna.recalibrate = False
 genAna.allGenTaus = True
 
 # Core Analyzer
+#ttHCoreEventAna.mhtForBiasedDPhi = "mhtJet40jvec"
 ttHCoreEventAna.mhtForBiasedDPhi = "mhtJetXjvec"
+#ttHCoreEventAna.jetPt = 40.
 ttHCoreEventAna.jetPt = mt2JPt ### jet pt 30: this will change ht and mht
 
 # switch off the SV and MC matching
@@ -120,11 +120,12 @@ from CMGTools.TTHAnalysis.analyzers.ttHMT2Control import ttHMT2Control
 
 ttHMT2Control = cfg.Analyzer(
             ttHMT2Control, name = 'ttHMT2Control',
-            jetPt = mt2JPt, ### this will change control variables (gamma_ and zll_)
+#            jetPt = 40.,
+            jetPt = mt2JPt, ### jet pt 30: this will change control variables (gamma_ and zll_)
             )
 
 ##------------------------------------------
-##  TOPOLOGICAL VARIABLES: minMT, MT2
+##  TOLOLOGIAL VARIABLES: minMT, MT2
 ##------------------------------------------
 
 from CMGTools.TTHAnalysis.analyzers.ttHTopoVarAnalyzer import ttHTopoVarAnalyzer
@@ -132,7 +133,8 @@ from CMGTools.TTHAnalysis.analyzers.ttHTopoVarAnalyzer import ttHTopoVarAnalyzer
 ttHTopoJetAna = cfg.Analyzer(
             ttHTopoVarAnalyzer, name = 'ttHTopoVarAnalyzer',
             doOnlyDefault = True,
-            jetPt = mt2JPt, ### this will change diffMetMht and deltaPhiMin
+#            jetPt = 40.,
+            jetPt = mt2JPt, ### jet pt 30: this will change diffMetMht and deltaPhiMin
             )
 
 from PhysicsTools.Heppy.analyzers.eventtopology.MT2Analyzer import MT2Analyzer
@@ -140,7 +142,8 @@ from PhysicsTools.Heppy.analyzers.eventtopology.MT2Analyzer import MT2Analyzer
 MT2Ana = cfg.Analyzer(
     MT2Analyzer, name = 'MT2Analyzer',
     doOnlyDefault = True,
-    jetPt = mt2JPt, ### this will change MT2 and pseudo-jets
+#    jetPt = 40.,
+    jetPt = mt2JPt, ### jet pt 30: this will change MT2 and pseudo-jets
     )
 
 ##------------------------------------------
@@ -169,9 +172,19 @@ hbheFilterAna = cfg.Analyzer(
 ##  PRODUCER
 ##------------------------------------------
 
-from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_HT900, triggers_HT800, triggers_MET170, triggers_HTMET100, triggers_HTMET120, triggers_MT2_mumu, triggers_MT2_ee, triggers_MT2_emu, triggers_MT2_mue, triggers_MT2_e, triggers_MT2_mu, triggers_dijet, triggers_ht350, triggers_ht475,triggers_photon75, triggers_photon90, triggers_photon120, triggers_photon75ps, triggers_photon90ps, triggers_photon120ps, triggers_photon155, triggers_photon165_HE10, triggers_photon175
-
-
+#from CMGTools.RootTools.samples.triggers_13TeV_PHYS14 import triggers_HT900, triggers_MET170, triggers_HTMET, triggers_MT2_mumu, triggers_MT2_ee, triggers_MT2_mue, triggers_1mu, triggers_photon155,triggers_1mu_isolow
+#
+#triggerFlagsAna.triggerBits = {
+#            'HT900' : triggers_HT900,
+#            'MET170' : triggers_MET170,
+#            'ht350met120' : triggers_HTMET,
+#            'SingleMu' : triggers_1mu_isolow,
+#            'DoubleMu' : triggers_MT2_mumu,
+#            'DoubleEl' : triggers_MT2_ee,
+#            'MuEG'     : triggers_MT2_mue,
+#            'htXprescale' : triggers_HTMET,
+#            'Photons'  : triggers_photon155
+#}
 
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_HT900, triggers_HT800, triggers_MET170, triggers_HTMET100, triggers_HTMET120, triggers_MT2_mumu, triggers_MT2_ee, triggers_MT2_e, triggers_MT2_mu, triggers_MT2_emu, triggers_MT2_mue, triggers_dijet, triggers_dijet70met120, triggers_dijet55met110, triggers_ht350, triggers_ht475,  triggers_ht600, triggers_photon75, triggers_photon90, triggers_photon120, triggers_photon75ps, triggers_photon90ps, triggers_photon120ps, triggers_photon155, triggers_photon165_HE10, triggers_photon175
 
@@ -194,6 +207,7 @@ triggerFlagsAna.triggerBits = {
 'PFHT350_Prescale' : triggers_ht350,
 'PFHT475_Prescale' : triggers_ht475,
 'PFHT600_Prescale'  : triggers_ht600,
+#'MuEG' : triggers_MT2_mue,
 'DiJet' : triggers_dijet,
 'ht350prescale' : triggers_ht350,
 'ht475prescale' : triggers_ht475,
@@ -252,6 +266,12 @@ susyCoreSequence.insert(susyCoreSequence.index(skimAnalyzer),
 #susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
 #                        ttHSVAna)
 
+
+susyCoreSequence.insert(susyCoreSequence.index(metAna),
+                        metHFAna)
+#susyCoreSequence.insert(susyCoreSequence.index(metAna),
+#                        metNoHFAna)
+
 sequence = cfg.Sequence(
     susyCoreSequence+[
     ttHMT2Control,
@@ -272,12 +292,10 @@ sequence = cfg.Sequence(
 from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 
 #-------- HOW TO RUN
-# choose 2 for full mc production
-# choose 3 for data production
-
-test = 0
-isData = False # will be changed accordingly if chosen to run on data
-doSpecialSettingsForMECCA = 1 # set to 1 for comparisons with americans
+# choose 2 for full production
+test = 3
+isData = False
+doSpecialSettingsForMECCA = 1
 if test==0:
     # ------------------------------------------------------------------------------------------- #
     # --- all this lines taken from CMGTools.RootTools.samples.samples_13TeV_PHYS14
@@ -288,8 +306,7 @@ if test==0:
     samples=[testComponent]
 
     dataDir = os.environ['CMSSW_BASE']+"/src/CMGTools/TTHAnalysis/data"
-    #json=dataDir+'/json/Cert_Run2012ABCD_22Jan2013ReReco.json'
-    json=dataDir+'/json/json_DCSONLY_Run2015B.txt'
+    json=dataDir+'/json/Cert_Run2012ABCD_22Jan2013ReReco.json'
     from CMGTools.TTHAnalysis.setup.Efficiencies import *
 
     for comp in samples:
@@ -305,16 +322,11 @@ if test==0:
     #eventSelector.toSelect = [ 442430994 ]
     #sequence = cfg.Sequence([eventSelector] + sequence)
     comp=testComponent
-    # 74X TTbar
-    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/SYNCHfiles/0066F143-F8FD-E411-9A0B-D4AE526A0D2E.root']
-
-    # 74X GJets
-    #comp.files = ['root://xrootd.unl.edu//store/mc/RunIISpring15DR74/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/16E31BE7-7C18-E511-A551-00266CF2454C.root']
-
-    # 74X Data
-    #comp.files = ['/afs/cern.ch/user/m/mangano/public/MECCA/dataset/74X/data/JetHT_promptReco_Run2015B.root']
-    #comp.files = ['root://xrootd-cms.infn.it//store/data/Run2015B/JetHT/MINIAOD/PromptReco-v1/000/251/562/00000/508117F0-9C2A-E511-A71B-02163E014241.root']
-    #comp.files = ['root://xrootd-cms.infn.it//store/data/Run2015B/JetHT/MINIAOD/PromptReco-v1/000/251/643/00000/0AF95D60-992C-E511-8D36-02163E0146A4.root']
+    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/gjets_ht200to400_miniaodsim_fix.root']
+    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTspring/ttbar25nsmad_1ECE44F9-5F02-E511-9A65-02163E00EA1F.root']
+    # 74X 
+    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/74samples/QCD_Pt_1000to1400_Asympt25ns/0AF8E723-53F9-E411-86B4-0025905C2CBA.root']
+    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/74samples/JetHT_GR_R_74_V12_19May_RelVal/1294BDDB-B7FE-E411-8028-002590596490.root']
 
 
     selectedComponents = [comp]
@@ -337,7 +349,6 @@ elif test==1:
 #    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/TTJets_miniAOD_fixPhoton_forSynch.root']
 #    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTspring/ttbar25nsmad_1ECE44F9-5F02-E511-9A65-02163E00EA1F.root']
 #    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/74samples/JetHT_GR_R_74_V12_19May_RelVal/1294BDDB-B7FE-E411-8028-002590596490.root']
-#    comp.files = ['/afs/cern.ch/user/m/mangano/public/MECCA/dataset/74X/data/JetHT_promptReco_Run2015B.root']
 
     #synche file MC
     comp=comp=TTJets_LO_50ns
@@ -372,23 +383,31 @@ elif test==2:
 #QCD_Pt80to120, QCD_Pt120to170, QCD_Pt300to470, QCD_Pt470to600, QCD_Pt1000to1400, QCD_Pt1400to1800, QCD_Pt1800to2400, QCD_Pt2400to3200, QCD_Pt3200toInf, # QCD_Pt
 #]
 
-### 50 ns
-    selectedComponents = [ 
-TTJets_LO_50ns, 
-WJetsToLNu_50ns, 
+### 25+50 ns
+    selectedComponents = ZJetsToNuNuHT + [ 
 DYJetsToLL_M50_50ns,
-QCD_Pt80to120_50ns,
-QCD_Pt120to170_50ns,
-QCD_Pt170to300_50ns,
-QCD_Pt300to470_50ns,
-QCD_Pt470to600_50ns,
-QCD_Pt600to800_50ns,
-QCD_Pt800to1000_50ns,
-QCD_Pt1000to1400_50ns,
-QCD_Pt1400to1800_50ns,
-QCD_Pt1800to2400_50ns,
-QCD_Pt2400to3200_50ns,
-QCD_Pt3200toInf_50ns,
+#QCD_Pt80to120_50ns,
+#QCD_Pt120to170_50ns,
+#QCD_Pt170to300_50ns,
+#QCD_Pt300to470_50ns,
+#QCD_Pt470to600_50ns,
+#QCD_Pt600to800_50ns,
+#QCD_Pt800to1000_50ns,
+#QCD_Pt1000to1400_50ns,
+#QCD_Pt1400to1800_50ns,
+#QCD_Pt1800to2400_50ns,
+#QCD_Pt2400to3200_50ns,
+#QCD_Pt3200toInf_50ns,
+GJets_HT100to200,
+GJets_HT200to400,
+GJets_HT400to600,
+GJets_HT600toInf,
+#TTJets_LO_50ns, 
+#WJetsToLNu_HT100to200,
+#WJetsToLNu_HT200to400,
+#WJetsToLNu_HT400to600,
+#WJetsToLNu_HT600toInf,
+#WJetsToLNu_50ns,
 ]
     
     # test all components (1 thread per component).
@@ -406,34 +425,33 @@ elif test==3:
     isData = True
     from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 
-    #synche file DATA
     #comp = JetHT_Run2015B_PromptReco
     #comp.files = ['/afs/cern.ch/user/m/mangano/public/MECCA/dataset/74X/data/JetHT_promptReco_Run2015B.root']
     #comp.files = ['root://eoscms.cern.ch//eos/cms/store/data/Run2015B/JetHT/MINIAOD/PromptReco-v1/000/251/643/00000/0AF95D60-992C-E511-8D36-02163E0146A4.root']
     #selectedComponents = [comp]
 
-    #selectedComponents = [JetHT_Run2015B, HTMHT_Run2015B, MET_Run2015B, SingleElectron_Run2015B, SingleMuon_Run2015B, SinglePhoton_Run2015B, DoubleEG_Run2015B, DoubleMuon_Run2015B, MuonEG_Run2015B]
-    selectedComponents = [JetHT_Run2015B_17Jul2015, HTMHT_Run2015B_17Jul2015, MET_Run2015B_17Jul2015, SingleElectron_Run2015B_17Jul2015, SingleMuon_Run2015B_17Jul2015, SinglePhoton_Run2015B_17Jul2015, DoubleEG_Run2015B_17Jul2015, MuonEG_Run2015B_17Jul2015, DoubleMuon_Run2015B_17Jul2015, JetHT_Run2015B_PromptReco, HTMHT_Run2015B_PromptReco, MET_Run2015B_PromptReco, SingleElectron_Run2015B_PromptReco, SingleMuon_Run2015B_PromptReco, SinglePhoton_Run2015B_PromptReco, DoubleEG_Run2015B_PromptReco, MuonEG_Run2015B_PromptReco, DoubleMuon_Run2015B_PromptReco]
-
+    selectedComponents = [JetHT_Run2015B_17Jul2015, JetHT_Run2015B_PromptReco, HTMHT_Run2015B_PromptReco, HTMHT_Run2015B_17Jul2015 ] #, MET_Run2015B_17Jul2015, SingleElectron_Run2015B_17Jul2015, SingleMuon_Run2015B_17Jul2015, SinglePhoton_Run2015B_17Jul2015, DoubleEG_Run2015B_17Jul2015, MuonEG_Run2015B_17Jul2015, DoubleMuon_Run2015B_17Jul2015, MET_Run2015B_PromptReco, SingleElectron_Run2015B_PromptReco, SingleMuon_Run2015B_PromptReco, SinglePhoton_Run2015B_PromptReco, DoubleEG_Run2015B_PromptReco, MuonEG_Run2015B_PromptReco, DoubleMuon_Run2015B_PromptReco]
+   
 # ------------------------------------------------------------------------------------------- #
 
 
+#if doSpecialSettingsForMECCA:
+#    jetAna.doQG = False
+#    photonAna.do_randomCone = False
+
 if doSpecialSettingsForMECCA:
     jetAna.doQG = False
-    photonAna.do_randomCone = False
+
 
 if isData:
     for comp in samples:
         comp.isMC = False
         comp.isData = True
         #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/74samples/JetHT_GR_R_74_V12_19May_RelVal/1294BDDB-B7FE-E411-8028-002590596490.root']
+
+
+
 # ------------------------------------------------------------------------------------------- #
-
-
-
-
-
-
 
 
 from PhysicsTools.HeppyCore.framework.services.tfile import TFileService 
@@ -445,15 +463,49 @@ output_service = cfg.Service(
       option='recreate'
     )
 
+# -------------------- Running Download from EOS
+
 # the following is declared in case this cfg is used in input to the heppy.py script
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 from CMGTools.TTHAnalysis.tools.EOSEventsWithDownload import EOSEventsWithDownload
 event_class = EOSEventsWithDownload
 if getHeppyOption("nofetch"):
     event_class = Events
+
+
+
+removeResiduals = True
+
+# -------------------- Running pre-processor
+import subprocess
+jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV2_MC.db'
+jecEra    = 'Summer15_50nsV2_MC'
+preprocessorFile = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
+extraArgs=[]
+if isData:
+  extraArgs.append('--isData')
+  GT= '74X_dataRun2_Prompt_v1'
+else:
+  GT= 'MCRUN2_74_V9A'
+if removeResiduals:extraArgs.append('--removeResiduals')
+args = ['python',
+  os.path.expandvars('$CMSSW_BASE/python/CMGTools/ObjectStudies/corMETMiniAOD_cfgCreator.py'),\
+  '--GT='+GT,
+  '--outputFile='+preprocessorFile,
+  '--jecDBFile='+jecDBFile,
+  '--jecEra='+jecEra
+  ] + extraArgs
+#print "Making pre-processorfile:"
+#print " ".join(args)
+subprocess.call(args)
+from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
+preprocessor = CmsswPreprocessor(preprocessorFile)
+
+
 config = cfg.Config( components = selectedComponents,
                      sequence = sequence,
                      services = [output_service],
-                     events_class = event_class)
-#                     events_class = Events)
+                     preprocessor=preprocessor, # comment if pre-processor non needed
+#                     events_class = event_class)
+                     events_class = Events)
 #printComps(config.components, True)
