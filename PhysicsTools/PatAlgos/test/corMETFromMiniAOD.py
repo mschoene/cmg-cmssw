@@ -26,22 +26,31 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 #configurable options =======================================================================
-runOnData=False #data/MC switch
+runOnData=True #data/MC switch
 usePrivateSQlite=True #use external JECs (sqlite file)
 useHFCandidates=False #create an additionnal NoHF slimmed MET collection if the option is set to false
-applyResiduals=False #application of residual corrections. Have to be set to True once the 13 TeV residual corrections are available. False to be kept meanwhile. Can be kept to False later for private tests or for analysis checks and developments (not the official recommendation!).
+applyResiduals=True #application of residual corrections. Have to be set to True once the 13 TeV residual corrections are available. False to be kept meanwhile. Can be kept to False later for private tests or for analysis checks and developments (not the official recommendation!).
 #===================================================================
 
 
 ### External JECs =====================================================================================================
 
-from Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff import *
-process.GlobalTag.globaltag = 'MCRUN2_74_v9'
+#from Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff import *
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+
+if runOnData:
+  process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v1'
+else:
+  process.GlobalTag.globaltag = 'MCRUN2_74_v9'
 
 if usePrivateSQlite:
     from CondCore.DBCommon.CondDBSetup_cfi import *
     import os
-    era="Summer15_50nsV2_MC"
+    if runOnData:
+      era="Summer15_50nsV3_DATA"
+    else:
+      era="Summer15_50nsV3_MC"
     dBFile = os.path.expandvars("$CMSSW_BASE/src/PhysicsTools/PatAlgos/test/"+era+".db")
     process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
                                connect = cms.string( "sqlite_file://"+dBFile ),
@@ -64,10 +73,13 @@ if usePrivateSQlite:
 
 
 # Define the input source
+if runOnData:
+  fname = 'root://eoscms.cern.ch//store/data/Run2015B/JetHT/MINIAOD/PromptReco-v1/000/251/252/00000/263D331F-AF27-E511-969B-02163E012627.root' 
+else:
+  fname = 'root://eoscms.cern.ch//store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v2/60000/001C7571-0511-E511-9B8E-549F35AE4FAF.root'
+# Define the input source
 process.source = cms.Source("PoolSource", 
-    fileNames = cms.untracked.vstring([
-            "root://eoscms.cern.ch//store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v3/10000/009D49A5-7314-E511-84EF-0025905A605E.root",
-    ])
+    fileNames = cms.untracked.vstring([ fname ])
 )
 
 
