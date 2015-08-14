@@ -5,6 +5,7 @@ import copy
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.HeppyCore.statistics.counter import Counter, Counters
+import PhysicsTools.HeppyCore.framework.config as cfg
 
 # New filter parameters taken from slide 11 of 
 # https://indico.cern.ch/event/433302/contribution/0/attachments/1126451/1608346/2015-07-15_slides_v3.pdf
