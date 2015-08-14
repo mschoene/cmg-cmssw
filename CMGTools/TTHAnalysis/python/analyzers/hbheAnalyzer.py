@@ -54,6 +54,7 @@ class hbheAnalyzer( Analyzer ):
         return True
 
 setattr(hbheAnalyzer,"defaultConfig", cfg.Analyzer(
+        class_object = hbheAnalyzer,
         IgnoreTS4TS5ifJetInLowBVRegion = False,
         )
 )

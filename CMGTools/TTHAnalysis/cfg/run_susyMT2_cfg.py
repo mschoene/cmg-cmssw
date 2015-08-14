@@ -53,8 +53,8 @@ jetAna.doQG = True
 jetAna.jetEta = 4.7
 jetAna.jetEtaCentral = 2.5
 jetAna.jetPt = 10.
-jetAna.mcGT     = "Summer15_50nsV4_MC", # jec corrections
-jetAna.dataGT   = "Summer15_50nsV4_MC", # jec corrections
+jetAna.mcGT     = "Summer15_50nsV4_MC" # jec corrections
+jetAna.dataGT   = "Summer15_50nsV4_DATA" # jec corrections
 jetAna.recalibrateJets = True
 jetAna.applyL2L3Residual = 'Data'
 jetAna.jetLepDR = 0.4
@@ -431,7 +431,7 @@ elif test==3:
     #comp.files = ['root://eoscms.cern.ch//eos/cms/store/data/Run2015B/JetHT/MINIAOD/PromptReco-v1/000/251/643/00000/0AF95D60-992C-E511-8D36-02163E0146A4.root']
     #selectedComponents = [comp]
 
-    selectedComponents = [JetHT_Run2015B_17Jul2015, JetHT_Run2015B_PromptReco, HTMHT_Run2015B_PromptReco, HTMHT_Run2015B_17Jul2015 ] #, MET_Run2015B_17Jul2015, SingleElectron_Run2015B_17Jul2015, SingleMuon_Run2015B_17Jul2015, SinglePhoton_Run2015B_17Jul2015, DoubleEG_Run2015B_17Jul2015, MuonEG_Run2015B_17Jul2015, DoubleMuon_Run2015B_17Jul2015, MET_Run2015B_PromptReco, SingleElectron_Run2015B_PromptReco, SingleMuon_Run2015B_PromptReco, SinglePhoton_Run2015B_PromptReco, DoubleEG_Run2015B_PromptReco, MuonEG_Run2015B_PromptReco, DoubleMuon_Run2015B_PromptReco]
+    selectedComponents = [JetHT_Run2015B_17Jul2015, JetHT_Run2015B_PromptReco, HTMHT_Run2015B_PromptReco, HTMHT_Run2015B_17Jul2015, MET_Run2015B_17Jul2015, SingleElectron_Run2015B_17Jul2015, SingleMuon_Run2015B_17Jul2015, SinglePhoton_Run2015B_17Jul2015, DoubleEG_Run2015B_17Jul2015, MuonEG_Run2015B_17Jul2015, DoubleMuon_Run2015B_17Jul2015, MET_Run2015B_PromptReco, SingleElectron_Run2015B_PromptReco, SingleMuon_Run2015B_PromptReco, SinglePhoton_Run2015B_PromptReco, DoubleEG_Run2015B_PromptReco, MuonEG_Run2015B_PromptReco, DoubleMuon_Run2015B_PromptReco]
    
 # ------------------------------------------------------------------------------------------- #
 
@@ -479,8 +479,15 @@ removeResiduals = False
 
 # -------------------- Running pre-processor
 import subprocess
-jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_MC.db'
-jecEra    = 'Summer15_50nsV4_MC'
+
+if isData:
+    uncFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_DATA_UncertaintySources_AK4PFchs.txt'
+    jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_DATA.db'
+    jecEra    = 'Summer15_50nsV4_DATA'
+else:
+    uncFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_DATA_UncertaintySources_AK4PFchs.txt'
+    jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_MC.db'
+    jecEra    = 'Summer15_50nsV4_MC'
 preprocessorFile = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
 extraArgs=[]
 if isData:

@@ -39,7 +39,7 @@ applyResiduals=False #application of residual corrections. Have to be set to Tru
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet( 
@@ -77,6 +77,9 @@ if usePrivateSQlite:
                                )
     process.es_prefer_jec = cms.ESPrefer("PoolDBESSource",'jec')
 
+#uncertainty file
+#jecUncertaintyFile="$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_DATA_UncertaintySources_AK4PFchs.txt"
+
 ### =====================================================================================================
 
 
@@ -104,11 +107,13 @@ from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMet
 #for a full met computation, remove the pfCandColl input
 runMetCorAndUncFromMiniAOD(process,
                            isData=options.isData,
+                           #jecUncFile=jecUncertaintyFile
                            )
 
 runMetCorAndUncFromMiniAOD(process,
                            isData=options.isData,
                            pfCandColl=cms.InputTag("noHFCands"),
+                           #jecUncFile=jecUncertaintyFile,
                            postfix="NoHF"
                            )
 
