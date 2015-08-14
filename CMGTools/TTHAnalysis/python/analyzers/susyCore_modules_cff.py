@@ -341,25 +341,7 @@ ttHHeavyFlavourHadronAna = cfg.Analyzer(
 
 
 
-metAna = cfg.Analyzer(
-    METAnalyzer, name="metAnalyzer",
-    metCollection     = "slimmedMETs",
-    noPUMetCollection = "slimmedMETs",    
-    copyMETsByValue = False,
-    doTkMet = False,
-    doMetNoPU = True,
-    doMetNoMu = False,
-    doMetNoEle = False,
-    doMetNoPhoton = False,
-    recalibrate = False,
-    jetAnalyzerCalibrationPostFix = "",
-    candidates='packedPFCandidates',
-    candidatesTypes='std::vector<pat::PackedCandidate>',
-    dzMax = 0.1,
-    collectionPostFix = "",
-    )
-
-#metHFAna = cfg.Analyzer(
+#metAna = cfg.Analyzer(
 #    METAnalyzer, name="metAnalyzer",
 #    metCollection     = "slimmedMETs",
 #    noPUMetCollection = "slimmedMETs",    
@@ -374,27 +356,45 @@ metAna = cfg.Analyzer(
 #    candidates='packedPFCandidates',
 #    candidatesTypes='std::vector<pat::PackedCandidate>',
 #    dzMax = 0.1,
-#    collectionPostFix = "HF",
-#    )
-#
-#
-#metAna = cfg.Analyzer(
-#    METAnalyzer, name="metAnalyzer",
-#    metCollection     = "slimmedMETsNoHF",
-#    noPUMetCollection = "slimmedMETsNoHF",
-#    copyMETsByValue = False,
-#    doTkMet = False,
-#    doMetNoPU = True,
-#    doMetNoMu = False,
-#    doMetNoEle = False,
-#    doMetNoPhoton = False,
-#    recalibrate = False,
-#    jetAnalyzerCalibrationPostFix = "",
-#    candidates='packedPFCandidates',
-#    candidatesTypes='std::vector<pat::PackedCandidate>',
-#    dzMax = 0.1,
 #    collectionPostFix = "",
 #    )
+
+metHFAna = cfg.Analyzer(
+    METAnalyzer, name="metAnalyzer",
+    metCollection     = "slimmedMETs",
+    noPUMetCollection = "slimmedMETs",    
+    copyMETsByValue = False,
+    doTkMet = False,
+    doMetNoPU = True,
+    doMetNoMu = False,
+    doMetNoEle = False,
+    doMetNoPhoton = False,
+    recalibrate = False,
+    jetAnalyzerCalibrationPostFix = "",
+    candidates='packedPFCandidates',
+    candidatesTypes='std::vector<pat::PackedCandidate>',
+    dzMax = 0.1,
+    collectionPostFix = "HF",
+    )
+
+
+metAna = cfg.Analyzer(
+    METAnalyzer, name="metAnalyzer",
+    metCollection     = "slimmedMETsNoHF",
+    noPUMetCollection = "slimmedMETsNoHF",
+    copyMETsByValue = False,
+    doTkMet = False,
+    doMetNoPU = True,
+    doMetNoMu = False,
+    doMetNoEle = False,
+    doMetNoPhoton = False,
+    recalibrate = False,
+    jetAnalyzerCalibrationPostFix = "",
+    candidates='packedPFCandidates',
+    candidatesTypes='std::vector<pat::PackedCandidate>',
+    dzMax = 0.1,
+    collectionPostFix = "",
+    )
 
 
 # Core Event Analyzer (computes basic quantities like HT, dilepton masses)

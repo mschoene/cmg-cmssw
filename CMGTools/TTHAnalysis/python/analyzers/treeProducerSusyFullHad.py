@@ -56,10 +56,10 @@ susyFullHad_globalVariables = susyCore_globalVariables + [
 #    NTupleVariable("metNoHF_rawPhi", lambda ev : ev.metNoHF.uncorrectedPhi() if  hasattr(ev,'metNoHF') else  0, help="raw noHF met phi"),
 #    NTupleVariable("metNoHF_rawSumEt", lambda ev : ev.metNoHF.uncorrectedSumEt() if  hasattr(ev,'metNoHF') else  0, help="raw noHF met sumEt"),
 
-#    NTupleVariable("metHF_rawPt", lambda ev : ev.metHF.uncorrectedPt() if  hasattr(ev,'metHF') else  0, help="raw noHF met p_{T}"),
-#    NTupleVariable("metHF_rawPhi", lambda ev : ev.metHF.uncorrectedPhi() if  hasattr(ev,'metHF') else  0, help="raw noHF met phi"),
-#    NTupleVariable("metHF_rawSumEt", lambda ev : ev.metHF.uncorrectedSumEt() if  hasattr(ev,'metHF') else  0, help="raw noHF met sumEt"),
-#
+    NTupleVariable("metHF_rawPt", lambda ev : ev.metHF.uncorrectedPt() if  hasattr(ev,'metHF') else  0, help="raw noHF met p_{T}"),
+    NTupleVariable("metHF_rawPhi", lambda ev : ev.metHF.uncorrectedPhi() if  hasattr(ev,'metHF') else  0, help="raw noHF met phi"),
+    NTupleVariable("metHF_rawSumEt", lambda ev : ev.metHF.uncorrectedSumEt() if  hasattr(ev,'metHF') else  0, help="raw noHF met sumEt"),
+
     NTupleVariable("met_rawPt", lambda ev : ev.met.uncorrectedPt(), help="raw met p_{T}"),
     NTupleVariable("met_rawPhi", lambda ev : ev.met.uncorrectedPhi(), help="raw met phi"),
     NTupleVariable("met_rawSumEt", lambda ev : ev.met.uncorrectedSumEt(), help="raw met sumEt"),
@@ -218,7 +218,7 @@ susyFullHad_globalObjects.update({
 ##            "gamma_pseudoJet1"       : NTupleObject("gamma_pseudoJet1",     fourVectorType, help="pseudoJet1 for hemishphere, with photon addition"),
 ##            "gamma_pseudoJet2"       : NTupleObject("gamma_pseudoJet2",     fourVectorType, help="pseudoJet2 for hemishphere, with photon addition"),
             ###
-#            "metHF" : NTupleObject("metHF", metType, help="PF E_{T}^{miss}, after type 1 corrections (HF)"),
+            "metHF" : NTupleObject("metHF", metType, help="PF E_{T}^{miss}, after type 1 corrections (HF)"),
 
 })
 

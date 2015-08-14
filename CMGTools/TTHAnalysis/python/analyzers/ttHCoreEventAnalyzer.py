@@ -265,11 +265,11 @@ class ttHCoreEventAnalyzer( Analyzer ):
         objects25a  = [ j for j in event.cleanJetsAll if j.pt() > 25 ] + event.selectedLeptons
         objects30a  = [ j for j in event.cleanJetsAll if j.pt() > 30 ] + event.selectedLeptons
         objects40a  = [ j for j in event.cleanJetsAll if j.pt() > 40 ] + event.selectedLeptons
-        objectsXa  = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ] + event.selectedLeptons
-#        objectsXa  = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0] + event.selectedLeptons
+#        objectsXa  = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ] + event.selectedLeptons
+        objectsXa  = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0] + event.selectedLeptons
         objects40ja = [ j for j in event.cleanJetsAll if j.pt() > 40 ] 
-        objectsXja = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ]
-#        objectsXja = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0]
+#        objectsXja = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ]
+        objectsXja = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0]
 
         objects40ja10l5t = []
         if hasattr(event, 'selectedIsoCleanTrack'):
@@ -281,15 +281,15 @@ class ttHCoreEventAnalyzer( Analyzer ):
 
         objectsXja10l5t = []
         if hasattr(event, 'selectedIsoCleanTrack'):
-            objectsXja10l5t = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ] + [ l for l in event.selectedLeptons if l.pt() > 10 ] + [ t for t in event.selectedIsoCleanTrack ]
-#            objectsXja10l5t = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0 ] + [ l for l in event.selectedLeptons if l.pt() > 10 ] + [ t for t in event.selectedIsoCleanTrack ]
+            #objectsXja10l5t = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ] + [ l for l in event.selectedLeptons if l.pt() > 10 ] + [ t for t in event.selectedIsoCleanTrack ]
+            objectsXja10l5t = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0 ] + [ l for l in event.selectedLeptons if l.pt() > 10 ] + [ t for t in event.selectedIsoCleanTrack ]
             objectsXja10l5t.sort(key = lambda obj : obj.pt(), reverse = True)
 
         objects40ja10l = [ j for j in event.cleanJetsAll if j.pt() > 40 ] + [ l for l in event.selectedLeptons if l.pt() > 10 ]
         objects40ja10l.sort(key = lambda obj : obj.pt(), reverse = True)
 
-        objectsXja10l = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ] + [ l for l in event.selectedLeptons if l.pt() > 10 ]
-#        objectsXja10l = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0 ] + [ l for l in event.selectedLeptons if l.pt() > 10 ]
+#        objectsXja10l = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt ] + [ l for l in event.selectedLeptons if l.pt() > 10 ]
+        objectsXja10l = [ j for j in event.cleanJetsAll if j.pt() > self.jetPt and abs(j.eta()) < 3.0 ] + [ l for l in event.selectedLeptons if l.pt() > 10 ]
         objectsXja10l.sort(key = lambda obj : obj.pt(), reverse = True)
 
         event.htJet25a = sum([x.pt() for x in objects25a])

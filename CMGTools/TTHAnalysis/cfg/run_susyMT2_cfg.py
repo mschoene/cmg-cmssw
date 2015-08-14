@@ -268,8 +268,8 @@ susyCoreSequence.insert(susyCoreSequence.index(skimAnalyzer),
 #                        ttHSVAna)
 
 
-#susyCoreSequence.insert(susyCoreSequence.index(metAna),
-#                        metHFAna)
+susyCoreSequence.insert(susyCoreSequence.index(metAna),
+                        metHFAna)
 ##susyCoreSequence.insert(susyCoreSequence.index(metAna),
 ##                        metNoHFAna)
 
