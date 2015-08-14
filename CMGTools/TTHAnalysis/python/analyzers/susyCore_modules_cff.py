@@ -292,8 +292,8 @@ jetAna = cfg.Analyzer(
     recalibrateJets = True, #'MC', # True, False, 'MC', 'Data'
     applyL2L3Residual = False, # Switch to 'Data' when they will become available for Data
     recalibrationType = "AK4PFchs",
-    mcGT     = "Summer15_50nsV2",
-    dataGT   = "Summer15_50nsV2",
+    mcGT     = "Summer15_50nsV2_MC",
+    dataGT   = "Summer15_50nsV2_DATA",
     jecPath = "${CMSSW_BASE}/src/CMGTools/RootTools/data/jec/",
     shiftJEC = 0, # set to +1 or -1 to apply +/-1 sigma shift to the nominal jet energies
     addJECShifts = False, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
@@ -341,23 +341,23 @@ ttHHeavyFlavourHadronAna = cfg.Analyzer(
 
 
 
-#metAna = cfg.Analyzer(
-#    METAnalyzer, name="metAnalyzer",
-#    metCollection     = "slimmedMETs",
-#    noPUMetCollection = "slimmedMETs",    
-#    copyMETsByValue = False,
-#    doTkMet = False,
-#    doMetNoPU = True,
-#    doMetNoMu = False,
-#    doMetNoEle = False,
-#    doMetNoPhoton = False,
-#    recalibrate = False,
-#    jetAnalyzerCalibrationPostFix = "",
-#    candidates='packedPFCandidates',
-#    candidatesTypes='std::vector<pat::PackedCandidate>',
-#    dzMax = 0.1,
-#    collectionPostFix = "",
-#    )
+metAna = cfg.Analyzer(
+    METAnalyzer, name="metAnalyzer",
+    metCollection     = "slimmedMETs",
+    noPUMetCollection = "slimmedMETs",    
+    copyMETsByValue = False,
+    doTkMet = False,
+    doMetNoPU = True,
+    doMetNoMu = False,
+    doMetNoEle = False,
+    doMetNoPhoton = False,
+    recalibrate = False,
+    jetAnalyzerCalibrationPostFix = "",
+    candidates='packedPFCandidates',
+    candidatesTypes='std::vector<pat::PackedCandidate>',
+    dzMax = 0.1,
+    collectionPostFix = "",
+    )
 
 metHFAna = cfg.Analyzer(
     METAnalyzer, name="metAnalyzer",

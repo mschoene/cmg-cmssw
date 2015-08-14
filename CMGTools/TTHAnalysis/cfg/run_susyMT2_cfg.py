@@ -53,8 +53,8 @@ jetAna.doQG = True
 jetAna.jetEta = 4.7
 jetAna.jetEtaCentral = 2.5
 jetAna.jetPt = 10.
-#jetAna.mcGT     = "Summer15_50nsV2_MC", # jec corrections
-#jetAna.dataGT   = "Summer15_50nsV2_MC", # jec corrections
+jetAna.mcGT     = "Summer15_50nsV4_MC", # jec corrections
+jetAna.dataGT   = "Summer15_50nsV4_MC", # jec corrections
 jetAna.recalibrateJets = True
 jetAna.applyL2L3Residual = 'Data'
 jetAna.jetLepDR = 0.4
@@ -165,6 +165,7 @@ ttHZskim = cfg.Analyzer(
 from CMGTools.TTHAnalysis.analyzers.hbheAnalyzer import hbheAnalyzer
 hbheFilterAna = cfg.Analyzer(
     hbheAnalyzer, name = 'hbheAnalyzer',
+    IgnoreTS4TS5ifJetInLowBVRegion=False,
 )
 
 
@@ -267,10 +268,10 @@ susyCoreSequence.insert(susyCoreSequence.index(skimAnalyzer),
 #                        ttHSVAna)
 
 
-susyCoreSequence.insert(susyCoreSequence.index(metAna),
-                        metHFAna)
 #susyCoreSequence.insert(susyCoreSequence.index(metAna),
-#                        metNoHFAna)
+#                        metHFAna)
+##susyCoreSequence.insert(susyCoreSequence.index(metAna),
+##                        metNoHFAna)
 
 sequence = cfg.Sequence(
     susyCoreSequence+[
@@ -474,12 +475,12 @@ if getHeppyOption("nofetch"):
 
 
 
-removeResiduals = True
+removeResiduals = False
 
 # -------------------- Running pre-processor
 import subprocess
-jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV2_MC.db'
-jecEra    = 'Summer15_50nsV2_MC'
+jecDBFile = '$CMSSW_BASE/src/CMGTools/RootTools/data/jec/Summer15_50nsV4_MC.db'
+jecEra    = 'Summer15_50nsV4_MC'
 preprocessorFile = "$CMSSW_BASE/tmp/MetType1_jec_%s.py"%(jecEra)
 extraArgs=[]
 if isData:

@@ -21,6 +21,7 @@ class hbheAnalyzer( Analyzer ):
 
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(hbheAnalyzer,self).__init__(cfg_ana,cfg_comp,looperName)
+        self.IgnoreTS4TS5ifJetInLowBVRegion = cfg_ana.IgnoreTS4TS5ifJetInLowBVRegion
 
     def declareHandles(self):
         super(hbheAnalyzer, self).declareHandles()
@@ -37,7 +38,10 @@ class hbheAnalyzer( Analyzer ):
         event.hbheMaxHPDHits        = self.mchandles['hcalnoise'].product().maxHPDHits()
         event.hbheMaxHPDNoOtherHits = self.mchandles['hcalnoise'].product().maxHPDNoOtherHits()
         event.hbheHasBadRBXTS4TS5   = self.mchandles['hcalnoise'].product().HasBadRBXTS4TS5()
-        event.hbheGoodJetFoundInLowBVRegion = self.mchandles['hcalnoise'].product().goodJetFoundInLowBVRegion()
+        event.hbheGoodJetFoundInLowBVRegion = False
+        if self.IgnoreTS4TS5ifJetInLowBVRegion: event.hbheGoodJetFoundInLowBVRegion = self.mchandles['hcalnoise'].product().goodJetFoundInLowBVRegion()
+
+        #event.hbheGoodJetFoundInLowBVRegion = self.mchandles['hcalnoise'].product().goodJetFoundInLowBVRegion()
 
         event.hbheFilterNew = 1
 
@@ -47,3 +51,8 @@ class hbheAnalyzer( Analyzer ):
             event.hbheFilterNew = 0
 
         return True
+
+setattr(hbheAnalyzer,"defaultConfig", cfg.Analyzer(
+        IgnoreTS4TS5ifJetInLowBVRegion = False,
+        )
+)

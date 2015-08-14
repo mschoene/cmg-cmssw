@@ -145,6 +145,7 @@ cp -r Loop/* $SUBMISIONDIR"""
    elif remoteDir.startswith("/pnfs/psi.ch"):
        cpCmd="""echo 'sending root files to remote dir'
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/dcap/ # Fabio's workaround to fix gfal-tools
+rm Loop/cmsswPreProcessing.root
 for f in Loop/mt2*.root
 do
    ff=`basename $f | cut -d . -f 1`
@@ -159,7 +160,8 @@ do
       rm Loop/$ff.root
    fi
 done
-cp -r Loop/* $SUBMISIONDIR""".format(idx=index, srm='srm://t3se01.psi.ch'+remoteDir+jobDir[jobDir.rfind("/"):jobDir.find("_Chunk")])
+rm Loop/cmsswPreProcessing.root
+cp -r Loop/* $SUBMISIONDIR""".format(idx=jobDir[jobDir.find("_Chunk")+6:].strip("/"), srm='srm://t3se01.psi.ch'+remoteDir+jobDir[jobDir.rfind("/"):jobDir.find("_Chunk")])
    else:
        print "remote directory not supported yet: ", remoteDir
        print 'path must start with "/pnfs/psi.ch"'
