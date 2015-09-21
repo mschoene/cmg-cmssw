@@ -83,9 +83,9 @@ class IsoTrackAnalyzer( Analyzer ):
 
         patcands = self.handles['packedCandidates'].product()
 
-        charged = [ p for p in patcands if ( p.charge() != 0 and p.fromPV() > 1 ) ]
-
-        self.IsoTrackIsolationComputer.setPackedCandidates(patcands, 1, 9999, 9999.)
+        charged = [ p for p in patcands if ( p.charge() != 0 and abs(p.dz())<=self.cfg_ana.dzMax ) ]
+ 
+        self.IsoTrackIsolationComputer.setPackedCandidates(patcands, -1, self.cfg_ana.dzPartMax, 9999., True)
 
 
         alltrack = map( IsoTrack, charged )
@@ -93,7 +93,6 @@ class IsoTrackAnalyzer( Analyzer ):
 
         for track in alltrack:
 
-            if ( abs(track.dz()) > self.cfg_ana.dzMax ): continue
             if ( (abs(track.pdgId())!=11) and (abs(track.pdgId())!=13) and (track.pt() < self.cfg_ana.ptMin) ): continue
             if ( track.pt() < self.cfg_ana.ptMinEMU ): continue
 
@@ -111,19 +110,19 @@ class IsoTrackAnalyzer( Analyzer ):
 ## ===> compute the isolation and find the most isolated track
 
             isoSum = self.IsoTrackIsolationComputer.chargedAbsIso(track.physObj, self.cfg_ana.isoDR, 0., self.cfg_ana.ptPartMin)
-            if( abs(track.pdgId())==211 ): isoSum = isoSum - track.pt() #BM: this is an ugly hack and it is error prone. It needs to be fixed using the addVeto method properly
 
             if self.cfg_ana.doRelIsolation:
-                relIso = (isoSum)/track.pt()
+                relIso = (isoSum-track.pt())/track.pt()
                 if ( (abs(track.pdgId())!=11) and (abs(track.pdgId())!=13) and (relIso > self.cfg_ana.MaxIsoSum) ): continue
                 elif((relIso > self.cfg_ana.MaxIsoSumEMU)): continue
             else:
-                if(isoSum > (self.cfg_ana.maxAbsIso)): continue
+                if(isoSum > (self.cfg_ana.maxAbsIso + track.pt())): continue
 
             if self.doIsoAnulus:
                 self.attachIsoAnulus(track)
 
-            track.absIso = isoSum
+            #if abs(track.pdgId())==211 :
+            track.absIso = isoSum - track.pt() 
 
             #### store a preIso track
             #event.preIsoTrack.append(track)
@@ -143,7 +142,7 @@ class IsoTrackAnalyzer( Analyzer ):
                                 nearestSelectedLeptons = makeNearestLeptons(myLeptons,track, event)
                                 if len(nearestSelectedLeptons) > 0:
                                     for lep in nearestSelectedLeptons:
-                                        if deltaR(lep.eta(), lep.phi(), track.eta(), track.phi()) > 0.01:
+                                        if deltaR(lep.eta(), lep.phi(), track.eta(), track.phi()) > 0.1:
                                             event.selectedIsoCleanTrack.append(track)
                                 else: 
                                     event.selectedIsoCleanTrack.append(track)

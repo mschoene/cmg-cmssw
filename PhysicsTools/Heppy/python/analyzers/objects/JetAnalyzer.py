@@ -137,16 +137,20 @@ class JetAnalyzer( Analyzer ):
             if self.testJetNoID( jet ): 
                 self.jetsAllNoID.append(jet) 
                 # temporary fix since the jetID it's not good for eta>3
-                if self.testJetID( jet ):
-                    if(self.cfg_ana.doQG):
-                        jet.qgl_calc =  self.qglcalc.computeQGLikelihood
-                        jet.qgl_rho =  rho
-                        
-                    self.jets.append(jet)
-                    self.jetsIdOnly.append(jet)
+                if abs(jet.eta()) <3:
+                    if self.testJetID (jet ):
+
+                        if(self.cfg_ana.doQG):
+                            jet.qgl_calc =  self.qglcalc.computeQGLikelihood
+                            jet.qgl_rho =  rho
+
+                        self.jets.append(jet)
+                        self.jetsIdOnly.append(jet)
+                    else:
+                        self.jetsFailId.append(jet)
                 else:
-                    self.jetsFailId.append(jet)
-            elif self.testJetID ( jet ):
+                    self.jets.append(jet)
+            elif self.testJetID (jet ):
                 self.jetsIdOnly.append(jet)
 
         ## Clean Jets from leptons
