@@ -345,12 +345,12 @@ if test==0:
     comp=testComponent
 
     # MC synch file (miniAOD v2)
-    comp.files = ['root://eoscms.cern.ch//eos/cms/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/30000/001F4F14-786E-E511-804F-0025905A60FE.root']
+    #comp.files = ['root://eoscms.cern.ch//eos/cms/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/30000/001F4F14-786E-E511-804F-0025905A60FE.root']
 
 
     # Data synch file (miniAOD v2)
-    #isData = True
-    #comp.files = ['root://eoscms.cern.ch//eos/cms/store/data/Run2015D/JetHT/MINIAOD/PromptReco-v4/000/258/177/00000/8ED4BA45-706D-E511-8D36-02163E014418.root']
+    isData = True
+    comp.files = ['root://eoscms.cern.ch//eos/cms/store/data/Run2015D/JetHT/MINIAOD/PromptReco-v4/000/258/177/00000/8ED4BA45-706D-E511-8D36-02163E014418.root']
 
 
     #comp.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/DCSOnly/json_DCSONLY.txt'
