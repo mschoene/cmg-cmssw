@@ -311,8 +311,8 @@ from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 # choose 2 for full mc production
 # choose 3 for data production
 # choose 4 for signal production
-test = int(getHeppyOption('test',1))
-isData = False # will be changed accordingly if chosen to run on data
+test = int(getHeppyOption('test',0))
+isData = True # will be changed accordingly if chosen to run on data
 doSpecialSettingsForMECCA = 1 # set to 1 for comparisons with americans
 runPreprocessor = False
 
@@ -329,6 +329,7 @@ if test==0:
 
     from CMGTools.TTHAnalysis.setup.Efficiencies import *
 
+    dataDir = os.environ['CMSSW_BASE']+"/src/CMGTools/TTHAnalysis/data"
     for comp in samples:
 #        comp.isMC = True
 #        comp.isData = False
@@ -342,19 +343,17 @@ if test==0:
     #eventSelector.toSelect = [ 442430994 ]
     #sequence = cfg.Sequence([eventSelector] + sequence)
     comp=testComponent
-    # 74X TTbar
-    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/SYNCHfiles/0066F143-F8FD-E411-9A0B-D4AE526A0D2E.root']
 
-    # 74X GJets
-    #comp.files = ['root://xrootd.unl.edu//store/mc/RunIISpring15DR74/GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/16E31BE7-7C18-E511-A551-00266CF2454C.root']
+    # MC synch file (miniAOD v2)
+    comp.files = ['root://eoscms.cern.ch//eos/cms/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/30000/001F4F14-786E-E511-804F-0025905A60FE.root']
 
-    # 747 Data
-    #comp.files = ['/afs/cern.ch/user/m/mangano/public/MECCA/dataset/74X/data/JetHT_promptReco_Run2015B.root']
-    #comp.files = ['/afs/cern.ch/work/m/mmasciov/CMSSW_7_4_7_MT2/src/CMGTools/TTHAnalysis/cfg/pickevents.root']
 
-    # 7_4_12 data
+    # Data synch file (miniAOD v2)
     #isData = True
-    #comp.files = ['/afs/cern.ch/user/c/casal/public/synch/86ACFECD-3C5F-E511-B8F2-02163E014374.root']
+    #comp.files = ['root://eoscms.cern.ch//eos/cms/store/data/Run2015D/JetHT/MINIAOD/PromptReco-v4/000/258/177/00000/8ED4BA45-706D-E511-8D36-02163E014418.root']
+
+
+    #comp.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/DCSOnly/json_DCSONLY.txt'
 
     selectedComponents = [comp]
 #    comp.splitFactor = 10
