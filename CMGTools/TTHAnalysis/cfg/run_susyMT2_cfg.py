@@ -126,6 +126,9 @@ ttHCoreEventAna.jetPt = mt2JPt ### jet pt 30: this will change ht and mht
 ##  CONTROL VARIABLES
 ##------------------------------------------ 
 
+from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer
+LHEAna = LHEAnalyzer.defaultConfig
+
 from CMGTools.TTHAnalysis.analyzers.ttHMT2Control import ttHMT2Control
 
 ttHMT2Control = cfg.Analyzer(
@@ -193,7 +196,7 @@ hbheFilterAna = cfg.Analyzer(
 
 
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_HT900, triggers_HT800, triggers_AllMET170, triggers_HT350_MET100, triggers_HT350_MET120
-from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_MT2_mumu, triggers_MT2_ee, triggers_MT2_e, triggers_MT2_mu, triggers_MT2_emu, triggers_MT2_mue 
+from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_MT2_mumu, triggers_MT2_ee, triggers_MT2_e, triggers_MT2_mu, triggers_MT2_emu, triggers_MT2_mue, triggers_doubleele33 
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_dijet, triggers_dijet70met120, triggers_dijet55met110, triggers_HT350, triggers_HT475,  triggers_HT600
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_photon75, triggers_photon90, triggers_photon120, triggers_photon75ps 
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import triggers_photon90ps, triggers_photon120ps, triggers_photon155, triggers_photon165_HE10, triggers_photon175
@@ -209,6 +212,7 @@ triggerFlagsAna.triggerBits = {
 'SingleEl' : triggers_MT2_e,
 'DoubleMu' : triggers_MT2_mumu,
 'DoubleEl' : triggers_MT2_ee,
+'DoubleEl33' : triggers_doubleele33,
 'MuX_Ele12' : triggers_MT2_emu,
 'Mu8_EleX'  : triggers_MT2_mue,
 #'MuEG' : triggers_MT2_mue,
@@ -282,6 +286,7 @@ susyCoreSequence.insert(susyCoreSequence.index(skimAnalyzer),
 
 sequence = cfg.Sequence(
     susyCoreSequence+[
+    LHEAna,
     ttHMT2Control,
     MT2Ana,
     ttHTopoJetAna,
@@ -311,6 +316,7 @@ from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 # choose 2 for full mc production
 # choose 3 for data production
 # choose 4 for signal production
+
 test = int(getHeppyOption('test',0))
 isData = True # will be changed accordingly if chosen to run on data
 doSpecialSettingsForMECCA = 1 # set to 1 for comparisons with americans
@@ -371,7 +377,8 @@ elif test==1:
     from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
 
 #    comp=GJets_HT200to400
-#    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/gjets_ht200to400_miniaodsim_fix.root']
+#    comp.files = comp.files[:1]
+##    comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/gjets_ht200to400_miniaodsim_fix.root']
 
 #    comp=TTJets
 #    #comp.files = ['/afs/cern.ch/user/d/dalfonso/public/TESTfilesPHY14/TTJets_miniAOD_fixPhoton_forSynch.root']
@@ -397,47 +404,17 @@ elif test==1:
 
 elif test==2:
 
-    #from CMGTools.TTHAnalysis.samples.samples_13TeV_PHYS14 import *
-    # full production
-#    selectedComponents = [ 
-#TTJets, # TTJets
-#TToLeptons_tch, TToLeptons_sch, TBarToLeptons_tch, TBarToLeptons_sch, TBar_tWch, T_tWch, #singleTop
-#TTWJets, TTZJets, TTH, #TT+boson
-#ZJetsToNuNu_HT100to200, ZJetsToNuNu_HT200to400, ZJetsToNuNu_HT400to600, ZJetsToNuNu_HT600toInf, # ZJetsToNuNu_HT
-#WJetsToLNu_HT100to200, WJetsToLNu_HT200to400, WJetsToLNu_HT400to600, WJetsToLNu_HT600toInf, # WJetsToLNu_HT
-#GJets_HT100to200_fixPhoton, GJets_HT200to400_fixPhoton, GJets_HT400to600_fixPhoton, GJets_HT600toInf_fixPhoton, # GJets_HT
-#QCD_HT_100To250_fixPhoton, QCD_HT_250To500_fixPhoton, QCD_HT_500To1000_fixPhoton, QCD_HT_1000ToInf_fixPhoton, QCD_HT_250To500_ext1_fixPhoton, QCD_HT_500To1000_ext1_fixPhoton,QCD_HT_1000ToInf_ext1_fixPhoton, # QCD_HT
-#QCD_Pt170to300_fixPhoton, QCD_Pt300to470_fixPhoton, QCD_Pt470to600_fixPhoton, QCD_Pt600to800_fixPhoton, QCD_Pt800to1000_fixPhoton, QCD_Pt1000to1400_fixPhoton, QCD_Pt1400to1800_fixPhoton, QCD_Pt1800to2400_fixPhoton, QCD_Pt2400to3200_fixPhoton, QCD_Pt3200_fixPhoton, # QCD_Pt
-#QCD_Pt50to80, QCD_Pt80to120, QCD_Pt120to170, #For QCD Estimate
-#SMS_T2tt_2J_mStop850_mLSP100, SMS_T2tt_2J_mStop650_mLSP325, SMS_T2tt_2J_mStop500_mLSP325, SMS_T2tt_2J_mStop425_mLSP325, SMS_T2qq_2J_mStop600_mLSP550, SMS_T2qq_2J_mStop1200_mLSP100, SMS_T2bb_2J_mStop900_mLSP100, SMS_T2bb_2J_mStop600_mLSP580, SMS_T1tttt_2J_mGl1500_mLSP100, SMS_T1tttt_2J_mGl1200_mLSP800, SMS_T1qqqq_2J_mGl1400_mLSP100, SMS_T1qqqq_2J_mGl1000_mLSP800, SMS_T1bbbb_2J_mGl1500_mLSP100, SMS_T1bbbb_2J_mGl1000_mLSP900, # SMS
-#DYJetsToLL_M50_HT100to200, DYJetsToLL_M50_HT200to400, DYJetsToLL_M50_HT400to600, DYJetsToLL_M50_HT600toInf # DYJetsToLL_M50_HT
-#]
+    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2 import *
+#    from CMGTools.RootTools.samples.samples_13TeV_74X import *
 
-    from CMGTools.RootTools.samples.samples_13TeV_74X import *
-### 25 ns
-#    selectedComponents = [ 
-#TTJets, TTJets_LO, # TTJets
-#QCD_Pt80to120, QCD_Pt120to170, QCD_Pt300to470, QCD_Pt470to600, QCD_Pt1000to1400, QCD_Pt1400to1800, QCD_Pt1800to2400, QCD_Pt2400to3200, QCD_Pt3200toInf, # QCD_Pt
-#]
-
-### 25    
-#    selectedComponents = [DYJetsToLL_M50_Zpt150toInf_LO]
-
-    selectedComponents = ZJetsToNuNuHT + DYJetsM50HT + QCDPt + QCDHT + [
-TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromTbar, TTJets_DiLepton,
-TTV, TToLeptons_tch, TbarToLeptons_tch, 
-TTJets_LO,
-#                                                                                                                                                                      
-GJets_HT100to200,
-GJets_HT200to400,
-GJets_HT400to600,
-GJets_HT600toInf,
-#
-WJetsToLNu_HT100to200,
-WJetsToLNu_HT200to400,
-WJetsToLNu_HT400to600,
-WJetsToLNu_HT600toInf,
-] ### Full SM BG Spring15
+    selectedComponents = DYJetsM50HT + ZJetsToNuNuHT + GJetsHT + QCDHT + WJetsToLNuHT + [
+TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext, TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext, TTJets_DiLepton, TTJets_DiLepton_ext, ### TTJets
+TTJets_LO_HT600to800, TTJets_LO_HT800to1200, TTJets_LO_HT1200to2500, TTJets_LO_HT2500toInf, ### TTJets HT-binned
+TTHnobb, TTHbb, TTWToLNu, TTWToQQ, TTZToQQ, TTZToLLNuNu, TTGJets, ### TTV
+TToLeptons_tch, TbarToLeptons_tch, TToLeptons_sch_amcatnlo, TBar_tWch, T_tWch, ### Single Top
+WWToLNuQQ, ZZTo2L2Q, WZTo1L1Nu2Q, WZTo2L2Q, VVTo2L2Nu, ### Di-bosons
+WWZ, WZZ, ZZZ, ### Tri-bosons
+] ### Full SM BG (Spring15 MiniAOD v2)
 
     # test all components (1 thread per component).
     for comp in selectedComponents:
@@ -456,16 +433,14 @@ elif test==3:
 
     dataDir = os.environ['CMSSW_BASE']+"/src/CMGTools/TTHAnalysis/data"
     json=dataDir+'/json/json_DCSONLY.txt'
-    #synche file DATA
+
+    #synch file DATA
     #comp = JetHT_Run2015B_PromptReco
     #comp.files = ['/afs/cern.ch/user/m/mangano/public/MECCA/dataset/74X/data/JetHT_promptReco_Run2015B.root']
     #comp.files = ['root://eoscms.cern.ch//eos/cms/store/data/Run2015B/JetHT/MINIAOD/PromptReco-v1/000/251/643/00000/0AF95D60-992C-E511-8D36-02163E0146A4.root']
     #selectedComponents = [comp]
 
-    ##selectedComponents = [JetHT_Run2015B, HTMHT_Run2015B, MET_Run2015B, SingleElectron_Run2015B, SingleMuon_Run2015B, SinglePhoton_Run2015B, DoubleEG_Run2015B, DoubleMuon_Run2015B, MuonEG_Run2015B]
-    #selectedComponents = [JetHT_Run2015B_17Jul2015, HTMHT_Run2015B_17Jul2015, MET_Run2015B_17Jul2015, SingleElectron_Run2015B_17Jul2015, SingleMuon_Run2015B_17Jul2015, SinglePhoton_Run2015B_17Jul2015, DoubleEG_Run2015B_17Jul2015, MuonEG_Run2015B_17Jul2015, DoubleMuon_Run2015B_17Jul2015, JetHT_Run2015B_PromptReco, HTMHT_Run2015B_PromptReco, MET_Run2015B_PromptReco, SingleElectron_Run2015B_PromptReco, SingleMuon_Run2015B_PromptReco, SinglePhoton_Run2015B_PromptReco, DoubleEG_Run2015B_PromptReco, MuonEG_Run2015B_PromptReco, DoubleMuon_Run2015B_PromptReco]
-
-    selectedComponents = [JetHT_Run2015D, HTMHT_Run2015D, MET_Run2015D, SingleElectron_Run2015D, SingleMuon_Run2015D, SinglePhoton_Run2015D, DoubleEG_Run2015D, MuonEG_Run2015D, DoubleMuon_Run2015D]
+    selectedComponents = dataSamples_Run2015D_v4 + dataSamples_Run2015D_05Oct
     
     for comp in selectedComponents:
         comp.json=json
@@ -473,10 +448,11 @@ elif test==3:
 
 elif test==4:
 
-    from CMGTools.RootTools.samples.samples_13TeV_signals import *
+#    from CMGTools.RootTools.samples.samples_13TeV_signals import *
+    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signals import *
+    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signalsEXO import *
 
-### 25
-    selectedComponents = + SignalSUSY + SignalEXO #+ SignalSUSYFullScan ###Signal Spring15
+    selectedComponents = SignalSUSYT1bbbbFullScan + SignalSUSYT1qqqqFullScan + SignalSUSYT1ttttFullScan + SignalDMFullScan #+ SignalSUSYFullScan ###Signal Spring15
     
     # test all components (1 thread per component).
     for comp in selectedComponents:
@@ -491,13 +467,13 @@ elif test==4:
 
 if doSpecialSettingsForMECCA:
     jetAna.doQG = False
-    photonAna.do_randomCone = False
+###    photonAna.do_randomCone = False
     # Below slow things note: it will in any case try it only on MC, not on data
     photonAna.do_mc_match = False
     jetAna.do_mc_match = False
     lepAna.do_mc_match = False
     isoTrackAna.do_mc_match = False
-    genAna.makeLHEweights = False
+###    genAna.makeLHEweights = False
 
 if isData:
     for comp in samples:
@@ -574,7 +550,7 @@ if runPreprocessor:
     config = cfg.Config( components = selectedComponents,
                          sequence = sequence,
                          services = [output_service],
-                         preprocessor=preprocessor, # comment if pre-processor non needed
+#                         preprocessor=preprocessor, # comment if pre-processor non needed
                          #                     events_class = event_class)
                          events_class = Events)
 else:
