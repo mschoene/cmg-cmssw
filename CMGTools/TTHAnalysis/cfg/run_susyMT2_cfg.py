@@ -67,11 +67,12 @@ jetAna.doQG = True
 jetAna.jetEta = 4.7
 jetAna.jetEtaCentral = 2.5
 jetAna.jetPt = 10.
-jetAna.mcGT     = "Summer15_25nsV2_MC" # jec corrections
-jetAna.dataGT   = "Summer15_25nsV5_DATA" # jec corrections
-jetAna.recalibrateJets = False # True
-jetAna.applyL2L3Residual = False # 'Data'
-jetAna.calculateSeparateCorrections = False
+jetAna.mcGT     = "Summer15_25nsV6_MC" # jec corrections
+jetAna.dataGT   = "Summer15_25nsV6_DATA" # jec corrections
+jetAna.recalibrateJets = True # True
+jetAna.applyL2L3Residual = True # 'Data'
+jetAna.calculateSeparateCorrections = True
+jetAna.calculateType1METCorrection  = True
 jetAna.jetLepDR = 0.4
 jetAna.smearJets = False
 jetAna.jetGammaDR = 0.4
@@ -109,7 +110,7 @@ isoTrackAna.setOff=False
 isoTrackAna.doIsoAnnulus = True
 
 # recalibrate MET
-metAna.recalibrate = False
+metAna.recalibrate = 'type1'
 metAna.old74XMiniAODs = False # get right Raw MET on old 74X MiniAODs
 
 # store all taus by default
@@ -317,8 +318,9 @@ from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 # choose 3 for data production
 # choose 4 for signal production
 
-test = int(getHeppyOption('test',0))
-isData = True # will be changed accordingly if chosen to run on data
+#test = int(getHeppyOption('test',0))
+test = 3
+isData = False # NEVER to be changed here. Will be changed accordingly AUTOMATICALLY if chosen to run on data
 doSpecialSettingsForMECCA = 1 # set to 1 for comparisons with americans
 runPreprocessor = False
 
@@ -407,15 +409,18 @@ elif test==2:
     from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2 import *
 #    from CMGTools.RootTools.samples.samples_13TeV_74X import *
 
-    selectedComponents = DYJetsM50HT + ZJetsToNuNuHT + GJetsHT + QCDHT + WJetsToLNuHT + [
-TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext, TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext, TTJets_DiLepton, TTJets_DiLepton_ext, ### TTJets
-TTJets_LO_HT600to800, TTJets_LO_HT800to1200, TTJets_LO_HT1200to2500, TTJets_LO_HT2500toInf, ### TTJets HT-binned
-TTHnobb, TTHbb, TTWToLNu, TTWToQQ, TTZToQQ, TTZToLLNuNu, TTGJets, ### TTV
-TToLeptons_tch, TbarToLeptons_tch, TToLeptons_sch_amcatnlo, TBar_tWch, T_tWch, ### Single Top
-WWToLNuQQ, ZZTo2L2Q, WZTo1L1Nu2Q, WZTo2L2Q, VVTo2L2Nu, ### Di-bosons
-WWZ, WZZ, ZZZ, ### Tri-bosons
-] ### Full SM BG (Spring15 MiniAOD v2)
-
+#    selectedComponents = DYJetsM50HT + ZJetsToNuNuHT + GJetsHT + QCDHT + WJetsToLNuHT + [
+#TTJets_SingleLeptonFromTbar, TTJets_SingleLeptonFromTbar_ext, TTJets_SingleLeptonFromT, TTJets_SingleLeptonFromT_ext, TTJets_DiLepton, TTJets_DiLepton_ext, ### TTJets
+#TTJets_LO_HT600to800, TTJets_LO_HT800to1200, TTJets_LO_HT1200to2500, TTJets_LO_HT2500toInf, ### TTJets HT-binned
+#TTHnobb, TTHbb, TTWToLNu, TTWToQQ, TTZToQQ, TTZToLLNuNu, TTGJets, ### TTV
+#TToLeptons_tch, TbarToLeptons_tch, TToLeptons_sch_amcatnlo, TBar_tWch, T_tWch, ### Single Top
+#WWToLNuQQ, ZZTo2L2Q, WZTo1L1Nu2Q, WZTo2L2Q, VVTo2L2Nu, ### Di-bosons
+#WWZ, WZZ, ZZZ, ### Tri-bosons
+#] ### Full SM BG (Spring15 MiniAOD v2)
+    
+#    selectedComponents = [ WJetsToLNu, WJetsToLNu_LO, DYJetsToLL_M50, DYJetsToLL_M50_LO, DYJetsToNuNu_M50, TToLeptons_sch_amcatnlo, WZTo1L3Nu ]
+    selectedComponents = [ QCD_HT1500to2000 ]
+   
     # test all components (1 thread per component).
     for comp in selectedComponents:
         comp.splitFactor = 1200
@@ -439,20 +444,27 @@ elif test==3:
     #comp.files = ['/afs/cern.ch/user/m/mangano/public/MECCA/dataset/74X/data/JetHT_promptReco_Run2015B.root']
     #comp.files = ['root://eoscms.cern.ch//eos/cms/store/data/Run2015B/JetHT/MINIAOD/PromptReco-v1/000/251/643/00000/0AF95D60-992C-E511-8D36-02163E0146A4.root']
     #selectedComponents = [comp]
-
-    selectedComponents = dataSamples_Run2015D_v4 + dataSamples_Run2015D_05Oct
     
+    ###selectedComponents = dataSamples_Run2015D_v4 + dataSamples_Run2015D_05Oct
+    selectedComponents = [ SingleElectron_Run2015D_05Oct, SingleMuon_Run2015D_05Oct ]
+   
     for comp in selectedComponents:
         comp.json=json
+        ###comp.files = comp.files[:1]
         
 
 elif test==4:
 
 #    from CMGTools.RootTools.samples.samples_13TeV_signals import *
-    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signals import *
-    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signalsEXO import *
+###    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signals import *
+    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signalsDM import *
 
-    selectedComponents = SignalSUSYT1bbbbFullScan + SignalSUSYT1qqqqFullScan + SignalSUSYT1ttttFullScan + SignalDMFullScan #+ SignalSUSYFullScan ###Signal Spring15
+###    selectedComponents = SignalSUSYT1bbbbFullScan + SignalSUSYT1qqqqFullScan + SignalSUSYT1ttttFullScan + SignalDMFullScan #+ SignalSUSYFullScan ###Signal Spring15
+###    selectedComponents = SignalSUSYT1bbbbFullScan + SignalSUSYT1qqqqFullScan + SignalSUSYT1ttttFullScan
+    selectedComponents = SignalDMFullScanVector
+    
+    ###selectedComponents = [ DMV_NNPDF30_Axial_Mphi50_Mchi50_gSM1p0_gDM1p0 ]
+    ###selectedComponents = [ SMS_T1bbbb_mGluino600_mLSP1to300 ]
     
     # test all components (1 thread per component).
     for comp in selectedComponents:
@@ -469,7 +481,7 @@ if doSpecialSettingsForMECCA:
     jetAna.doQG = False
 ###    photonAna.do_randomCone = False
     # Below slow things note: it will in any case try it only on MC, not on data
-    photonAna.do_mc_match = False
+###    photonAna.do_mc_match = False
     jetAna.do_mc_match = False
     lepAna.do_mc_match = False
     isoTrackAna.do_mc_match = False
