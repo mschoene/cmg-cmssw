@@ -9,15 +9,15 @@ susyFullHad_globalVariables = susyCore_globalVariables + [
     NTupleVariable("LHEweight_original", lambda ev: ev.LHE_originalWeight if  hasattr(ev,'LHE_originalWeight') else  0, mcOnly=True, help="original LHE weight"),
     
     ### Gen HT (for stiching)
-    NTupleVariable("lheHT", lambda ev : ev.lheHT, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer"),
-    NTupleVariable("lheHTIncoming", lambda ev : ev.lheHTIncoming, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer (only LHE status<0 as mothers)"),
+    NTupleVariable("lheHT", lambda ev : ev.lheHT if hasattr(ev, 'lheHT') else 0, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer"),
+    NTupleVariable("lheHTIncoming", lambda ev : ev.lheHTIncoming if hasattr(ev, 'lheHTIncoming') else 0, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer (only LHE status<0 as mothers)"),
     
 
     ##--------------------------------------------------
     ## MET filter information (temporary)
     ##--------------------------------------------------
-    NTupleVariable("Flag_HBHENoiseFilter", lambda ev: ev.hbheFilterNew, help="HBEHE baseline temporary filter decision"),
-    NTupleVariable("Flag_HBHEIsoNoiseFilter", lambda ev: ev.hbheFilterIso, help="HBEHE isolation temporary filter decision"),
+    NTupleVariable("Flag_HBHENoiseFilter", lambda ev: ev.hbheFilterNew if hasattr(ev, 'hbheFilterNew') else 1, help="HBEHE baseline temporary filter decision"),
+    NTupleVariable("Flag_HBHEIsoNoiseFilter", lambda ev: ev.hbheFilterIso if hasattr(ev, 'hbheFilterIso') else 1, help="HBEHE isolation temporary filter decision"),
     
     ##--------------------------------------------------
     ## energy sums
