@@ -459,6 +459,8 @@ elif test==4:
 ###    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signals import *
     from CMGTools.RootTools.samples.samples_13TeV_RunIISpring15MiniAODv2_signalsDM import *
 
+    jetAna.relaxJetId=True
+
 ###    selectedComponents = SignalSUSYT1bbbbFullScan + SignalSUSYT1qqqqFullScan + SignalSUSYT1ttttFullScan + SignalDMFullScan #+ SignalSUSYFullScan ###Signal Spring15
 ###    selectedComponents = SignalSUSYT1bbbbFullScan + SignalSUSYT1qqqqFullScan + SignalSUSYT1ttttFullScan
     selectedComponents = SignalDMFullScanVector
