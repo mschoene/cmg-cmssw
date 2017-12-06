@@ -274,8 +274,6 @@ class JetAnalyzer( Analyzer ):
                     #print "overlap reco", lep.p4().pt(), lep.p4().eta(), lep.p4().phi(), lep.jetOverlap.p4().pt(), lep.jetOverlap.p4().eta(), lep.jetOverlap.p4().phi()
                         lep.jetOverlapIdx = self.cleanJetsAll.index(lep.jetOverlap)
                     elif lep.jetOverlap in self.discardedJets:
-#            lep.jetOverlapIdx = self.cleanJetsAll.index(lep.jetOverlap)
-#                elif lep.jetOverlap in self.discardedJets:
                     #print "overlap discarded", lep.p4().pt(), lep.p4().eta(), lep.p4().phi(), lep.jetOverlap.p4().pt(), lep.jetOverlap.p4().eta(), lep.jetOverlap.p4().phi()
                         lep.jetOverlapIdx = 1000 + self.discardedJets.index(lep.jetOverlap)
 
@@ -334,7 +332,9 @@ class JetAnalyzer( Analyzer ):
                     self.gamma_cleanJetsFailIdAll.append(jet)
 
             self.gamma_cleanJetsFailId = [j for j in self.gamma_cleanJetsFailIdAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
-        
+        else:
+            self.cleanJetsAll = jetsEtaCut
+
         ## Associate jets to leptons
         incleptons = event.inclusiveLeptons if hasattr(event, 'inclusiveLeptons') else event.selectedLeptons
         jlpairs = matchObjectCollection(incleptons, allJets, self.jetLepDR**2)

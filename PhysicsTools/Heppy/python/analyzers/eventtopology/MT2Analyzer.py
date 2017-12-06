@@ -410,6 +410,34 @@ class MT2Analyzer( Analyzer ):
                 self.zllmt_mt2_Xj = self.getMT2Hemi(event,objectsXjc+[l for l in csLeptons if l not in csLeptons_mt],event.zllmt_met,self.cfg_ana.collectionPostFix,"_Xj_zllmt")
 
 
+## ===> full gg_MT2
+        setattr(event, "mt2"+self.cfg_ana.collectionPostFix+"_gg", -999)
+        setattr(event, "pseudoJet1"+self.cfg_ana.collectionPostFix+"_gg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        setattr(event, "pseudoJet2"+self.cfg_ana.collectionPostFix+"_gg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        
+        if hasattr(event, 'gg_met'):
+            gg_objects40jc = [ j for j in event.gg_cleanJets if j.pt() > 40 and abs(j.eta())<2.5 ]
+            gg_objects40j10lc = gg_objects40jc + objects10lc
+            gg_objects40j10lc.sort(key = lambda obj : obj.pt(), reverse = True)
+            
+            ## if len(gg_objects40j10lc)>=2:
+            if len(gg_objects40jc)>=2:
+                self.gg_mt2 = self.getMT2Hemi(event,gg_objects40jc,event.gg_met,self.cfg_ana.collectionPostFix,"_gg")
+
+        setattr(event, "mt2"+self.cfg_ana.collectionPostFix+"_Xj_gg", -999)
+        setattr(event, "pseudoJet1"+self.cfg_ana.collectionPostFix+"_Xj_gg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        setattr(event, "pseudoJet2"+self.cfg_ana.collectionPostFix+"_Xj_gg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        
+        if hasattr(event, 'gg_met'):
+            gg_objectsXjc = [ j for j in event.gg_cleanJets if j.pt() > self.jetPt and abs(j.eta())<2.5 ]
+            gg_objectsXj10lc = gg_objectsXjc + objects10lc
+            gg_objectsXj10lc.sort(key = lambda obj : obj.pt(), reverse = True)
+            
+            if len(gg_objectsXjc)>=2:
+                
+                self.gg_mt2_Xj = self.getMT2Hemi(event,gg_objectsXjc,event.gg_met,self.cfg_ana.collectionPostFix,"_Xj_gg")
+
+
 #### do the mt2 with one or two b jets (medium CSV)                                                                                                                                                                                                         
         if len(event.bjetsMedium)>=2:
 
@@ -440,6 +468,7 @@ class MT2Analyzer( Analyzer ):
                 self.mt2lep = self.computeMT2(event.selectedLeptons[0], event.selectedLeptons[1], self.met)
                 setattr(event, "mt2lep"+self.cfg_ana.collectionPostFix, self.mt2lep)
 
+
 ###
 
     def process(self, event):
@@ -469,6 +498,7 @@ class MT2Analyzer( Analyzer ):
 
 setattr(MT2Analyzer,"defaultConfig", cfg.Analyzer(
     class_object = MT2Analyzer,
+    #    metCollection     = "slimmedMETsMuEGClean",
     metCollection     = "slimmedMETs",
     collectionPostFix = "",
     doOnlyDefault = True,

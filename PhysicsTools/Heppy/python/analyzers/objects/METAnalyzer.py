@@ -287,6 +287,8 @@ class METAnalyzer( Analyzer ):
 
 setattr(METAnalyzer,"defaultConfig", cfg.Analyzer(
     class_object = METAnalyzer,
+#    metCollection     = "slimmedMETsMuEGClean",
+#    noPUMetCollection = "slimmedMETsMuEGClean",
     metCollection     = "slimmedMETs",
     noPUMetCollection = "slimmedMETs",
     copyMETsByValue = False,

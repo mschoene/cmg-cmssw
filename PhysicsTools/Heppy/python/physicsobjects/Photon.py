@@ -119,6 +119,9 @@ class Photon(PhysicsObject ):
         "POG_SPRING15_25ns_Tight": {"conversionVeto": [True,True], "H/E":[0.05,0.05],"sigmaIEtaIEta":[0.0100,0.0268],
         "chaHadIso":[0.76,0.56],"neuHadIso":[[0.97,0.014,0.000019],[2.09, 0.0139,0.000025]],"phoIso":[[0.08,0.0053],[0.16,0.0034]]},
 
+        "POG_Spring16_Medium": {"conversionVeto": [True,True], "H/E":[0.0396,0.0219],"sigmaIEtaIEta":[0.01022,0.03001],
+        "chaHadIso":[0.441,0.442],"neuHadIso":[[2.725,0.0148,0.000017],[1.715,0.0163,0.000014]],"phoIso":[[2.571,0.0047],[3.863, 0.0034]]},
+
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonIdentificationRun2#CSA14_selections_for_20_bx_25_sc
         "POG_CSA14_25ns_Loose": {"conversionVeto": [True,True], "H/E":[0.553,0.062],"sigmaIEtaIEta":[0.0099,0.0284],
         "chaHadIso":[2.49,1.04],"neuHadIso":[[15.43,0.007],[19.71,0.0129]],"phoIso":[[9.42,0.0033],[11.88,0.0108]]},
@@ -189,6 +192,11 @@ class Photon(PhysicsObject ):
              if self.calScaledIsoValueExp(*self.CutBasedIDWP(name)["neuHadIso"][idForBarrel]) < self.neutralHadronIso(isocorr):
                  passPhotonIso = False
         elif "POG_SPRING15_25ns" in name:
+             if self.calScaledIsoValueQuadr(*self.CutBasedIDWP(name)["neuHadIso"][idForBarrel]) < self.neutralHadronIso(isocorr):
+                 passPhotonIso = False
+             if self.calScaledIsoValueLin(*self.CutBasedIDWP(name)["phoIso"][idForBarrel]) < self.photonIso(isocorr):
+                 passPhotonIso = False
+        elif "POG_Spring16" in name:
              if self.calScaledIsoValueQuadr(*self.CutBasedIDWP(name)["neuHadIso"][idForBarrel]) < self.neutralHadronIso(isocorr):
                  passPhotonIso = False
              if self.calScaledIsoValueLin(*self.CutBasedIDWP(name)["phoIso"][idForBarrel]) < self.photonIso(isocorr):
