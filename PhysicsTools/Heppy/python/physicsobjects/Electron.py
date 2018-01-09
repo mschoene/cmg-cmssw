@@ -43,6 +43,7 @@ class Electron( Lepton ):
         elif id == "MVA_ID_NonTrig_Spring15_HZZ":     return self.mvaIDRun2("NonTrigSpring15MiniAOD","HZZ")
         elif id == "MVA_ID_NonTrig_Spring16_HZZ":     return self.mvaIDRun2("Spring16","HZZ")
         elif id == "MVA_ID_NonTrig_Spring16_VLoose":   return self.mvaIDRun2("Spring16","VLoose")
+        elif id == "MVA_ID_NonTrig_Spring16_VLooseSI":   return self.mvaIDRun2("Spring16","VLooseSI")
         elif id == "MVA_ID_NonTrig_Spring16_VLooseIdEmu":   return self.mvaIDRun2("Spring16","VLooseIdEmu")
         elif id == "MVA_ID_NonTrig_Spring16_Tight":    return self.mvaIDRun2("Spring16","Tight")
         elif id.startswith("POG_Cuts_ID_"):
@@ -352,7 +353,16 @@ class Electron( Lepton ):
                     else:
                         if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.870;
                         elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.838;
-                        else            : return self.mvaRun2(name+'HZZ') > -0.763;
+                        else            : return self.mvaRun2(name+'HZZ') > -0.763;     
+                elif wp == "VLooseSI":
+                    if self.pt() <= 10:
+                        if   eta < 0.8  : return self.mvaRun2(name) > -0.11;
+                        elif eta < 1.479: return self.mvaRun2(name) > -0.55;
+                        else            : return self.mvaRun2(name) > -0.60;
+                    else:
+                        if   eta < 0.8  : return self.mvaRun2(name) > -0.16;
+                        elif eta < 1.479: return self.mvaRun2(name) > -0.65;
+                        else            : return self.mvaRun2(name) > -0.74;
                 elif wp == "POG80": 
                     # for pt < 10 the performance is suboptimal, 
                     #see https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2 for updates on this category
