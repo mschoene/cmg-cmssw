@@ -356,13 +356,13 @@ class Electron( Lepton ):
                         else            : return self.mvaRun2(name+'HZZ') > -0.763;     
                 elif wp == "VLooseSI":
                     if self.pt() <= 10:
-                        if   eta < 0.8  : return self.mvaRun2(name) > -0.11;
-                        elif eta < 1.479: return self.mvaRun2(name) > -0.55;
-                        else            : return self.mvaRun2(name) > -0.60;
+                        if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.11;
+                        elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.55;
+                        else            : return self.mvaRun2(name+'HZZ') > -0.60;
                     else:
-                        if   eta < 0.8  : return self.mvaRun2(name) > -0.16;
-                        elif eta < 1.479: return self.mvaRun2(name) > -0.65;
-                        else            : return self.mvaRun2(name) > -0.74;
+                        if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.16;
+                        elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.65;
+                        else            : return self.mvaRun2(name+'HZZ') > -0.74;
                 elif wp == "POG80": 
                     # for pt < 10 the performance is suboptimal, 
                     #see https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2 for updates on this category
