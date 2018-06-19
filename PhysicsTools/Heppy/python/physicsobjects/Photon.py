@@ -153,7 +153,8 @@ class Photon(PhysicsObject ):
         baseWP = re.split('_',name)
         if "looseSieie" in baseWP[-1]: 
             baseWP.pop()
-            WPs["_".join(baseWP)]["sigmaIEtaIEta"] = [0.0103,0.0276]
+            WPs["_".join(baseWP)]["sigmaIEtaIEta"] = [0.015,0.035]
+            #MG WPs["_".join(baseWP)]["sigmaIEtaIEta"] = [0.0103,0.0276]
 
         return WPs["_".join(baseWP)]
 
@@ -181,7 +182,8 @@ class Photon(PhysicsObject ):
         passPhotonID = True
 
         if self.CutBasedIDWP(name)["conversionVeto"][idForBarrel]:
-            if ( self.physObj.passElectronVeto()==False ):
+            if (conversionSafe_eleVeto==False and self.physObj.hasPixelSeed()) or (conversionSafe_eleVeto==True and self.physObj.passElectronVeto()==False):
+#MG            if ( self.physObj.passElectronVeto()==False ):
                 #            if (conversionSafe_eleVeto==False and self.physObj.hasPixelSeed()) or (conversionSafe_eleVeto==True and self.physObj.passElectronVeto()==False):
                 passPhotonID = False
 
