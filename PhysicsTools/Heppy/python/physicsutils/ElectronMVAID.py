@@ -44,6 +44,7 @@ class ElectronMVAID_Fall17:
         self.name = name
         self.tag = tag
         self.flavor = flavor
+
         self.sxmls = ROOT.vector(ROOT.string)()
         for x in xmls: self.sxmls.push_back(x)
         self._init = False

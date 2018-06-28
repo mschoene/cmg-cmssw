@@ -37,9 +37,9 @@ _btagWPs = {
 #    "CSVv2IVFL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.460),
 #    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.800),
 
-#    "CSVv2IVFL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.5426),
-#    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8484),
-#    "CSVv2IVFT": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.935),
+    "CSVv2IVFL_2016": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.5426),
+    "CSVv2IVFM_2016": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8484),
+    "CSVv2IVFT_2016": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.935),
 
     "CSVv2IVFL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.5803),
     "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8838),
