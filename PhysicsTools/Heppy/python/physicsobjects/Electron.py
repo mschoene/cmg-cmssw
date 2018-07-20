@@ -3,6 +3,8 @@ from PhysicsTools.Heppy.physicsutils.ElectronMVAID import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 import ROOT
 import sys
+from math import exp
+
 
 class Electron( Lepton ):
 
@@ -39,15 +41,9 @@ class Electron( Lepton ):
         elif id == "POG_MVA_ID_Spring15_NonTrig_VLooseIdEmu":   return self.mvaIDRun2("NonTrigSpring15MiniAOD","VLooseIdEmu")
         elif id == "POG_MVA_ID_Spring15_NonTrig_VLooseIdIsoEmu":   return self.mvaIDRun2("NonTrigSpring15MiniAOD","VLooseIdIsoEmu")
         elif id == "POG_MVA_ID_Spring15_NonTrig_Tight":    return self.mvaIDRun2("NonTrigSpring15MiniAOD","Tight")
-    
-        elif id == "MVA_ID_NonTrig_Spring16_VetoRazor":    return self.mvaIDRun2("Spring16","Veto")
-
-
-        
         elif id == "MVA_ID_NonTrig_Phys14Fix_HZZ":     return self.mvaIDRun2("NonTrigPhys14Fix","HZZ")
         elif id == "MVA_ID_NonTrig_Spring15_HZZ":     return self.mvaIDRun2("NonTrigSpring15MiniAOD","HZZ")
         elif id == "MVA_ID_NonTrig_Spring16_HZZ":     return self.mvaIDRun2("Spring16","HZZ")
-        elif id == "MVA_ID_NonTrig_Spring16_VLooseSI":   return self.mvaIDRun2("Spring16","VLooseSI")
         elif id == "MVA_ID_NonTrig_Spring16_VLoose":   return self.mvaIDRun2("Spring16","VLoose")
         elif id == "MVA_ID_NonTrig_Spring16_VLooseIdEmu":   return self.mvaIDRun2("Spring16","VLooseIdEmu")
         elif id == "MVA_ID_NonTrig_Spring16_Tight":    return self.mvaIDRun2("Spring16","Tight")
@@ -70,11 +66,17 @@ class Electron( Lepton ):
             wp = wp.replace("_zs","")
         elif showerShapes == "auto":
             showerShapes = "full5x5"
+
+        hOverE_CE, hOverE_Cr = 0, 0
+        if "POG_FALL17_94X_v1" in wp:
+            hOverE_CE = 1.12 if self.physObj.isEB() else 0.5
+            hOverE_Cr = 0.0368 if self.physObj.isEB() else 0.201
+
         vars = {
-            'dEtaIn' : abs(self.dEtaInSeed()) if "POG_SPRING16_25ns_v1" in wp else abs(self.physObj.deltaEtaSuperClusterTrackAtVtx()),
+            'dEtaIn' : abs(self.dEtaInSeed()) if (("POG_SPRING16_25ns_v1" in wp) or ("POG_FALL17_94X_v1" in wp)) else abs(self.physObj.deltaEtaSuperClusterTrackAtVtx()),
             'dPhiIn' : abs(self.physObj.deltaPhiSuperClusterTrackAtVtx()),
             'sigmaIEtaIEta' : self.physObj.full5x5_sigmaIetaIeta() if showerShapes == "full5x5" else self.physObj.sigmaIetaIeta(),
-            'H/E' : self.physObj.hadronicOverEm(),
+            'H/E' : self.physObj.hadronicOverEm() - (hOverE_CE  + hOverE_Cr * self.rho)/(self.physObj.superCluster().energy()),
             #'1/E-1/p' : abs(1.0/self.physObj.ecalEnergy() - self.physObj.eSuperClusterOverP()/self.physObj.ecalEnergy()),
             '1/E-1/p' : abs(1.0/self.physObj.ecalEnergy() - self.physObj.eSuperClusterOverP()/self.physObj.ecalEnergy()) if self.physObj.ecalEnergy()>0. else 9e9,
             'conversionVeto' : self.physObj.passConversionVeto(),
@@ -128,6 +130,11 @@ class Electron( Lepton ):
             'POG_SPRING16_25ns_v1_Medium' :  [('dEtaIn', [0.00311, 0.00609]), ('dPhiIn', [0.1030, 0.0450]), ('sigmaIEtaIEta', [0.00998, 0.0298]), ('H/E', [0.2530, 0.0878]), ('1/E-1/p', [0.1340, 0.13])],
             'POG_SPRING16_25ns_v1_Tight'  :  [('dEtaIn', [0.00308, 0.00605]), ('dPhiIn', [0.0816, 0.0394]), ('sigmaIEtaIEta', [0.00998, 0.0292]), ('H/E', [0.0414, 0.0641]), ('1/E-1/p', [0.0129, 0.0129])],
             'POG_SPRING16_25ns_v1_HLT'    :  [('dEtaIn', [0.004, 999]), ('dPhiIn', [0.020, 999]), ('sigmaIEtaIEta', [0.011, 0.031]), ('H/E', [0.060, 0.065]), ('1/E-1/p', [0.013, 0.013]), ('chi2', [sys.float_info.max, 3.0]), ('ECALPFIsoEA', [0.160, 0.120]), ('HCALPFIsoEA', [0.120, 0.120]), ('trkIso', [0.08, 0.08])],
+            ## ------- https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_92X_and_later
+            'POG_FALL17_94X_v1_Veto'      :  [('dEtaIn', [0.00523, 0.00984]), ('dPhiIn', [0.1590, 0.1570]), ('sigmaIEtaIEta', [0.0128, 0.0445]), ('H/E', [0.050, 0.0500]), ('1/E-1/p', [0.1930, 0.0962])],
+            'POG_FALL17_94X_v1_Loose'     :  [('dEtaIn', [0.00387, 0.00720]), ('dPhiIn', [0.0716, 0.1470]), ('sigmaIEtaIEta', [0.0105, 0.0356]), ('H/E', [0.050, 0.0414]), ('1/E-1/p', [0.1290, 0.0875])],
+            'POG_FALL17_94X_v1_Medium'    :  [('dEtaIn', [0.00365, 0.00625]), ('dPhiIn', [0.0588, 0.0355]), ('sigmaIEtaIEta', [0.0105, 0.0309]), ('H/E', [0.026, 0.0260]), ('1/E-1/p', [0.0327, 0.0335])],
+            'POG_FALL17_94X_v1_Tight'     :  [('dEtaIn', [0.00353, 0.00567]), ('dPhiIn', [0.0499, 0.0165]), ('sigmaIEtaIEta', [0.0104, 0.0305]), ('H/E', [0.026, 0.0260]), ('1/E-1/p', [0.0278, 0.0158])],
         }
         WP_conversion_veto = {
             # missing Hits incremented by 1 because we return False if >=, note the '='
@@ -164,6 +171,11 @@ class Electron( Lepton ):
             'POG_SPRING16_25ns_v1_ConvVeto_Loose'  :  WP['POG_SPRING16_25ns_v1_Loose' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
             'POG_SPRING16_25ns_v1_ConvVeto_Medium' :  WP['POG_SPRING16_25ns_v1_Medium']+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
             'POG_SPRING16_25ns_v1_ConvVeto_Tight'  :  WP['POG_SPRING16_25ns_v1_Tight' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            ## ------- https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_92X_and_later
+            'POG_FALL17_94X_v1_ConvVeto_Veto'   :  WP['POG_FALL17_94X_v1_Veto'  ]+[('conversionVeto', [True, True]), ('missingHits', [3, 4])],
+            'POG_FALL17_94X_v1_ConvVeto_Loose'  :  WP['POG_FALL17_94X_v1_Loose' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            'POG_FALL17_94X_v1_ConvVeto_Medium' :  WP['POG_FALL17_94X_v1_Medium']+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            'POG_FALL17_94X_v1_ConvVeto_Tight'  :  WP['POG_FALL17_94X_v1_Tight' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
         }
 
         WP.update(WP_conversion_veto)
@@ -192,6 +204,9 @@ class Electron( Lepton ):
         ## ------- in Spring16, not optimised simultaneously to the rest of ID. Cuts independent on WP
         for wps in ['Veto','Loose','Medium','Tight']:
             WP_conversion_veto_DxyDz['POG_SPRING16_25ns_v1_ConvVetoDxyDz_%s' % wps] =  WP['POG_SPRING16_25ns_v1_ConvVeto_%s' % wps ]+[('dxy',[0.05, 0.10]), ('dz',[0.10,0.20])]
+        ## ------- in   Fall17, not optimised simultaneously to the rest of ID. Cuts independent on WP
+        for wps in ['Veto','Loose','Medium','Tight']:
+            WP_conversion_veto_DxyDz['POG_FALL17_94X_v1_ConvVetoDxyDz_%s' % wps] =  WP['POG_FALL17_94X_v1_ConvVeto_%s' % wps ]+[('dxy',[0.05, 0.10]), ('dz',[0.10,0.20])]
 
         WP.update(WP_conversion_veto_DxyDz)
 
@@ -365,15 +380,6 @@ class Electron( Lepton ):
                         if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.870;
                         elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.838;
                         else            : return self.mvaRun2(name+'HZZ') > -0.763;
-                elif wp == "VLooseSI":
-                    if self.pt() <= 10:
-                        if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.11;
-                        elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.55;
-                        else            : return self.mvaRun2(name+'HZZ') > -0.60;
-                    else:
-                        if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.16;
-                        elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.65;
-                        else            : return self.mvaRun2(name+'HZZ') > -0.74;
                 elif wp == "POG80": 
                     # for pt < 10 the performance is suboptimal, 
                     #see https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2 for updates on this category
@@ -391,31 +397,7 @@ class Electron( Lepton ):
                     smooth_cut = True
                     _vlow = [0.46,-0.03,0.06]
                     _low = [-0.48,-0.67,-0.49]
-                    _high = [-0.85,-0.91,-0.83]              
-                elif wp=="Veto": # implementation according to Razor
-                    smooth_cut = True
-                    pt = self.pt()
-
-                    if pt <= 10:
-                        if   eta < 0.8  : return self.mvaRun2(name+'HZZ') >  0.46;
-                        elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.03;
-                        else            : return self.mvaRun2(name+'HZZ') >  0.06;
-
-                    elif pt >10 and pt <=15:
-                        if   eta < 0.8  : return self.mvaRun2(name+'GP') > -0.48;
-                        elif eta < 1.479: return self.mvaRun2(name+'GP') > -0.67;
-                        else            : return self.mvaRun2(name+'GP') > -0.49;
-
-                    elif pt >15 and pt <=25:
-                        if   eta < 0.8  : return self.mvaRun2(name+'GP') > -0.48 - ( 0.037*( pt-15.0) );
-                        elif eta < 1.479: return self.mvaRun2(name+'GP') > -0.67 - ( 0.024*( pt-15.0) );
-                        else            : return self.mvaRun2(name+'GP') > -0.49 - ( 0.034*( pt-15.0) );
-
-                    else:
-                        if   eta < 0.8  : return self.mvaRun2(name+'GP') > -0.85;
-                        elif eta < 1.479: return self.mvaRun2(name+'GP') > -0.91;
-                        else            : return self.mvaRun2(name+'GP') > -0.83;
-
+                    _high = [-0.85,-0.91,-0.83]
                 elif wp=="VLooseIdEmu":
                     smooth_cut = True
                     _vlow = [-0.30,-0.46,-0.63]

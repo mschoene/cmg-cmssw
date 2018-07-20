@@ -38,11 +38,11 @@ _btagWPs = {
 #    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.800),
 
 #    "CSVv2IVFL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.5426),
-    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8484),
+# MG    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8484),
 #    "CSVv2IVFT": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.935),
 
     "CSVv2IVFL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.5803),
-#MG    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8838),
+    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8838),
     "CSVv2IVFT": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.9693),
 
 #    "CMVAv2L": ("pfCombinedMVAV2BJetTags", -0.715), # for same b-jet efficiency of CSVv2IVFL on ttbar MC, jet pt > 30
@@ -136,10 +136,10 @@ class Jet(PhysicsObject):
 
 
         # jetID from here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data
-        if name == "POG_PFID_Loose":    return ((eta<3.0 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
-# MG commented        if name == "POG_PFID_Loose":    return ((eta<2.7 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (nhf<0.98 and phf>0.01 and npn>2)) or (eta>3.0 and (phf<0.90 and npn>10)))
-# MG reverted back        if name == "POG_PFID_Tight":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (phf<0.99 and  phf>0.02 and npn>2)) or (eta>3.0 and (phf<0.90 and nhf>0.02 and npn>10)))
-        if name == "POG_PFID_Tight":    return ((eta<3.0 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
+# MG old 2016 rec        if name == "POG_PFID_Loose":    return ((eta<3.0 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
+        if name == "POG_PFID_Loose":    return ((eta<2.7 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (nhf<0.98 and phf>0.01 and npn>2)) or (eta>3.0 and (phf<0.90 and npn>10)))
+        if name == "POG_PFID_Tight":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (phf<0.99 and  phf>0.02 and npn>2)) or (eta>3.0 and (phf<0.90 and nhf>0.02 and npn>10)))
+# MG old 2016       if name == "POG_PFID_Tight":    return ((eta<3.0 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
         if name == "POG_PFID_TightLepVeto": return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90 and muf<0.8) and (eta>2.4 or (elf<0.80 and chf>0 and chm>0)))))
 #        if name == "POG_PFID_Tight":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (nhf<0.98 and  phf>0.01 and npn>2)) or (eta>3.0 and (phf<0.90 and npn>10)))
 #        if name == "POG_PFID_TightLepVeto": return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90 and muf<0.8) and (eta>2.4 or (elf<0.90 and chf>0 and chm>0)))))

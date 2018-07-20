@@ -195,7 +195,8 @@ class JetAnalyzer( Analyzer ):
         
 	##Sort Jets by pT 
         allJets.sort(key = lambda j : j.pt(), reverse = True)
-        
+        self.allJetsUsedForMET.sort(key = lambda j : j.pt(), reverse = True)
+ 
         leptons = []
         if hasattr(event, 'selectedLeptons'):
             leptons = [ l for l in event.selectedLeptons if l.pt() > self.lepPtMin and self.lepSelCut(l) ]
@@ -238,7 +239,7 @@ class JetAnalyzer( Analyzer ):
                 self.jetsIdOnly.append(jet)
 
         jetsEtaCut = [j for j in self.jets if abs(j.eta()) <  self.cfg_ana.jetEta ]
-
+        # MG you can ignore all this
 ###This is diff from Central:        
         if self.doJetCleaning:
 
@@ -334,7 +335,7 @@ class JetAnalyzer( Analyzer ):
             self.gamma_cleanJetsFailId = [j for j in self.gamma_cleanJetsFailIdAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
         else:
             self.cleanJetsAll = jetsEtaCut
-
+        # MG now you can not ignore anymore
         ## Associate jets to leptons
         incleptons = event.inclusiveLeptons if hasattr(event, 'inclusiveLeptons') else event.selectedLeptons
         jlpairs = matchObjectCollection(incleptons, allJets, self.jetLepDR**2)
@@ -434,8 +435,9 @@ class JetAnalyzer( Analyzer ):
 
     def testJetID(self, jet):
         jet.puJetIdPassed = jet.puJetId() 
-#MG        jet.pfJetIdPassed = jet.jetID('POG_PFID_Tight') 
-        jet.pfJetIdPassed = jet.jetID('POG_PFID_Loose') 
+        jet.pfJetIdPassed = jet.jetID('POG_PFID_Tight') 
+        # new recommendation
+        #jet.pfJetIdPassed = jet.jetID('POG_PFID_Loose') 
         if self.cfg_ana.relaxJetId:
             return True
         else:
