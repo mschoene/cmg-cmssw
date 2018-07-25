@@ -149,6 +149,9 @@ class LeptonAnalyzer( Analyzer ):
 
     
     def makeLeptons(self, event):
+        #print '*****************'
+        #print 'NEW EVENT'
+        
         ### inclusive leptons = all leptons that could be considered somewhere in the analysis, with minimal requirements (used e.g. to match to MC)
         event.inclusiveLeptons = []
         ### selected leptons = subset of inclusive leptons passing some basic id definition and pt requirement
@@ -182,8 +185,10 @@ class LeptonAnalyzer( Analyzer ):
                     abs(mu.dxy())<self.cfg_ana.inclusive_muon_dxy and abs(mu.dz())<self.cfg_ana.inclusive_muon_dz):
                 inclusiveMuons.append(mu)
         for ele in allelectrons:
-            if ( ele.electronID(self.cfg_ana.inclusive_electron_id) and
-                    ele.pt()>self.cfg_ana.inclusive_electron_pt and abs(ele.eta())<self.cfg_ana.inclusive_electron_eta and 
+           # print 'in loop over all electrons'
+            # MG if ( ele.electronID(self.cfg_ana.inclusive_electron_id) and
+                    #ele.pt()>self.cfg_ana.inclusive_electron_pt and abs(ele.eta())<self.cfg_ana.inclusive_electron_eta and 
+            if (ele.pt()>self.cfg_ana.inclusive_electron_pt and abs(ele.eta())<self.cfg_ana.inclusive_electron_eta and 
                     abs(ele.dxy())<self.cfg_ana.inclusive_electron_dxy and abs(ele.dz())<self.cfg_ana.inclusive_electron_dz and 
                     ele.lostInner()<=self.cfg_ana.inclusive_electron_lostHits ):
                 inclusiveElectrons.append(ele)
@@ -223,10 +228,13 @@ class LeptonAnalyzer( Analyzer ):
                     event.otherLeptons.append(mu)
         looseMuons = event.selectedLeptons[:]
         for ele in inclusiveElectrons:
+               #print 'in loop over inclusive electrons'
                ele.looseIdOnly = ele.electronID(self.cfg_ana.loose_electron_id)
                if ele.looseIdOnly < 0: print "Negative id for electron of pt %.1f, id %s, ret %r"  % (ele.pt(),self.cfg_ana.loose_electron_id, ele.looseIdOnly) 
-               if (ele.looseIdOnly and
-                         ele.pt()>self.cfg_ana.loose_electron_pt and abs(ele.eta())<self.cfg_ana.loose_electron_eta and 
+               #MG if (ele.looseIdOnly and
+               #          ele.pt()>self.cfg_ana.loose_electron_pt and abs(ele.eta())<self.cfg_ana.loose_electron_eta and 
+               #if (ele.looseIdOnly and
+               if (ele.pt()>self.cfg_ana.loose_electron_pt and abs(ele.eta())<self.cfg_ana.loose_electron_eta and 
                          abs(ele.dxy()) < self.cfg_ana.loose_electron_dxy and abs(ele.dz())<self.cfg_ana.loose_electron_dz and 
                          self.eleIsoCut(ele) and 
                          ele.lostInner() <= self.cfg_ana.loose_electron_lostHits and
@@ -243,6 +251,11 @@ class LeptonAnalyzer( Analyzer ):
         event.selectedMuons.sort(key = lambda l : l.pt(), reverse = True)
         event.selectedElectrons.sort(key = lambda l : l.pt(), reverse = True)
         event.inclusiveLeptons.sort(key = lambda l : l.pt(), reverse = True)
+
+
+        #print 'Number of selected electrons, ', len(event.selectedElectrons)
+        #for i,el in enumerate(event.selectedElectrons):
+       #   print i, 'pt=',el.pt(), 'eta=', el.eta(), 'phi=', el.phi(), 'dxy=',el.dxy(), 'dz=',el.dz(), 'losthits=',el.lostInner(),'minireliso=', el.miniRelIso, 'sigmaietaieta=', el.full5x5_sigmaIetaIeta() 
 
         for lepton in event.selectedLeptons:
             if hasattr(self,'efficiency'):

@@ -20,7 +20,8 @@ import PhysicsTools.HeppyCore.framework.config as cfg
 from ROOT import heppy
 
 
-
+def stampP(obj):
+  print 'pt={:>8} eta={:>8} phi={:>8}'.format(obj.pt(), obj.eta(), obj.phi())
 
 def mtw(x1,x2):
     import math
@@ -171,6 +172,19 @@ class IsoTrackAnalyzer( Analyzer ):
 
         event.selectedIsoTrack.sort(key = lambda l : l.pt(), reverse = True)
         event.selectedIsoCleanTrack.sort(key = lambda l : l.pt(), reverse = True)
+
+        clean_recoelectrons = [el for el in event.selectedLeptons if abs(el.pdgId()) == 11]
+        clean_recomuons = [el for el in event.selectedLeptons if abs(el.pdgId()) == 13]
+        #print '************************'
+        #print 'NEW EVENT'
+        #print '\nAfter cleaning stage 1'
+        #print 'Clean reco electrons', len(clean_recoelectrons)
+        #for ele in clean_recoelectrons: stampP(ele)
+        #print 'Clean reco muons', len(clean_recomuons)
+        #for mu in clean_recomuons: stampP(mu)
+        #print 'Clean pf leptons', len(event.selectedIsoCleanTrack)
+        #for it in event.selectedIsoCleanTrack: stampP(it)
+
 
         self.counters.counter('events').inc('all events')
         if(len(event.selectedIsoTrack)): self.counters.counter('events').inc('has >=1 selected Iso Track')
