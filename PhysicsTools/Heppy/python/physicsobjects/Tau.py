@@ -17,15 +17,13 @@ class Tau(Lepton):
         '''Just making the tau behave as a lepton, with dummy parameters.'''
         return -1
 
-    def relIsoR(self, R=0.3, dBetaFactor=0, allCharged=0):
-        '''Just making the tau behave as a lepton, with dummy parameters.'''
-        return -1
-
     def mvaId(self):
         '''For a transparent treatment of electrons, muons and taus. Returns -99'''
         return -99
 
     def dxy_approx(self, vertex=None):
+        # TEMPORARY FIX: always use dxy/dz from leadChargedHadrCand as in NanoAOD, ignoring vertex
+        return self.leadChargedHadrCand().dxy()
         '''Returns standard dxy for an arbitrary passed vertex'''
         if vertex is None:
             vertex = self.associatedVertex
@@ -40,6 +38,8 @@ class Tau(Lepton):
         Returns standard dxy calculation if the passed vertex differs from the
         one in the tau object.
         '''
+        # TEMPORARY FIX: always use dxy/dz from leadChargedHadrCand as in NanoAOD, ignoring vertex
+        return self.leadChargedHadrCand().dxy()
         if vertex is None:
             vertex = self.associatedVertex
         # x/y/z are directly saved in the tau object instead of a reference to 
@@ -50,6 +50,8 @@ class Tau(Lepton):
             return self.dxy_approx(vertex)
 
     def dz(self, vertex=None):
+        # TEMPORARY FIX: always use dxy/dz from leadChargedHadrCand as in NanoAOD, ignoring vertex
+        return self.leadChargedHadrCand().dz()
         if vertex is None:
             vertex = self.associatedVertex
         vtx = self.leadChargedHadrCand().vertex()
