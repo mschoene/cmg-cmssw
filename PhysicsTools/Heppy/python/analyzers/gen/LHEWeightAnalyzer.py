@@ -51,7 +51,6 @@ class LHEWeightAnalyzer( Analyzer ):
     def process(self, event):
         self.readCollections( event.input )
         
-        # if not MC, nothing to do
         if not self.cfg_comp.isMC:
             return True
 

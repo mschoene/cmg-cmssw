@@ -44,6 +44,8 @@ class Electron( Lepton ):
     
         elif id == "MVA_ID_NonTrig_Spring16_VetoRazor":    return self.mvaIDRun2("Spring16","Veto")
 
+        elif id == "MVA_ID_NonTrig_94X_VLoose":    return self.mvaIDRun2("Fall17noIso","Veto")
+
 
         
         elif id == "MVA_ID_NonTrig_Phys14Fix_HZZ":     return self.mvaIDRun2("NonTrigPhys14Fix","HZZ")
@@ -459,7 +461,32 @@ class Electron( Lepton ):
                     return (val>cut)
 
             elif name == "Fall17noIso":
-                if wp == 'Loose':
+                if wp == 'Veto':
+                    if self.pt()<=10:
+                        if eta<0.8:
+                            return self.mvaRun2(name) > 0.488
+                        elif eta<1.479:
+                            return self.mvaRun2(name) > -0.045
+                        else:
+                            return self.mvaRun2(name) > 0.176
+
+                    elif self.pt()<25:
+                        if eta<0.8:
+                            return self.mvaRun2(name) >  (-0.788  + (0.148/15.)* (-self.pt()-10.))
+                        elif eta<1.479:
+                            return self.mvaRun2(name) >  (-0.85  + (0.075/15.)* (-self.pt()-10.))
+                        else:
+                            return self.mvaRun2(name) >  (-0.81  + (0.077/15.)* (-self.pt()-10.))
+
+                    else:
+                        if eta<0.8:
+                            return self.mvaRun2(name) > -0.64
+                        elif eta<1.479:
+                            return self.mvaRun2(name) > -0.775
+                        else:
+                            return self.mvaRun2(name) > -0.733
+
+                elif wp == 'Loose':
                     if self.pt() <= 10:
                         if   eta < 0.8  : return self.mvaRun2(name) > -0.13285867293779202
                         elif eta < 1.479: return self.mvaRun2(name) > -0.31765300958836074
