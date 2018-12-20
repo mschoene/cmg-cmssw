@@ -15,7 +15,6 @@
 #include <string>
 #include <bitset> 
 
-
 class EnergyScaleCorrection
 {	
 public:  
@@ -133,7 +132,7 @@ public:
   EnergyScaleCorrection(const std::string& correctionFileName, unsigned int genSeed=0);
   EnergyScaleCorrection(){};
   ~EnergyScaleCorrection(){}
-  
+
  
   float scaleCorr(unsigned int runnr, double et, double eta, double r9,
 		  unsigned int gainSeed=12, std::bitset<kErrNrBits> uncBitMask=kErrNone) const; 

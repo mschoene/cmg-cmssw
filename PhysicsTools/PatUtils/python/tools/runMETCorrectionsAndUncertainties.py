@@ -84,10 +84,17 @@ class RunMETCorrectionsAndUncertainties(ConfigToolBase):
                           "Switch for data/MC processing", Type=bool)
         self.addParameter(self._defaultParameters, 'onMiniAOD', False,
                           "Switch on miniAOD configuration", Type=bool)
+
+#        self.addParameter(self._defaultParameters, 'postfix', 'ModifiedMET',
+#                          "Technical parameter to identify the resulting sequence and its modules (allows multiple calls in a job)", Type=str)
+#        self.addParameter(self._defaultParameters,'fixEE2017', True,
+#                          "Exclude jets and PF candidates with EE noise characteristics (fix for 2017 run)", Type=bool)
+
         self.addParameter(self._defaultParameters, 'postfix', '',
                           "Technical parameter to identify the resulting sequence and its modules (allows multiple calls in a job)", Type=str)
         self.addParameter(self._defaultParameters,'fixEE2017', False,
                           "Exclude jets and PF candidates with EE noise characteristics (fix for 2017 run)", Type=bool)
+
         self.addParameter(self._defaultParameters,'fixEE2017Params', {'userawPt': True, 'PtThreshold': 75.0, 'MinEtaThreshold': 2.65, 'MaxEtaThreshold': 3.139},
                           "Parameters dict for fixEE2017: userawPt, PtThreshold, MinEtaThreshold, MaxEtaThreshold", Type=dict)
 
@@ -267,7 +274,7 @@ class RunMETCorrectionsAndUncertainties(ConfigToolBase):
         if fixEE2017:
             if recoMetFromPFCsIsNone: self.setParameter('recoMetFromPFCs',True)
             if reclusterJetsIsNone: self.setParameter('reclusterJets',False)
-        
+       
         #met reprocessing and jet reclustering
         if recoMetFromPFCs and reclusterJetsIsNone and not fixEE2017:
             self.setParameter('reclusterJets',True)
@@ -474,7 +481,7 @@ class RunMETCorrectionsAndUncertainties(ConfigToolBase):
                 raise ValueError("PAT default sequence is not defined !!")
             process.patDefaultSequence += getattr(process, "fullPatMetSequence"+postfix)
     
-#====================================================================================================
+#===================================================================================================
     def produceMET(self, process,  metType, metModuleSequence, postfix):
 
         task = getPatAlgosToolsTask(process)
@@ -1388,6 +1395,7 @@ class RunMETCorrectionsAndUncertainties(ConfigToolBase):
                                metSource= cms.InputTag("slimmedMETs" if not self._parameters["Puppi"].value else "slimmedMETsPuppi",processName=cms.InputTag.skipCurrentProcess()),
                                correctionLevel = cms.string(correctionLevel)
                                )
+
         if(correctionLevel=="raw"):
             addToProcessAndTask("pfMet"+postfix, pfMet, process, task)
             patMetModuleSequence += getattr(process, "pfMet"+postfix)
@@ -1646,6 +1654,7 @@ class RunMETCorrectionsAndUncertainties(ConfigToolBase):
 
             from PhysicsTools.PatAlgos.slimming.slimmedMETs_cfi import slimmedMETs
             addToProcessAndTask("slimmedMETs"+postfix, slimmedMETs.clone(), process, task)
+
             getattr(process,"slimmedMETs"+postfix).src = cms.InputTag("patPFMetT1"+postfix)
             getattr(process,"slimmedMETs"+postfix).rawVariation = cms.InputTag("patPFMet"+postfix)
             getattr(process,"slimmedMETs"+postfix).t1Uncertainties = cms.InputTag("patPFMetT1%s"+postfix)

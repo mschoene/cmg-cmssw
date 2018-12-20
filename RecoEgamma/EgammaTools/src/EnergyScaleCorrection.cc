@@ -12,14 +12,17 @@
 EnergyScaleCorrection::EnergyScaleCorrection(const std::string& correctionFileName, unsigned int genSeed):
   smearingType_(ECALELF)
 {
-
   if(!correctionFileName.empty()) { 
     std::string filename = correctionFileName+"_scales.dat";
+
     readScalesFromFile(filename);
+
     if(scales_.empty()) {
       throw cms::Exception("EnergyScaleCorrection") << "scale correction map empty";
     }
+
   }
+
   
   if(!correctionFileName.empty()) { 
     std::string filename = correctionFileName+"_smearings.dat";
@@ -27,6 +30,7 @@ EnergyScaleCorrection::EnergyScaleCorrection(const std::string& correctionFileNa
     if(smearings_.empty()) {
       throw cms::Exception("EnergyScaleCorrection") << "smearing correction map empty";
     }
+
   }
 
 }
@@ -35,8 +39,12 @@ float EnergyScaleCorrection::scaleCorr(unsigned int runNumber, double et, double
 				       unsigned int gainSeed, std::bitset<kErrNrBits> uncBitMask) const
 {
   const ScaleCorrection* scaleCorr =  getScaleCorr(runNumber, et, eta, r9, gainSeed);
-  if(scaleCorr!=nullptr) return scaleCorr->scale();
-  else return kDefaultScaleVal_;
+
+  if(scaleCorr!=nullptr){
+    return scaleCorr->scale();
+  }  else{
+    return kDefaultScaleVal_;
+  }
 }
 
 
@@ -46,8 +54,11 @@ float EnergyScaleCorrection::scaleCorrUncert(unsigned int runNumber, double et, 
 {
   
   const ScaleCorrection* scaleCorr = getScaleCorr(runNumber, et, eta, r9, gainSeed);
-  if(scaleCorr!=nullptr) return scaleCorr->scaleErr(uncBitMask);
-  else return 0.;
+  if(scaleCorr!=nullptr){
+    return scaleCorr->scaleErr(uncBitMask);
+  }  else{ 
+    return 0.;
+  }
 }
 
 
@@ -76,11 +87,13 @@ const EnergyScaleCorrection::ScaleCorrection*
 EnergyScaleCorrection::getScaleCorr(unsigned int runnr, double et, double eta, double r9,
 				    unsigned int gainSeed) const
 {
-
   // buld the category based on the values of the object
   CorrectionCategory category(runnr, et, eta, r9, gainSeed);
+
   auto result = std::equal_range(scales_.begin(),scales_.end(),category,Sorter<CorrectionCategory,ScaleCorrection>()); 
+
   auto nrFound = std::distance(result.first,result.second);
+
   if(nrFound==0){
     edm::LogInfo("EnergyScaleCorrection") << "Scale category not found: " << category << " Returning uncorrected value.";
     return nullptr;
@@ -95,8 +108,10 @@ EnergyScaleCorrection::getScaleCorr(unsigned int runnr, double et, double eta, d
   if(!result.first->first.inCategory(runnr,et,eta,r9,gainSeed)){
     throw cms::Exception("LogicError") <<" error found scale category "<<result.first->first<<" that does not contain run "<<runnr<<" et "<<et<<" eta "<<eta<<" r9 "<<r9<<" gain seed "<<gainSeed;
   }
+
   return &result.first->second;
 }
+
 
 const EnergyScaleCorrection::SmearCorrection* 
 EnergyScaleCorrection::getSmearCorr(unsigned int runnr, double et, double eta, double r9,
@@ -181,15 +196,18 @@ void EnergyScaleCorrection::readScalesFromFile(const std::string& filename)
   int runMin, runMax;
   std::string category, region2;
   double energyScale, energyScaleErr, energyScaleErrStat, energyScaleErrSyst, energyScaleErrGain;
-  
+
   for(file >> category; file.good(); file >> category) {
+   
     file >> region2
 	 >> runMin >> runMax
 	 >> energyScale >> energyScaleErr >> energyScaleErrStat >> energyScaleErrSyst >> energyScaleErrGain;
+
     addScale(category, runMin, runMax, energyScale, energyScaleErrStat, energyScaleErrSyst, energyScaleErrGain);
   }
   
   file.close();  
+
   return;
 }
 
@@ -198,6 +216,7 @@ void EnergyScaleCorrection::readScalesFromFile(const std::string& filename)
 void EnergyScaleCorrection::readSmearingsFromFile(const std::string& filename)
 {
   std::ifstream file(edm::FileInPath(filename).fullPath().c_str());
+  
   if(!file.good()) {
     throw cms::Exception("EnergyScaleCorrection") << "file " << filename << " not readable";
   }
@@ -215,44 +234,49 @@ void EnergyScaleCorrection::readSmearingsFromFile(const std::string& filename)
       file.get();
       continue;
     }
-    
     if(file.peek() == 35) { // 35 = #
       file.ignore(1000, 10); // ignore the rest of the line until \n
       continue;
     }
     
-    if(smearingType_ == UNKNOWN) { // trying to guess: not recommended
-      throw cms::Exception("ConfigError") <<"unknown smearing type";
+    // if(smearingType_ == UNKNOWN) { // trying to guess: not recommended
+    //   throw cms::Exception("ConfigError") <<"unknown smearing type";
       
-    }else if(smearingType_ == GLOBE) {
-      file >> category >> unused >> etaMin >> etaMax >> r9Min >> r9Max >> runMin >> runMax >>
-	eMean >> errEMean >>
-	rho >> errRho >> phi >> errPhi;
+    // }else if(smearingType_ == GLOBE) {
+    //   file >> category >> unused >> etaMin >> etaMax >> r9Min >> r9Max >> runMin >> runMax >>
+    // 	eMean >> errEMean >>
+    // 	rho >> errRho >> phi >> errPhi;
       
-      addSmearing(category, runMin, runMax, rho,  errRho, phi, errPhi, eMean, errEMean);
+    //   addSmearing(category, runMin, runMax, rho,  errRho, phi, errPhi, eMean, errEMean);
       
-    } else if(smearingType_ == ECALELF) {
-      file >> category >> 
-	eMean >> errEMean >>
-	rho >> errRho >> phiString >> errPhiString;
+
+    // } else if(smearingType_ == ECALELF) {
+
+    // <td id="LC7" class="blob-code blob-code-inner js-file-line">absEta_1.566_2-lowR9    6.77   0         0.029708  0.0002   M_PI_2  M_PI_2</td>
+
+    file >> category >> 
+      eMean >> errEMean >>
+      rho >> errRho >> phiString >> errPhiString;
       
-      if(phiString=="M_PI_2") phi=M_PI_2;
-      else phi = std::stod(phiString);
-      
-      if(errPhiString=="M_PI_2") errPhi=M_PI_2;
-      else errPhi = std::stod(errPhiString);
-      
-      addSmearing(category, runMin, runMax, rho,  errRho, phi, errPhi, eMean, errEMean);
-      
-    } else {
-      file >> category >> rho >> phi;
-      errRho = errPhi = eMean = errEMean = 0;
-      addSmearing(category, runMin, runMax, rho,  errRho, phi, errPhi, eMean, errEMean);
-    }
+
+    if(phiString=="M_PI_2") phi=M_PI_2;
+    else phi = std::stod(phiString);
+
+    if(errPhiString=="M_PI_2") errPhi=M_PI_2;
+    else errPhi = std::stod(errPhiString);
+
+    addSmearing(category, runMin, runMax, rho,  errRho, phi, errPhi, eMean, errEMean);
+
+    // } else {
+    //   file >> category >> rho >> phi;
+    //   errRho = errPhi = eMean = errEMean = 0;
+    //   addSmearing(category, runMin, runMax, rho,  errRho, phi, errPhi, eMean, errEMean);
+    // }
 
   }
   
   file.close();
+
   return;
 }
 

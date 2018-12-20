@@ -424,13 +424,20 @@ class LeptonAnalyzer( Analyzer ):
           elif self.eleEffectiveArea == "Fall17":
               SCEta = abs(ele.superCluster().eta())
               ## from RecoEgamma/ElectronIdentification/data/Fall17/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_92X.txt
-              if   SCEta < 1.000: ele.EffectiveArea03 = 0.1566
-              elif SCEta < 1.479: ele.EffectiveArea03 = 0.1626
-              elif SCEta < 2.000: ele.EffectiveArea03 = 0.1073
-              elif SCEta < 2.200: ele.EffectiveArea03 = 0.0854
-              elif SCEta < 2.300: ele.EffectiveArea03 = 0.1051
-              elif SCEta < 2.400: ele.EffectiveArea03 = 0.1204
-              else:               ele.EffectiveArea03 = 0.1524
+              if   SCEta < 1.000: ele.EffectiveArea03 = 0.1440
+              elif SCEta < 1.479: ele.EffectiveArea03 = 0.1562
+              elif SCEta < 2.000: ele.EffectiveArea03 = 0.1032
+              elif SCEta < 2.200: ele.EffectiveArea03 = 0.0859
+              elif SCEta < 2.300: ele.EffectiveArea03 = 0.1116
+              elif SCEta < 2.400: ele.EffectiveArea03 = 0.1321
+              else:               ele.EffectiveArea03 = 0.1654
+              # if   SCEta < 1.000: ele.EffectiveArea03 = 0.1566
+              # elif SCEta < 1.479: ele.EffectiveArea03 = 0.1626
+              # elif SCEta < 2.000: ele.EffectiveArea03 = 0.1073
+              # elif SCEta < 2.200: ele.EffectiveArea03 = 0.0854
+              # elif SCEta < 2.300: ele.EffectiveArea03 = 0.1051
+              # elif SCEta < 2.400: ele.EffectiveArea03 = 0.1204
+              # else:               ele.EffectiveArea03 = 0.1524
               # warning: EAs not computed for cone DR=0.4, use the values for DR=0.3 scaled by 16/9 instead
               ele.EffectiveArea04 = ele.EffectiveArea03*16./9.
           else: raise RuntimeError,  "Unsupported value for ele_effectiveAreas: can only use Data2012 (rho: ?), Phys14_v1 and Spring15_v1 (rho: fixedGridRhoFastjetAll)"
@@ -476,6 +483,8 @@ class LeptonAnalyzer( Analyzer ):
                  ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Tight")
             elif self.cfg_ana.ele_tightId=="Cuts_FALL17_94X_v1_ConvVetoDxyDz" :
                  ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Tight")
+            elif self.cfg_ana.ele_tightId=="Cuts_FALL17_94X_v2_ConvVetoDxyDz" :
+                 ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Tight")
 
             else :
                  try:

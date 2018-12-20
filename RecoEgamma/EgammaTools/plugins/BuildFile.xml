@@ -1,5 +1,3 @@
-<library   file="*.cc" name="RecoEgammaEgammaToolsPlugins">
-  <flags   EDM_PLUGIN="1"/>
   <use   name="FWCore/Framework"/>
   <use   name="PhysicsTools/MVAComputer"/>
   <use   name="PhysicsTools/MVATrainer"/>
@@ -10,4 +8,8 @@
   <use   name="CondFormats/EgammaObjects"/>
   <use   name="DataFormats/EgammaCandidates"/>
   <use   name="RecoEgamma/EgammaTools"/>
+<library   file="*.cc" name="RecoEgammaEgammaToolsPlugins">
+  <flags   EDM_PLUGIN="1"/>
 </library>
+<export>
+</export>

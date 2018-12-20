@@ -10,7 +10,8 @@ const EnergyScaleCorrection::SmearCorrection ElectronEnergyCalibrator::defaultSm
 
 ElectronEnergyCalibrator::ElectronEnergyCalibrator(const EpCombinationTool &combinator,
 						   const std::string& correctionFile) :
-  correctionRetriever_(correctionFile), 
+  correctionRetriever_(), 
+  //  correctionRetriever_(correctionFile), 
   epCombinationTool_(&combinator), 
   rng_(nullptr),
   minEt_(1.0),

@@ -1,5 +1,8 @@
-#ifndef RecoEgamma_EgammaTools_PhotonEnergyCalibrator_h
-#define RecoEgamma_EgammaTools_PhotonEnergyCalibrator_h
+#ifndef PhotonEnergyCalibrator_h
+#define PhotonEnergyCalibrator_h
+
+//#ifndef RecoEgamma_EgammaTools_PhotonEnergyCalibrator_h
+//#define RecoEgamma_EgammaTools_PhotonEnergyCalibrator_h
 
 //author: Alan Smithee
 //description: 
@@ -14,7 +17,6 @@
 #include "RecoEgamma/EgammaTools/interface/EGEnergySysIndex.h"
 
 #include <TRandom.h>
-
 #include <vector>
 
 class PhotonEnergyCalibrator
@@ -22,12 +24,13 @@ class PhotonEnergyCalibrator
  public: 
   enum class EventType{
     DATA,
-    MC,
-  };
-
-  PhotonEnergyCalibrator() {}
-  PhotonEnergyCalibrator(const std::string& correctionFile);  
+      MC,
+      };
+  
+  PhotonEnergyCalibrator(  ) {}
+  PhotonEnergyCalibrator(const std::string& correctionFile );  
   ~PhotonEnergyCalibrator(){}
+
   
   /// Initialize with a random number generator (if not done, it will use the CMSSW service)
   /// Caller code owns the TRandom.
@@ -39,14 +42,13 @@ class PhotonEnergyCalibrator
   /// Correct this photon.
   /// StreamID is needed when used with CMSSW Random Number Generator
   std::array<float,EGEnergySysIndex::kNrSysErrs> 
-  calibrate(reco::Photon &photon, const unsigned int runNumber, 
-	    const EcalRecHitCollection* recHits,  edm::StreamID const & id, const EventType eventType) const ;
+    calibrate(reco::Photon &photon, const unsigned int runNumber, const EcalRecHitCollection* recHits, bool  isMC,  edm::StreamID const & id = edm::StreamID::invalidStreamID()) const ;
+  //calibrate(reco::Photon &photon, const unsigned int runNumber, const EcalRecHitCollection* recHits,  edm::StreamID const & id, bool  isMC) const ;
+
 
   std::array<float,EGEnergySysIndex::kNrSysErrs> 
-  calibrate(reco::Photon &photon, const unsigned int runNumber, 
-	    const EcalRecHitCollection* recHits, const float smearNrSigma, 
-	    const EventType eventType) const ;
-  
+    calibrate(reco::Photon &photon, const unsigned int runNumber, 	    const EcalRecHitCollection *recHits, bool isMC,    const float smearNrSigma) const ;
+
 private:
   void setEnergyAndSystVarations(const float scale,const float smearNrSigma,const float et,
 				 const EnergyScaleCorrection::ScaleCorrection& scaleCorr,
@@ -63,6 +65,8 @@ private:
   EnergyScaleCorrection correctionRetriever_;
   TRandom *rng_; //this is not owned
   float minEt_;
+  //  float minEt_=1.0;
+
 
   //default values to access if no correction availible
   static const EnergyScaleCorrection::ScaleCorrection defaultScaleCorr_;
