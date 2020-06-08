@@ -34,7 +34,7 @@ class AutoHandle( Handle, object ):
 
         Call this function, and then just call self.product() to get the collection'''
         if self.disabled : #if autodisable kicked in, we do not even try getbylabel
-             return
+            return
         try:
             event.getByLabel( self.label, self)
             if not self.isValid(): raise RuntimeError    

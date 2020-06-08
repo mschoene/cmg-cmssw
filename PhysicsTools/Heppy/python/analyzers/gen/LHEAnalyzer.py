@@ -43,8 +43,14 @@ class LHEAnalyzer( Analyzer ):
         self.readCollections( event.input )
         if not self.mchandles['LHEweights'].isValid(): return True
         lhehandle = self.mchandles['LHEweights'].product()
+
+        print lhehandle
+        print lhehandle.hepeup()
+
         hepeup=lhehandle.hepeup()
         pup=hepeup.PUP
+
+        print pup
         l=None
         lBar=None
         nu=None
@@ -98,6 +104,9 @@ class LHEAnalyzer( Analyzer ):
             event.lheV_pt = sqrt( (pup[v[0]][0]+pup[v[1]][0])**2 +  (pup[v[0]][1]+pup[v[1]][1])**2 )
 
         geninfos = self.mchandles['GenInfos'].product()
+
+        print geninfos
+
         event.npLO = lhehandle.npLO()
         event.npNLO = lhehandle.npNLO()
         event.nMEPartons = geninfos.nMEPartons()

@@ -278,6 +278,7 @@ class MT2Analyzer( Analyzer ):
         setattr(event, "mt2"+self.cfg_ana.collectionPostFix+"_Xj_hgg", -999)
         setattr(event, "pseudoJet1"+self.cfg_ana.collectionPostFix+"_Xj_hgg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
         setattr(event, "pseudoJet2"+self.cfg_ana.collectionPostFix+"_Xj_hgg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        setattr(event, "mt2"+self.cfg_ana.collectionPostFix+"_Xj_hgg_genMET", -999)
         
         if hasattr(event, 'met'):
             hgg_objectsXjc = [ j for j in event.gg_cleanJets if j.pt() > self.jetPt and abs(j.eta())<2.4 ]
@@ -296,6 +297,11 @@ class MT2Analyzer( Analyzer ):
              
                  if len(hgg_objectsXj10lc)>=2:
                      self.hgg_mt2_Xj = self.getMT2Hemi(event,hgg_objectsXj10lc,event.met,self.cfg_ana.collectionPostFix,"_Xj_hgg")
+
+           ### MT2 with reco jets and GEN met:
+                     if self.cfg_comp.isMC and self.met.genMET():
+#                         self.mt2_Xj_genmet = self.getMT2Hemi(event,objectsXj10lc,self.met.genMET(),self.cfg_ana.collectionPostFix,"_Xj_hgg_genmet")
+                         self.hgg_mt2_Xj_genmet = self.getMT2Hemi(event,hgg_objectsXj10lc,self.met.genMET(),self.cfg_ana.collectionPostFix,"_Xj_hgg_genMET")
 
 
 

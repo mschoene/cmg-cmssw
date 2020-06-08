@@ -116,11 +116,12 @@ class Lepton( PhysicsObject):
         return self.relIso(0.4, 'EA', area_cone_size=area_cone_size)
     
     def lostInner(self):
-        if hasattr(self.innerTrack(),"trackerExpectedHitsInner") :
-		return self.innerTrack().trackerExpectedHitsInner().numberOfLostHits()
-	else :	
-		return self.innerTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS)	
-
+#        if hasattr(self.innerTrack(),"trackerExpectedHitsInner") :
+#        if ( abs(self.pdgId())==13 ): 
+#            return self.innerTrack().trackerExpectedHitsInner().numberOfLostHits()
+#	else :	
+        return self.innerTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS)	
+    
     def p4WithFSR(self):
         ret = self.p4()
         for p in getattr(self, 'ownFsrPhotons', getattr(self, 'fsrPhotons', [])):

@@ -89,6 +89,7 @@ MicroEventContentGEN = cms.PSet(
         'keep LHEEventProduct_*_*_*',
         'keep GenFilterInfo_*_*_*',
         'keep GenLumiInfoHeader_generator_*_*',
+        'keep GenLumiInfoHeader_generator_*',
         'keep GenLumiInfoProduct_*_*_*',
         'keep GenEventInfoProduct_generator_*_*',
         'keep recoGenParticles_genPUProtons_*_*', 
