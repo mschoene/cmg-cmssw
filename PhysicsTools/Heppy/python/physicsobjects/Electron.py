@@ -3,6 +3,7 @@ from PhysicsTools.Heppy.physicsutils.ElectronMVAID import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 import ROOT
 import sys
+from math import exp
 
 class Electron( Lepton ):
 
@@ -42,6 +43,8 @@ class Electron( Lepton ):
     
         elif id == "MVA_ID_NonTrig_Spring16_VetoRazor":    return self.mvaIDRun2("Spring16","Veto")
 
+        elif id == "MVA_ID_NonTrig_94X_VLoose":    return self.mvaIDRun2("Fall17noIso","Veto")
+
 
         
         elif id == "MVA_ID_NonTrig_Phys14Fix_HZZ":     return self.mvaIDRun2("NonTrigPhys14Fix","HZZ")
@@ -54,6 +57,9 @@ class Electron( Lepton ):
         elif id == "MVA_ID_nonIso_Fall17_Loose":       return self.mvaIDRun2("Fall17noIso","Loose")
         elif id == "MVA_ID_nonIso_Fall17_wp90":        return self.mvaIDRun2("Fall17noIso","wp90")
         elif id == "MVA_ID_nonIso_Fall17_wp80":        return self.mvaIDRun2("Fall17noIso","wp80")
+        elif id == "MVA_ID_nonIso_Fall17_SUSYVLooseFO":       return self.mvaIDRun2("Fall17noIso","SUSYVLooseFO")
+        elif id == "MVA_ID_nonIso_Fall17_SUSYVLoose":       return self.mvaIDRun2("Fall17noIso","SUSYVLoose")
+        elif id == "MVA_ID_nonIso_Fall17_SUSYTight":       return self.mvaIDRun2("Fall17noIso","SUSYTight")
         elif id == "MVA_ID_Iso_Fall17_Loose":       return self.mvaIDRun2("Fall17Iso","Loose")
         elif id == "MVA_ID_Iso_Fall17_wp90":        return self.mvaIDRun2("Fall17Iso","wp90")
         elif id == "MVA_ID_Iso_Fall17_wp80":        return self.mvaIDRun2("Fall17Iso","wp80")
@@ -70,15 +76,30 @@ class Electron( Lepton ):
             wp = wp.replace("_zs","")
         elif showerShapes == "auto":
             showerShapes = "full5x5"
+
+        hOverE_CE, hOverE_Cr = 0, 0
+        if "POG_FALL17_94X_v1" in wp:
+            hOverE_CE = 1.12 if self.physObj.isEB() else 0.5
+            hOverE_Cr = 0.0368 if self.physObj.isEB() else 0.201
+
+        if "POG_FALL17_94X_v2" in wp: # these are just the loose wp values, for the others fix this
+            hOverE_CE = 1.16 if self.physObj.isEB() else 2.54
+            hOverE_Cr = 0.0324 if self.physObj.isEB() else 0.183
+
         vars = {
-            'dEtaIn' : abs(self.dEtaInSeed()) if "POG_SPRING16_25ns_v1" in wp else abs(self.physObj.deltaEtaSuperClusterTrackAtVtx()),
+            'dEtaIn' : abs(self.dEtaInSeed()) if (("POG_SPRING16_25ns_v1" in wp) or ("POG_FALL17_94X_v" in wp)) else abs(self.physObj.deltaEtaSuperClusterTrackAtVtx()),
+            #'dEtaIn' : abs(self.dEtaInSeed()) if (("POG_SPRING16_25ns_v1" in wp) or ("POG_FALL17_94X_v1" in wp)) else abs(self.physObj.deltaEtaSuperClusterTrackAtVtx()),
             'dPhiIn' : abs(self.physObj.deltaPhiSuperClusterTrackAtVtx()),
             'sigmaIEtaIEta' : self.physObj.full5x5_sigmaIetaIeta() if showerShapes == "full5x5" else self.physObj.sigmaIetaIeta(),
-            'H/E' : self.physObj.hadronicOverEm(),
+            'H/E' : self.physObj.hadronicOverEm() - (hOverE_CE  + hOverE_Cr * self.rho)/(self.physObj.superCluster().energy()),
             #'1/E-1/p' : abs(1.0/self.physObj.ecalEnergy() - self.physObj.eSuperClusterOverP()/self.physObj.ecalEnergy()),
             '1/E-1/p' : abs(1.0/self.physObj.ecalEnergy() - self.physObj.eSuperClusterOverP()/self.physObj.ecalEnergy()) if self.physObj.ecalEnergy()>0. else 9e9,
             'conversionVeto' : self.physObj.passConversionVeto(),
-            'missingHits' : self.physObj.gsfTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS), # http://cmslxr.fnal.gov/source/DataFormats/TrackReco/interface/HitPattern.h?v=CMSSW_7_2_3#0153
+
+
+#ele->gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS)
+            'missingHits' : self.physObj.gsfTrack().hitPattern().numberOfAllHits(ROOT.reco.HitPattern.MISSING_INNER_HITS), # http://cmslxr.fnal.gov/source/DataFormats/TrackReco/interface/HitPattern.h?v=CMSSW_7_2_3#0153
+            #          'missingHits' : self.physObj.gsfTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS), # http://cmslxr.fnal.gov/source/DataFormats/TrackReco/interface/HitPattern.h?v=CMSSW_7_2_3#0153
             'dxy' : abs(self.dxy()),
             'dz' : abs(self.dz()),
             'chi2' : self.normalizedGsfChi2(),
@@ -128,6 +149,16 @@ class Electron( Lepton ):
             'POG_SPRING16_25ns_v1_Medium' :  [('dEtaIn', [0.00311, 0.00609]), ('dPhiIn', [0.1030, 0.0450]), ('sigmaIEtaIEta', [0.00998, 0.0298]), ('H/E', [0.2530, 0.0878]), ('1/E-1/p', [0.1340, 0.13])],
             'POG_SPRING16_25ns_v1_Tight'  :  [('dEtaIn', [0.00308, 0.00605]), ('dPhiIn', [0.0816, 0.0394]), ('sigmaIEtaIEta', [0.00998, 0.0292]), ('H/E', [0.0414, 0.0641]), ('1/E-1/p', [0.0129, 0.0129])],
             'POG_SPRING16_25ns_v1_HLT'    :  [('dEtaIn', [0.004, 999]), ('dPhiIn', [0.020, 999]), ('sigmaIEtaIEta', [0.011, 0.031]), ('H/E', [0.060, 0.065]), ('1/E-1/p', [0.013, 0.013]), ('chi2', [sys.float_info.max, 3.0]), ('ECALPFIsoEA', [0.160, 0.120]), ('HCALPFIsoEA', [0.120, 0.120]), ('trkIso', [0.08, 0.08])],
+            ## ------- https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_92X_and_later
+            'POG_FALL17_94X_v1_Veto'      :  [('dEtaIn', [0.00523, 0.00984]), ('dPhiIn', [0.1590, 0.1570]), ('sigmaIEtaIEta', [0.0128, 0.0445]), ('H/E', [0.050, 0.0500]), ('1/E-1/p', [0.1930, 0.0962])],
+            'POG_FALL17_94X_v1_Loose'     :  [('dEtaIn', [0.00387, 0.00720]), ('dPhiIn', [0.0716, 0.1470]), ('sigmaIEtaIEta', [0.0105, 0.0356]), ('H/E', [0.050, 0.0414]), ('1/E-1/p', [0.1290, 0.0875])],
+            'POG_FALL17_94X_v1_Medium'    :  [('dEtaIn', [0.00365, 0.00625]), ('dPhiIn', [0.0588, 0.0355]), ('sigmaIEtaIEta', [0.0105, 0.0309]), ('H/E', [0.026, 0.0260]), ('1/E-1/p', [0.0327, 0.0335])],
+            'POG_FALL17_94X_v1_Tight'     :  [('dEtaIn', [0.00353, 0.00567]), ('dPhiIn', [0.0499, 0.0165]), ('sigmaIEtaIEta', [0.0104, 0.0305]), ('H/E', [0.026, 0.0260]), ('1/E-1/p', [0.0278, 0.0158])],
+            ## ------- https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Working_points_for_94X_and_later
+            'POG_FALL17_94X_v2_Veto'      :  [('dEtaIn', [0.00463, 0.00814]), ('dPhiIn', [0.148, 0.19]), ('sigmaIEtaIEta', [0.0126, 0.0457]), ('H/E', [0.050, 0.0500]), ('1/E-1/p', [0.208, 0.132])],
+            'POG_FALL17_94X_v2_Loose'     :  [('dEtaIn', [0.00377, 0.00674]), ('dPhiIn', [0.0884, 0.169]), ('sigmaIEtaIEta', [0.0112, 0.0425]), ('H/E', [0.050, 0.0441]), ('1/E-1/p', [0.193, 0.111])],
+            'POG_FALL17_94X_v2_Medium'    :  [('dEtaIn', [0.0032, 0.00674]), ('dPhiIn', [0.0547, 0.0394]), ('sigmaIEtaIEta', [0.0106, 0.0387]), ('H/E', [0.046, 0.0275]), ('1/E-1/p', [0.184, 0.0721])],
+            'POG_FALL17_94X_v2_Tight'     :  [('dEtaIn', [0.00353, 0.00567]), ('dPhiIn', [0.0499, 0.0165]), ('sigmaIEtaIEta', [0.0104, 0.0353]), ('H/E', [0.026, 0.0188]), ('1/E-1/p', [0.159, 0.0197])],
         }
         WP_conversion_veto = {
             # missing Hits incremented by 1 because we return False if >=, note the '='
@@ -164,7 +195,18 @@ class Electron( Lepton ):
             'POG_SPRING16_25ns_v1_ConvVeto_Loose'  :  WP['POG_SPRING16_25ns_v1_Loose' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
             'POG_SPRING16_25ns_v1_ConvVeto_Medium' :  WP['POG_SPRING16_25ns_v1_Medium']+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
             'POG_SPRING16_25ns_v1_ConvVeto_Tight'  :  WP['POG_SPRING16_25ns_v1_Tight' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
-        }
+            ## ------- https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_92X_and_later
+            'POG_FALL17_94X_v1_ConvVeto_Veto'   :  WP['POG_FALL17_94X_v1_Veto'  ]+[('conversionVeto', [True, True]), ('missingHits', [3, 4])],
+            'POG_FALL17_94X_v1_ConvVeto_Loose'  :  WP['POG_FALL17_94X_v1_Loose' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            'POG_FALL17_94X_v1_ConvVeto_Medium' :  WP['POG_FALL17_94X_v1_Medium']+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            'POG_FALL17_94X_v1_ConvVeto_Tight'  :  WP['POG_FALL17_94X_v1_Tight' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+
+            'POG_FALL17_94X_v2_ConvVeto_Veto'   :  WP['POG_FALL17_94X_v2_Veto'  ]+[('conversionVeto', [True, True]), ('missingHits', [3, 4])],
+            'POG_FALL17_94X_v2_ConvVeto_Loose'  :  WP['POG_FALL17_94X_v2_Loose' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            'POG_FALL17_94X_v2_ConvVeto_Medium' :  WP['POG_FALL17_94X_v2_Medium']+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            'POG_FALL17_94X_v2_ConvVeto_Tight'  :  WP['POG_FALL17_94X_v2_Tight' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+
+            }
 
         WP.update(WP_conversion_veto)
 
@@ -188,10 +230,16 @@ class Electron( Lepton ):
             'POG_SPRING15_25ns_v1_ConvVetoDxyDz_Loose'  :  WP['POG_SPRING15_25ns_v1_ConvVeto_Loose' ]+[('dxy',[0.0261, 0.1180]), ('dz',[0.410, 0.822])],
             'POG_SPRING15_25ns_v1_ConvVetoDxyDz_Medium' :  WP['POG_SPRING15_25ns_v1_ConvVeto_Medium']+[('dxy',[0.0118, 0.0739]), ('dz',[0.373, 0.602])],
             'POG_SPRING15_25ns_v1_ConvVetoDxyDz_Tight'  :  WP['POG_SPRING15_25ns_v1_ConvVeto_Tight' ]+[('dxy',[0.0111, 0.0351]), ('dz',[0.0466,0.417])],
-        }
+            }
         ## ------- in Spring16, not optimised simultaneously to the rest of ID. Cuts independent on WP
         for wps in ['Veto','Loose','Medium','Tight']:
             WP_conversion_veto_DxyDz['POG_SPRING16_25ns_v1_ConvVetoDxyDz_%s' % wps] =  WP['POG_SPRING16_25ns_v1_ConvVeto_%s' % wps ]+[('dxy',[0.05, 0.10]), ('dz',[0.10,0.20])]
+        ## ------- in   Fall17, not optimised simultaneously to the rest of ID. Cuts independent on WP
+        for wps in ['Veto','Loose','Medium','Tight']:
+            WP_conversion_veto_DxyDz['POG_FALL17_94X_v1_ConvVetoDxyDz_%s' % wps] =  WP['POG_FALL17_94X_v1_ConvVeto_%s' % wps ]+[('dxy',[0.05, 0.10]), ('dz',[0.10,0.20])]
+
+        for wps in ['Veto','Loose','Medium','Tight']:
+            WP_conversion_veto_DxyDz['POG_FALL17_94X_v2_ConvVetoDxyDz_%s' % wps] =  WP['POG_FALL17_94X_v2_ConvVeto_%s' % wps ]+[('dxy',[0.05, 0.10]), ('dz',[0.10,0.20])]
 
         WP.update(WP_conversion_veto_DxyDz)
 
@@ -438,7 +486,32 @@ class Electron( Lepton ):
                     return (val>cut)
 
             elif name == "Fall17noIso":
-                if wp == 'Loose':
+                if wp == 'Veto':
+                    if self.pt()<=10:
+                        if eta<0.8:
+                            return self.mvaRun2(name) > 0.488
+                        elif eta<1.479:
+                            return self.mvaRun2(name) > -0.045
+                        else:
+                            return self.mvaRun2(name) > 0.176
+
+                    elif self.pt()<25:
+                        if eta<0.8:
+                            return self.mvaRun2(name) >  (-0.788  + (0.148/15.)* (-self.pt()-10.))
+                        elif eta<1.479:
+                            return self.mvaRun2(name) >  (-0.85  + (0.075/15.)* (-self.pt()-10.))
+                        else:
+                            return self.mvaRun2(name) >  (-0.81  + (0.077/15.)* (-self.pt()-10.))
+
+                    else:
+                        if eta<0.8:
+                            return self.mvaRun2(name) > -0.64
+                        elif eta<1.479:
+                            return self.mvaRun2(name) > -0.775
+                        else:
+                            return self.mvaRun2(name) > -0.733
+
+                elif wp == 'Loose':
                     if self.pt() <= 10:
                         if   eta < 0.8  : return self.mvaRun2(name) > -0.13285867293779202
                         elif eta < 1.479: return self.mvaRun2(name) > -0.31765300958836074
@@ -499,6 +572,50 @@ class Electron( Lepton ):
                         tau = 8.109845366281608
                         A = 3.013927699126942
                     return self.mvaRun2(name) > c-A*exp(-self.pt()/tau)
+                elif wp == 'SUSYVLooseFO':
+                    if self.pt()<5:
+                        raise RuntimeError, 'MVA_ID_nonIso_Fall17_SUSYVLooseFO electron ID cannot be called for objects with pt below 5 GeV'
+                    elif self.pt()<10:
+                        if eta<0.8: _thiscut = -0.135
+                        elif eta<1.479: _thiscut = -0.417
+                        else: _thiscut = -0.470
+                    elif self.pt()<25:
+                        if eta<0.8: _thiscut = (-0.93 + (0.043/15.)*(self.pt()-10.))
+                        elif eta<1.479: _thiscut = (-0.93 + (0.04/15.)*(self.pt()-10.))
+                        else: _thiscut = (-0.942 + (0.032/15.)*(self.pt()-10.))
+                    else:
+                        if eta<0.8: _thiscut = -0.887
+                        elif eta<1.479: _thiscut = -0.89
+                        else: _thiscut = -0.91
+                    return self.mvaRun2(name) > _thiscut
+                elif wp == 'SUSYVLoose':
+                    if self.pt()<5:
+                        raise RuntimeError, 'MVA_ID_nonIso_Fall17_SUSYVLoose electron ID cannot be called for objects with pt below 5 GeV'
+                    elif self.pt()<10:
+                        if eta<0.8: _thiscut = 0.488
+                        elif eta<1.479: _thiscut = -0.045
+                        else: _thiscut = 0.176
+                    elif self.pt()<25:
+                        if eta<0.8: _thiscut = (-0.788 + (0.148/15.)*(self.pt()-10.))
+                        elif eta<1.479: _thiscut = (-0.85 + (0.075/15.)*(self.pt()-10.))
+                        else: _thiscut = (-0.81 + (0.077/15.)*(self.pt()-10.))
+                    else:
+                        if eta<0.8: _thiscut = -0.64
+                        elif eta<1.479: _thiscut = -0.775
+                        else: _thiscut = -0.733
+                    return self.mvaRun2(name) > _thiscut
+                elif wp == 'SUSYTight':
+                    if self.pt()<10:
+                        raise RuntimeError, 'MVA_ID_nonIso_Fall17_SUSYTight electron ID cannot be called for objects with pt below 10 GeV'
+                    elif self.pt()<25:
+                        if eta<0.8: _thiscut = 0.2+0.032*(self.pt()-10)
+                        elif eta<1.479: _thiscut = 0.1+0.025*(self.pt()-10)
+                        else: _thiscut = -0.1+0.028*(self.pt()-10)
+                    else:
+                        if eta<0.8: _thiscut = 0.68
+                        elif eta<1.479: _thiscut = 0.475
+                        else: _thiscut = 0.32
+                    return self.mvaRun2(name) > _thiscut
 
             elif name == "Fall17Iso":
                 if wp == 'Loose':
@@ -583,29 +700,26 @@ class Electron( Lepton ):
         else: isoValue = -999
         return max(0, isoValue - self.rhoHLT*hltEA)
 
-    def chargedHadronIsoR(self,R=0.4):
+    def chargedHadronIso(self,R=0.4):
         if   R == 0.3: return self.physObj.pfIsolationVariables().sumChargedHadronPt
         elif R == 0.4: return self.physObj.chargedHadronIso()
         raise RuntimeError("Electron chargedHadronIso missing for R=%s" % R)
 
-    def neutralHadronIsoR(self,R=0.4):
+    def neutralHadronIso(self,R=0.4):
         if   R == 0.3: return self.physObj.pfIsolationVariables().sumNeutralHadronEt
         elif R == 0.4: return self.physObj.neutralHadronIso()
         raise RuntimeError("Electron neutralHadronIso missing for R=%s" % R)
 
-    def photonIsoR(self,R=0.4):
+    def photonIso(self,R=0.4):
         if   R == 0.3: return self.physObj.pfIsolationVariables().sumPhotonEt
         elif R == 0.4: return self.physObj.photonIso()
         raise RuntimeError("Electron photonIso missing for R=%s" % R)
 
-    def chargedAllIsoR(self,R=0.4):
+    def chargedAllIso(self,R=0.4):
         if   R == 0.3: return self.physObj.pfIsolationVariables().sumChargedParticlePt
         raise RuntimeError("Electron chargedAllIso missing for R=%s" % R)
 
-    def chargedAllIso(self):
-        raise RuntimeError("Electron chargedAllIso missing")
-
-    def puChargedHadronIsoR(self,R=0.4):
+    def puChargedHadronIso(self,R=0.4):
         if   R == 0.3: return self.physObj.pfIsolationVariables().sumPUPt
         elif R == 0.4: return self.physObj.puChargedHadronIso()
         raise RuntimeError("Electron chargedHadronIso missing for R=%s" % R)
@@ -615,21 +729,21 @@ class Electron( Lepton ):
         '''
         Calculate Isolation, subtract FSR, apply specific PU corrections" 
         '''
-        photonIso = self.photonIsoR(R)
+        photonIso = self.photonIso(R)
         if hasattr(self,'fsrPhotons'):
             for gamma in self.fsrPhotons:
                 dr = deltaR(gamma.eta(), gamma.phi(), self.physObj.eta(), self.physObj.phi())
                 if (self.isEB() or dr > 0.08) and dr < R:
                     photonIso = max(photonIso-gamma.pt(),0.0)                
         if puCorr == "deltaBeta":
-            offset = dBetaFactor * self.puChargedHadronIsoR(R)
+            offset = dBetaFactor * self.puChargedHadronIso(R)
         elif puCorr == "rhoArea":
             offset = self.rho*getattr(self,"EffectiveArea"+(str(R).replace(".","")))
         elif puCorr in ["none","None",None]:
             offset = 0
         else:
              raise RuntimeError("Unsupported PU correction scheme %s" % puCorr)
-        return self.chargedHadronIsoR(R)+max(0.,photonIso+self.neutralHadronIsoR(R)-offset)            
+        return self.chargedHadronIso(R)+max(0.,photonIso+self.neutralHadronIso(R)-offset)            
 
 
     def dxy(self, vertex=None):
@@ -667,9 +781,9 @@ class Electron( Lepton ):
 
     def lostInner(self) :
         if hasattr(self.gsfTrack(),"trackerExpectedHitsInner") :
-		return self.gsfTrack().trackerExpectedHitsInner().numberOfLostHits()
+            return self.gsfTrack().trackerExpectedHitsInner().numberOfLostHits()
 	else :
-		return self.gsfTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS)
+            return self.gsfTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS)
 
     def validCandidateP4Kind(self):
         raw = self.physObj.candidateP4Kind()

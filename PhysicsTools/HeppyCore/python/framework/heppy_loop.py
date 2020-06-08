@@ -45,7 +45,6 @@ def runLoopAsync(comp, outDir, configName, options):
 _globalGracefulStopFlag = multiprocessing.Value('i',0)
 def runLoop( comp, outDir, config, options):
     fullName = '/'.join( [outDir, comp.name ] )
-    # import pdb; pdb.set_trace()
     config.components = [comp]
     memcheck = 2 if getattr(options,'memCheck',False) else -1
     loop = Looper( fullName,
@@ -192,6 +191,9 @@ def main( options, args, parser ):
                               callback=ML.callBack)
         pool.close()
         pool.join()
+    elif len(selComps)==0:
+        print "ERROR: no components selected"
+        sys.exit(1)
     else:
         # when running only one loop, do not use multiprocessor module.
         # then, the exceptions are visible -> use only one sample for testing

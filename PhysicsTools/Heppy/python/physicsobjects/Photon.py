@@ -145,8 +145,11 @@ class Photon(PhysicsObject ):
         "chaHadIso":[1.295,1.011],"neuHadIso":[[10.910,0.0148,0.000017],[5.931,0.0163,0.000014]],"phoIso":[[3.630,0.0047],[6.641, 0.0034]]},
 
         ##loose 17 cut based
-        "POG_Spring17_Loose": {"conversionVeto": [True,True], "H/E":[0.105,0.029],"sigmaIEtaIEta":[0.0103, 0.0276 ],
-        "chaHadIso":[2.839,2.150],"neuHadIso":[[9.188,0.0126,0.000026],[10.471,0.0119,0.000025]],"phoIso":[[2.956,0.0035],[4.895, 0.0040]]},
+        "POG_Spring17_Loose": {"conversionVeto": [True,True], "H/E":[0.04596,0.0590],"sigmaIEtaIEta":[0.0106, 0.0272 ],
+        "chaHadIso":[1.694,2.089],"neuHadIso":[[24.032,0.01512,0.00002259],[19.722,0.0117,0.000023]],"phoIso":[[2.876,0.004017],[4.162, 0.0037]]},
+
+#        "POG_Spring17_Loose": {"conversionVeto": [True,True], "H/E":[0.105,0.029],"sigmaIEtaIEta":[0.0103, 0.0276 ],
+#        "chaHadIso":[2.839,2.150],"neuHadIso":[[9.188,0.0126,0.000026],[10.471,0.0119,0.000025]],"phoIso":[[2.956,0.0035],[4.895, 0.0040]]},
 
         }
         

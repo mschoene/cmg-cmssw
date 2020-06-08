@@ -8,6 +8,6 @@ namespace {
     SimpleElectron fuffaElectron;
     EpCombinationTool fuffaElectronCombinator;
     ElectronEnergyCalibratorRun2 fuffaElectronCalibrator;
-    PhotonEnergyCalibratorRun2 fuffaPhotonCalibrator;
+    PhotonEnergyCalibratorRun2 fuffaPhotonCalibratorRun2;
   };
 }

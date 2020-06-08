@@ -92,6 +92,7 @@ class CmsswPreprocessor :
                                 print "WARNING: cmsswPreprocessor received options but can't pass on to cmsswConfig"
                 
 		cmsswConfig.process.source.fileNames = inputfiles
+		print inputfiles
 		# cmsRun will not create the output file if maxEvents==0, leading to crash of the analysis downstream.
 		# Thus, we set nEvents = 1 if the input file is empty (the output file will be empty as well).
 		cmsswConfig.process.maxEvents.input = 1 if (fineSplitFactor>1 and nEvents==0) else nEvents
@@ -125,7 +126,9 @@ class CmsswPreprocessor :
 		runstring="%s %s >& %s/cmsRun.log" % (self.command,configfile,wd)
 		print "Running pre-processor: %s " %runstring
                 ret=os.system(runstring)
+		print ret
                 if ret != 0:
                      print "CMSRUN failed"
-                     exit(ret)
+                     sys.exit(ret)
+		#                     exit(ret)
 		return component

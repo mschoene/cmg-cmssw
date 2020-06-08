@@ -15,6 +15,8 @@
 #include "PhysicsTools/Heppy/interface/Megajet.h"
 #include "PhysicsTools/Heppy/interface/ReclusterJets.h"
 #include "PhysicsTools/Heppy/interface/IsolationComputer.h"
+#include "PhysicsTools/Heppy/interface/FloatZipper.h"
+#include "PhysicsTools/Heppy/interface/PATTauDiscriminationByMVAIsolationRun2FWlite.h"
 
 #include "EgammaAnalysis/ElectronTools/interface/SimpleElectron.h"
 #include "EgammaAnalysis/ElectronTools/interface/ElectronEPcombinator.h"
@@ -50,6 +52,7 @@ namespace {
     //  heppy::SimpleElectron fuffaElectron;
     //  ElectronEnergyCalibrator fuffaElectronCalibrator;
     //  heppy::ElectronEPcombinator fuffaElectronCombinator;
+    heppy::PATTauDiscriminationByMVAIsolationRun2FWlite PATTauDiscriminationByMVAIsolationRun2FWlite_;
 
   };
 }

@@ -4,21 +4,24 @@
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
-PhotonEnergyCalibratorRun2::PhotonEnergyCalibratorRun2(bool isMC, bool synchronization, 
-						       std::string correctionFile
-						       ) :
-  isMC_(isMC), synchronization_(synchronization),
-  rng_(nullptr),
-  _correctionRetriever(correctionFile) // here is opening the files and reading thecorrections
-{
-  if(isMC_) {
-    _correctionRetriever.doScale = false; 
-    _correctionRetriever.doSmearings = true;
-  } else {
-    _correctionRetriever.doScale = true; 
-    _correctionRetriever.doSmearings = false;
-  }
-}
+// PhotonEnergyCalibratorRun2::PhotonEnergyCalibratorRun2(//bool isMC //, bool synchronization//, 
+// 						       //  std::string correctionFile
+// 						       ) :
+//   isMC_(0 ), synchronization_( 0 ),
+//   rng_(nullptr),
+//   //  _correctionRetriever(correctionFile) // here is opening the files and reading thecorrections
+//   _correctionRetriever("Run2017_17Nov2017_v1_ele_unc") // here is opening the files and reading thecorrections
+
+                
+// {
+//   if(isMC_) {
+//     _correctionRetriever.doScale = false; 
+//     _correctionRetriever.doSmearings = true;
+//   } else {
+//     _correctionRetriever.doScale = true; 
+//     _correctionRetriever.doSmearings = false;
+//   }
+// }
 
 PhotonEnergyCalibratorRun2::~PhotonEnergyCalibratorRun2()
 {}
@@ -39,8 +42,13 @@ void PhotonEnergyCalibratorRun2::calibrate(SimplePhoton &photon, edm::StreamID c
     float aeta = std::abs(photon.getEta()); //, r9 = photon.getR9();
     float et = photon.getNewEnergy()/cosh(aeta);
 
+
+    //x_correctionRetriever.doScale = true; 
+   //    _correctionRetriever.doSmearings = false;
+
     scale = _correctionRetriever.ScaleCorrection(photon.getRunNumber(), photon.isEB(), photon.getR9(), aeta, et);
     smear = _correctionRetriever.getSmearingSigma(photon.getRunNumber(), photon.isEB(), photon.getR9(), aeta, et, 0., 0.); 
+
     
     double newEcalEnergy, newEcalEnergyError;
     if (isMC_) {

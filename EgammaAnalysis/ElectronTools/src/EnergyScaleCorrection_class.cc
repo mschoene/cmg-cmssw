@@ -20,7 +20,10 @@ EnergyScaleCorrection_class::EnergyScaleCorrection_class(std::string correctionF
   doScale(false), doSmearings(false),
   smearingType_(ECALELF)
 {
-  
+
+  correctionFileName = "Run2017_17Nov2017_v1_ele_unc";
+  //correctionFileName = "Legacy2016_07Aug2017_FineEtaR9_v3_ele_unc";
+
   if(!correctionFileName.empty()) { 
     std::string filename = correctionFileName+"_scales.dat";
     ReadFromFile(filename);
@@ -55,6 +58,10 @@ float EnergyScaleCorrection_class::ScaleCorrection(unsigned int runNumber, bool 
   float correction = 1;
   if(doScale) correction *= getScaleOffset(runNumber, isEBEle, R9Ele, etaSCEle, EtEle);
   
+  std::cout << correction<< std::endl;
+
+  std::cout << runNumber << "   " << etaSCEle << "   " << R9Ele << "   " << EtEle << std::endl;
+
   return correction; 
 }
 
@@ -85,6 +92,9 @@ float EnergyScaleCorrection_class::getScaleSystUncertainty(unsigned int runNumbe
 
 correctionValue_class EnergyScaleCorrection_class::getScaleCorrection(unsigned int runNumber, bool isEBEle, double R9Ele, double etaSCEle, double EtEle) const
 {
+  
+  std::cout << runNumber << "   " << etaSCEle << "   " << R9Ele << "   " << EtEle << std::endl;
+
   // buld the category based on the values of the object
   correctionCategory_class category(runNumber, etaSCEle, R9Ele, EtEle);
   correction_map_t::const_iterator corr_itr = scales.find(category); // find the correction value in the map that associates the category to the correction
@@ -371,6 +381,8 @@ float EnergyScaleCorrection_class::getSmearingSigma(int runNumber, bool isEBEle,
     // }
     corr_itr = smearings_not_defined.find(category);
     std::cerr << "[WARNING] Smearing category not found: " << std::endl;
+
+    std::cout << runNumber << "   " << etaSCEle << "   " << R9Ele << "   " << EtEle << std::endl;
     std::cerr << category << std::endl;
     //     exit(1);
   }

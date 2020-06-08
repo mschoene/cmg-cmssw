@@ -424,13 +424,20 @@ class LeptonAnalyzer( Analyzer ):
           elif self.eleEffectiveArea == "Fall17":
               SCEta = abs(ele.superCluster().eta())
               ## from RecoEgamma/ElectronIdentification/data/Fall17/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_92X.txt
-              if   SCEta < 1.000: ele.EffectiveArea03 = 0.1566
-              elif SCEta < 1.479: ele.EffectiveArea03 = 0.1626
-              elif SCEta < 2.000: ele.EffectiveArea03 = 0.1073
-              elif SCEta < 2.200: ele.EffectiveArea03 = 0.0854
-              elif SCEta < 2.300: ele.EffectiveArea03 = 0.1051
-              elif SCEta < 2.400: ele.EffectiveArea03 = 0.1204
-              else:               ele.EffectiveArea03 = 0.1524
+              if   SCEta < 1.000: ele.EffectiveArea03 = 0.1440
+              elif SCEta < 1.479: ele.EffectiveArea03 = 0.1562
+              elif SCEta < 2.000: ele.EffectiveArea03 = 0.1032
+              elif SCEta < 2.200: ele.EffectiveArea03 = 0.0859
+              elif SCEta < 2.300: ele.EffectiveArea03 = 0.1116
+              elif SCEta < 2.400: ele.EffectiveArea03 = 0.1321
+              else:               ele.EffectiveArea03 = 0.1654
+              # if   SCEta < 1.000: ele.EffectiveArea03 = 0.1566
+              # elif SCEta < 1.479: ele.EffectiveArea03 = 0.1626
+              # elif SCEta < 2.000: ele.EffectiveArea03 = 0.1073
+              # elif SCEta < 2.200: ele.EffectiveArea03 = 0.0854
+              # elif SCEta < 2.300: ele.EffectiveArea03 = 0.1051
+              # elif SCEta < 2.400: ele.EffectiveArea03 = 0.1204
+              # else:               ele.EffectiveArea03 = 0.1524
               # warning: EAs not computed for cone DR=0.4, use the values for DR=0.3 scaled by 16/9 instead
               ele.EffectiveArea04 = ele.EffectiveArea03*16./9.
           else: raise RuntimeError,  "Unsupported value for ele_effectiveAreas: can only use Data2012 (rho: ?), Phys14_v1 and Spring15_v1 (rho: fixedGridRhoFastjetAll)"
@@ -452,11 +459,11 @@ class LeptonAnalyzer( Analyzer ):
         # Compute relIso with R=0.3 and R=0.4 cones
         for ele in allelectrons:
             if self.cfg_ana.ele_isoCorr=="rhoArea" :
-                 ele.absIso03 = (ele.chargedHadronIsoR(0.3) + max(ele.neutralHadronIsoR(0.3)+ele.photonIsoR(0.3)-ele.rho*ele.EffectiveArea03,0))
-                 ele.absIso04 = (ele.chargedHadronIsoR(0.4) + max(ele.neutralHadronIsoR(0.4)+ele.photonIsoR(0.4)-ele.rho*ele.EffectiveArea04,0))
+                 ele.absIso03 = (ele.chargedHadronIso(0.3) + max(ele.neutralHadronIso(0.3)+ele.photonIso(0.3)-ele.rho*ele.EffectiveArea03,0))
+                 ele.absIso04 = (ele.chargedHadronIso(0.4) + max(ele.neutralHadronIso(0.4)+ele.photonIso(0.4)-ele.rho*ele.EffectiveArea04,0))
             elif self.cfg_ana.ele_isoCorr=="deltaBeta" :
-                 ele.absIso03 = (ele.chargedHadronIsoR(0.3) + max( ele.neutralHadronIsoR(0.3)+ele.photonIsoR(0.3) - ele.puChargedHadronIsoR(0.3)/2, 0.0))
-                 ele.absIso04 = (ele.chargedHadronIsoR(0.4) + max( ele.neutralHadronIsoR(0.4)+ele.photonIsoR(0.4) - ele.puChargedHadronIsoR(0.4)/2, 0.0))
+                 ele.absIso03 = (ele.chargedHadronIso(0.3) + max( ele.neutralHadronIso(0.3)+ele.photonIso(0.3) - ele.puChargedHadronIso(0.3)/2, 0.0))
+                 ele.absIso04 = (ele.chargedHadronIso(0.4) + max( ele.neutralHadronIso(0.4)+ele.photonIso(0.4) - ele.puChargedHadronIso(0.4)/2, 0.0))
             else :
                  raise RuntimeError("Unsupported ele_isoCorr name '" + str(self.cfg_ana.ele_isoCorr) +  "'! For now only 'rhoArea' and 'deltaBeta' are supported.")
             ele.relIso03 = ele.absIso03/ele.pt()
@@ -474,6 +481,10 @@ class LeptonAnalyzer( Analyzer ):
                  ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Tight")
             elif self.cfg_ana.ele_tightId=="Cuts_SPRING16_25ns_v1_ConvVetoDxyDz" :
                  ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Tight")
+            elif self.cfg_ana.ele_tightId=="Cuts_FALL17_94X_v1_ConvVetoDxyDz" :
+                 ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v1_ConvVetoDxyDz_Tight")
+            elif self.cfg_ana.ele_tightId=="Cuts_FALL17_94X_v2_ConvVetoDxyDz" :
+                 ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_FALL17_94X_v2_ConvVetoDxyDz_Tight")
 
             else :
                  try:
@@ -771,15 +782,19 @@ setattr(LeptonAnalyzer,"defaultConfig",cfg.Analyzer(
     inclusive_electron_id  = "",
     inclusive_electron_pt  = 5,
     inclusive_electron_eta = 2.5,
-    inclusive_electron_dxy = 0.5,
-    inclusive_electron_dz  = 1.0,
+    inclusive_electron_dxy = 0.2,
+    inclusive_electron_dz  = 0.5,
+#    inclusive_electron_dxy = 0.5,
+#    inclusive_electron_dz  = 1.0,
     inclusive_electron_lostHits = 1.0,
     # loose electron selection
     loose_electron_id     = "", #POG_MVA_ID_NonTrig_full5x5",
     loose_electron_pt     = 7,
     loose_electron_eta    = 2.4,
-    loose_electron_dxy    = 0.05,
-    loose_electron_dz     = 0.2,
+    loose_electron_dxy    = 0.2,
+    loose_electron_dz     = 0.5,
+#    loose_electron_dxy    = 0.05,
+#    loose_electron_dz     = 0.2,
     loose_electron_relIso = 0.4,
     # loose_electron_isoCut = lambda electron : electron.miniRelIso < 0.1
     loose_electron_lostHits = 1.0,

@@ -7,6 +7,9 @@ from PhysicsTools.HeppyCore.statistics.counter import Counter, Counters
 from PhysicsTools.Heppy.physicsutils.JetReCalibrator import Type1METCorrector, setFakeRawMETOnOldMiniAODs
 import PhysicsTools.HeppyCore.framework.config as cfg
 
+
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+
 import copy
 import ROOT
 from math import hypot
@@ -283,10 +286,11 @@ class METAnalyzer( Analyzer ):
         #subtract muon momentum and construct met
         px,py = self.metNoMu.px()+mupx, self.metNoMu.py()+mupy
         self.metNoMu.setP4(ROOT.reco.Particle.LorentzVector(px,py, 0, hypot(px,py)))
-        px,py = self.metNoMuNoPU.px()+mupx, self.metNoMuNoPU.py()+mupy
-        self.metNoMuNoPU.setP4(ROOT.reco.Particle.LorentzVector(px,py, 0, hypot(px,py)))
         setattr(event, "metNoMu"+self.cfg_ana.collectionPostFix, self.metNoMu)
-        if self.cfg_ana.doMetNoPU: setattr(event, "metNoMuNoPU"+self.cfg_ana.collectionPostFix, self.metNoMuNoPU)
+        if self.cfg_ana.doMetNoPU:
+            px,py = self.metNoMuNoPU.px()+mupx, self.metNoMuNoPU.py()+mupy
+            self.metNoMuNoPU.setP4(ROOT.reco.Particle.LorentzVector(px,py, 0, hypot(px,py)))
+            setattr(event, "metNoMuNoPU"+self.cfg_ana.collectionPostFix, self.metNoMuNoPU)
 
 
     def makeMETNoEle(self, event):
@@ -303,11 +307,12 @@ class METAnalyzer( Analyzer ):
         #subtract electron momentum and construct met
         px,py = self.metNoEle.px()+elepx, self.metNoEle.py()+elepy
         self.metNoEle.setP4(ROOT.reco.Particle.LorentzVector(px,py, 0, hypot(px,py)))
-
-        px,py = self.metNoEleNoPU.px()+elepx, self.metNoEleNoPU.py()+elepy
-        self.metNoEleNoPU.setP4(ROOT.reco.Particle.LorentzVector(px,py, 0, hypot(px,py)))
         setattr(event, "metNoEle"+self.cfg_ana.collectionPostFix, self.metNoEle)
-        if self.cfg_ana.doMetNoPU: setattr(event, "metNoEleNoPU"+self.cfg_ana.collectionPostFix, self.metNoEleNoPU)
+
+        if self.cfg_ana.doMetNoPU:
+            px,py = self.metNoEleNoPU.px()+elepx, self.metNoEleNoPU.py()+elepy
+            self.metNoEleNoPU.setP4(ROOT.reco.Particle.LorentzVector(px,py, 0, hypot(px,py)))
+            setattr(event, "metNoEleNoPU"+self.cfg_ana.collectionPostFix, self.metNoEleNoPU)
 
     def makeMETNoPhoton(self, event):
         self.metNoPhoton = copy.deepcopy(self.met)
@@ -424,6 +429,27 @@ class METAnalyzer( Analyzer ):
             self.makeMETNoPhoton(event)
 
     def process(self, event):
+
+#         import FWCore.ParameterSet.Config as cms
+#         process = cms.Process('corrMETs')
+
+#         process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#         from Configuration.AlCa.GlobalTag import GlobalTag
+#         process.GlobalTag = GlobalTag( process.GlobalTag, "94X_dataRun2_ReReco_EOY17_v6")
+
+# #        print "first ", self.cfg_ana.metCollection
+        
+#         runMetCorAndUncFromMiniAOD (
+#             process,
+#             isData = not( self.cfg_comp.isMC ), # false for MC
+#             fixEE2017 = True,
+# #            postfix = "",
+#             postfix = "ModifiedMET",
+#             )
+
+#         process.p = cms.Path( process.fullPatMetSequenceModifiedMET )
+
+
         self.readCollections( event.input)
         self.counters.counter('events').inc('all events')
 
@@ -445,8 +471,12 @@ setattr(METAnalyzer,"defaultConfig", cfg.Analyzer(
     class_object = METAnalyzer,
 #    metCollection     = "slimmedMETsMuEGClean",
 #    noPUMetCollection = "slimmedMETsMuEGClean",
-    metCollection     = "slimmedMETs",
-    noPUMetCollection = "slimmedMETs",
+#    metCollection     = "slimmedMETs",
+#    noPUMetCollection = "slimmedMETs",
+
+    metCollection     = "slimmedMETsModifiedMET",
+    noPUMetCollection = "slimmedMETsModifiedMET",
+
     copyMETsByValue = False,
     recalibrate = True,
     applyJetSmearing = True,

@@ -14,7 +14,8 @@ class PhotonEnergyCalibratorRun2 {
   PhotonEnergyCalibratorRun2() {}
   
   // further configuration will be added when we will learn how it will work
-  PhotonEnergyCalibratorRun2(bool isMC, bool synchronization, std::string correctionFile);
+  //  PhotonEnergyCalibratorRun2(bool isMC, bool synchronization, std::string correctionFile);
+  //  PhotonEnergyCalibratorRun2();//bool isMC);//, bool synchronization);
 
   ~PhotonEnergyCalibratorRun2() ;
   
@@ -32,7 +33,7 @@ class PhotonEnergyCalibratorRun2 {
   
  protected:    
   // whatever data will be needed
-  bool isMC_, synchronization_;
+  bool isMC_=0, synchronization_=0;
   TRandom *rng_;
   std::vector<double> smearings_;
   std::vector<double> scales_;

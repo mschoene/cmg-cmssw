@@ -32,7 +32,7 @@ private:
 template<typename T>
 CalibratedPhotonProducerRun2T<T>::CalibratedPhotonProducerRun2T( const edm::ParameterSet & conf ) :
   thePhotonToken(consumes<edm::View<T> >(conf.getParameter<edm::InputTag>("photons"))),
-  theEnCorrectorRun2(conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::string >("correctionFile")) {
+  theEnCorrectorRun2( ) {//conf.getParameter<bool> "isMC")){ //, conf.getParameter<bool>("isSynchronization")) {//, conf.getParameter<std::string >("correctionFile")) {
 
   if (conf.existsAs<bool>("semiDeterministic") && conf.getParameter<bool>("semiDeterministic")) {
     theSemiDeterministicRng.reset(new TRandom2());

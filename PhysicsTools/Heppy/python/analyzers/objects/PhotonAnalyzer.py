@@ -19,6 +19,7 @@ from PhysicsTools.HeppyCore.utils.deltar import deltaR, deltaPhi, bestMatch, mat
 import PhysicsTools.HeppyCore.framework.config as cfg
 
 
+
 class PhotonAnalyzer( Analyzer ):
 
     
@@ -33,11 +34,7 @@ class PhotonAnalyzer( Analyzer ):
 	#FIXME: only Embedded works
         if self.cfg_ana.doPhotonScaleCorrections:
             conf = cfg_ana.doPhotonScaleCorrections
-            self.photonEnergyCalibrator = Run2PhotonCalibrator(
-                conf['data'],
-                cfg_comp.isMC,
-                conf['isSync'] if 'isSync' in conf else False,
-            )
+            self.photonEnergyCalibratorRun2 = Run2PhotonCalibrator( "RecoEgamma/EgammaTools/data/Run2017_17Nov2017_v1_ele_unc" )
 
     def declareHandles(self):
         super(PhotonAnalyzer, self).declareHandles()
@@ -69,6 +66,7 @@ class PhotonAnalyzer( Analyzer ):
 
         event.selectedPhotons = []
         event.selectedPhotonsCentral = []
+        event.selectedPhotonsWideEta = []
 
         if self.doFootprintRemovedIsolation:
             # values are taken from EGamma implementation: https://github.com/cms-sw/cmssw/blob/CMSSW_7_6_X/RecoEgamma/PhotonIdentification/plugins/PhotonIDValueMapProducer.cc#L198-L199
@@ -77,12 +75,14 @@ class PhotonAnalyzer( Analyzer ):
         # Photon scale calibrations
         if self.cfg_ana.doPhotonScaleCorrections:
             for gamma in event.allphotons:
-                self.photonEnergyCalibrator.correct(gamma, event.run)
+                self.photonEnergyCalibratorRun2.correct( gamma, event.run, self.cfg_comp.isMC )
+                
 
         foundPhoton = False
         for gamma in event.allphotons:
             if gamma.pt() < self.cfg_ana.ptMin: continue
-            if abs(gamma.eta()) > self.cfg_ana.etaMax: continue
+            # use the supercluster eta instead            if abs(gamma.eta()) > self.cfg_ana.etaMax: continue
+            # if abs(gamma.superCluster().eta()) > self.cfg_ana.etaMax: continue
             foundPhoton = True
 
             gamma.rho = float(self.handles['rhoPhoton'].product()[0])
@@ -97,13 +97,20 @@ class PhotonAnalyzer( Analyzer ):
                 else:                          gamma.EffectiveArea03 = [ 0.0035, 0.1709, 0.1484 ]
             elif 'Spring17' in self.cfg_ana.gammaID:
                 # default: values for SPRING17 ID
-                if   abs(gamma.eta()) < 1.0:   gamma.EffectiveArea03 = [ 0.0385, 0.0636, 0.1240  ]
-                elif abs(gamma.eta()) < 1.479: gamma.EffectiveArea03 = [ 0.0468, 0.1103, 0.1093 ]
-                elif abs(gamma.eta()) < 2.0:   gamma.EffectiveArea03 = [ 0.0435, 0.0759, 0.0631 ]
-                elif abs(gamma.eta()) < 2.2:   gamma.EffectiveArea03 = [ 0.0378, 0.0236, 0.0779 ]
-                elif abs(gamma.eta()) < 2.3:   gamma.EffectiveArea03 = [ 0.0338, 0.0151, 0.0999 ]
-                elif abs(gamma.eta()) < 2.4:   gamma.EffectiveArea03 = [ 0.0314, 0.00007, 0.1155 ]
-                else:                          gamma.EffectiveArea03 = [ 0.0269, 0.0132, 0.1373 ]
+                if   abs(gamma.eta()) < 1.0:   gamma.EffectiveArea03 = [ 0.0112, 0.0668, 0.1113  ]
+                elif abs(gamma.eta()) < 1.479: gamma.EffectiveArea03 = [ 0.0108, 0.1054, 0.0953 ]
+                elif abs(gamma.eta()) < 2.0:   gamma.EffectiveArea03 = [ 0.0106, 0.0786, 0.0619 ]
+                elif abs(gamma.eta()) < 2.2:   gamma.EffectiveArea03 = [ 0.01002, 0.0233, 0.0837 ]
+                elif abs(gamma.eta()) < 2.3:   gamma.EffectiveArea03 = [ 0.0098, 0.0078, 0.1070 ]
+                elif abs(gamma.eta()) < 2.4:   gamma.EffectiveArea03 = [ 0.0089, 0.0028, 0.1212 ]
+                else:                          gamma.EffectiveArea03 = [ 0.0087, 0.0137, 0.1466 ]
+                # if   abs(gamma.eta()) < 1.0:   gamma.EffectiveArea03 = [ 0.0385, 0.0636, 0.1240  ]
+                # elif abs(gamma.eta()) < 1.479: gamma.EffectiveArea03 = [ 0.0468, 0.1103, 0.1093 ]
+                # elif abs(gamma.eta()) < 2.0:   gamma.EffectiveArea03 = [ 0.0435, 0.0759, 0.0631 ]
+                # elif abs(gamma.eta()) < 2.2:   gamma.EffectiveArea03 = [ 0.0378, 0.0236, 0.0779 ]
+                # elif abs(gamma.eta()) < 2.3:   gamma.EffectiveArea03 = [ 0.0338, 0.0151, 0.0999 ]
+                # elif abs(gamma.eta()) < 2.4:   gamma.EffectiveArea03 = [ 0.0314, 0.00007, 0.1155 ]
+                # else:                          gamma.EffectiveArea03 = [ 0.0269, 0.0132, 0.1373 ]
             else:
                 # default: values for SPRING15_25ns
                 if   abs(gamma.eta()) < 1.0:   gamma.EffectiveArea03 = [ 0.0, 0.0599, 0.1271  ]
@@ -159,13 +166,20 @@ class PhotonAnalyzer( Analyzer ):
                 keepThisPhoton = gamma.passPhotonID(self.cfg_ana.gammaID,self.cfg_ana.conversionSafe_eleVeto) and gamma.passPhotonIso(self.cfg_ana.gammaID,self.cfg_ana.gamma_isoCorr)
 
             if keepThisPhoton:
+                event.selectedPhotonsWideEta.append(gamma)
+
+            if abs(gamma.superCluster().eta()) > self.cfg_ana.etaMax: continue
+
+            if keepThisPhoton:
                 event.selectedPhotons.append(gamma)
 
             if keepThisPhoton and abs(gamma.eta()) < self.etaCentral:
                 event.selectedPhotonsCentral.append(gamma)
 
+
         event.selectedPhotons.sort(key = lambda l : l.pt(), reverse = True)
         event.selectedPhotonsCentral.sort(key = lambda l : l.pt(), reverse = True)
+        event.selectedPhotonsWideEta.sort(key = lambda l : l.pt(), reverse = True)
 
         self.counters.counter('events').inc('all events')
         if foundPhoton: self.counters.counter('events').inc('has >=1 gamma at preselection')

@@ -8,11 +8,20 @@ class LHEAnalyzer( Analyzer ):
     """    """
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(LHEAnalyzer,self).__init__(cfg_ana,cfg_comp,looperName)
-        self.lheh=Handle('LHEEventProduct')
 
     def declareHandles(self):
         super(LHEAnalyzer, self).declareHandles()
-#        self.mchandles['lhestuff'] = AutoHandle( 'externalLHEProducer','LHEEventProduct')
+
+        self.mchandles['LHEweights'] = AutoHandle('externalLHEProducer',
+                                                  'LHEEventProduct',
+                                                  mayFail=True,
+                                                  fallbackLabel='source',
+                                                  lazy=False )
+        self.mchandles['GenInfos'] = AutoHandle('generator',
+                                                'GenEventInfoProduct',
+                                                mayFail=True,
+                                                fallbackLabel='source',
+                                                lazy=False )
 
     def beginLoop(self, setup):
         super(LHEAnalyzer,self).beginLoop(setup)
@@ -30,15 +39,18 @@ class LHEAnalyzer( Analyzer ):
         event.lheNl=0
         event.lheNg=0
         event.lheV_pt = 0
-        try:
-          event.input.getByLabel( 'externalLHEProducer',self.lheh)
-        except :
-          return True
-        if not  self.lheh.isValid() :
-            return True
+
         self.readCollections( event.input )
-        hepeup=self.lheh.product().hepeup()
+        if not self.mchandles['LHEweights'].isValid(): return True
+        lhehandle = self.mchandles['LHEweights'].product()
+
+        print lhehandle
+        print lhehandle.hepeup()
+
+        hepeup=lhehandle.hepeup()
         pup=hepeup.PUP
+
+        print pup
         l=None
         lBar=None
         nu=None
@@ -90,6 +102,15 @@ class LHEAnalyzer( Analyzer ):
               v=(nu,nuBar)
           if v :
             event.lheV_pt = sqrt( (pup[v[0]][0]+pup[v[1]][0])**2 +  (pup[v[0]][1]+pup[v[1]][1])**2 )
+
+        geninfos = self.mchandles['GenInfos'].product()
+
+        print geninfos
+
+        event.npLO = lhehandle.npLO()
+        event.npNLO = lhehandle.npNLO()
+        event.nMEPartons = geninfos.nMEPartons()
+        event.nMEPartonsFiltered = geninfos.nMEPartonsFiltered()
 
         return True
 

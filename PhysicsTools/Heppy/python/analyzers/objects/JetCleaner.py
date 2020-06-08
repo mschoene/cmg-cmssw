@@ -130,9 +130,10 @@ class JetCleaner( Analyzer ):
         self.gamma_noIdCleanJetsFwd = [j for j in self.gamma_noIdCleanJetsAll if abs(j.eta()) >= self.cfg_ana.jetEtaCentral ]
         ###
 
-        ##And now for the cleaning from all photons
+        ##And now for the cleaning from leading 2 photons
         ###
-        gg_photons = [ g for g in event.selectedPhotons ] 
+        gg_photons = event.selectedPhotons[:2]
+        #fix to not clean all like here        gg_photons = [ g for g in event.selectedPhotons ] 
         self.gg_cleanJetsAll = []
         self.gg_noIdCleanJetsAll = []
         if self.cleanFromLepAndGammaSimultaneously:

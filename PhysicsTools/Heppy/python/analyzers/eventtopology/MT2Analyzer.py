@@ -278,6 +278,7 @@ class MT2Analyzer( Analyzer ):
         setattr(event, "mt2"+self.cfg_ana.collectionPostFix+"_Xj_hgg", -999)
         setattr(event, "pseudoJet1"+self.cfg_ana.collectionPostFix+"_Xj_hgg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
         setattr(event, "pseudoJet2"+self.cfg_ana.collectionPostFix+"_Xj_hgg", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        setattr(event, "mt2"+self.cfg_ana.collectionPostFix+"_Xj_hgg_genMET", -999)
         
         if hasattr(event, 'met'):
             hgg_objectsXjc = [ j for j in event.gg_cleanJets if j.pt() > self.jetPt and abs(j.eta())<2.4 ]
@@ -296,6 +297,36 @@ class MT2Analyzer( Analyzer ):
              
                  if len(hgg_objectsXj10lc)>=2:
                      self.hgg_mt2_Xj = self.getMT2Hemi(event,hgg_objectsXj10lc,event.met,self.cfg_ana.collectionPostFix,"_Xj_hgg")
+
+           ### MT2 with reco jets and GEN met:
+                     if self.cfg_comp.isMC and self.met.genMET():
+#                         self.mt2_Xj_genmet = self.getMT2Hemi(event,objectsXj10lc,self.met.genMET(),self.cfg_ana.collectionPostFix,"_Xj_hgg_genmet")
+                         self.hgg_mt2_Xj_genmet = self.getMT2Hemi(event,hgg_objectsXj10lc,self.met.genMET(),self.cfg_ana.collectionPostFix,"_Xj_hgg_genMET")
+
+
+
+#mt2 with non-corrected met 
+        setattr(event, "mt2"+self.cfg_ana.collectionPostFix+"_Xj_hgg_stdMET", -999)
+        setattr(event, "pseudoJet1"+self.cfg_ana.collectionPostFix+"_Xj_hgg_stdMET", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        setattr(event, "pseudoJet2"+self.cfg_ana.collectionPostFix+"_Xj_hgg_stdMET", ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 ))
+        
+        if hasattr(event, 'met_stdMET'):
+            hgg_stdMET_objectsXjc = [ j for j in event.gg_cleanJets if j.pt() > self.jetPt and abs(j.eta())<2.4 ]
+            hgg_stdMET_objectsXj10lc = hgg_stdMET_objectsXjc + objects10lc
+
+            photons = []
+            if hasattr(event, 'selectedPhotons'):
+                photons = [ g for g in event.selectedPhotons ] 
+
+            hgg_stdMET_Lvec = ROOT.reco.Particle.LorentzVector( 0, 0, 0, 0 )
+            if len( photons ) >= 2 :
+                 hgg_stdMET_Lvec = ROOT.reco.Particle.LorentzVector( photons[0].px(), photons[0].py(), photons[0].pz(), photons[0].energy() ) + ROOT.reco.Particle.LorentzVector( photons[1].px(), photons[1].py(), photons[1].pz(), photons[1].energy() )  
+            
+                 hgg_stdMET_objectsXj10lc = hgg_stdMET_objectsXj10lc + [ hgg_stdMET_Lvec ]
+                 hgg_stdMET_objectsXj10lc.sort(key = lambda obj : obj.pt(), reverse = True)
+             
+                 if len(hgg_stdMET_objectsXj10lc)>=2:
+                     self.hgg_stdMET_mt2_Xj = self.getMT2Hemi(event,hgg_stdMET_objectsXj10lc,event.met_stdMET,self.cfg_ana.collectionPostFix,"_Xj_hgg_stdMET")
 
 
 
@@ -533,6 +564,7 @@ class MT2Analyzer( Analyzer ):
 
 setattr(MT2Analyzer,"defaultConfig", cfg.Analyzer(
     class_object = MT2Analyzer,
+#    metCollection     = "slimmedMETsModifiedMET",
     metCollection     = "slimmedMETs",
     collectionPostFix = "",
     doOnlyDefault = True,
